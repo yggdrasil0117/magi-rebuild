@@ -1,0 +1,7 @@
+# MAGI Web additions to the established Windows Python 3.12 harness snapshot.
+-r requirements-harness.lock.txt
+fastapi==0.121.0
+uvicorn==0.38.0
+starlette==0.49.3
+annotated-doc==0.0.5
+click==8.5.0

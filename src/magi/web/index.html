@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MAGI · 个人决策与行动</title>
+<style>
+body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:900px;margin:30px auto;padding:0 20px}h1{letter-spacing:.15em}input,select,textarea,button{font:inherit;background:#1d2b36;color:inherit;border:1px solid #587180;border-radius:6px;padding:8px;margin:4px}textarea{width:95%;min-height:100px}button{cursor:pointer}pre{white-space:pre-wrap;overflow-wrap:anywhere}article{border-top:1px solid #455b69;margin-top:20px;padding:12px}small{color:#a9c4cf}#status{color:#ffcd84}
+</style>
+<h1>MAGI</h1><p>个人决策与行动 · 日常交流 → 三人格权衡 → 确认计划 → 反馈修订</p>
+<p><small>本机简易界面。凭据只保存在当前页面内存；历史来自 MAGI 业务库。请按顺序发送，修订时新发消息。</small></p>
+<input id="token" type="password" placeholder="服务凭据" autocomplete="off">
+<input id="chat" aria-label="会话" value="study"><button id="load">加载历史</button>
+<select id="mode"><option value="chat">日常助手</option><option value="deliberations">三人格审议</option></select>
+<div id="history"></div><p id="status" role="status"></p>
+<textarea id="text" placeholder="你的目标、约束，或执行反馈"></textarea>
+<div><input id="budget" type="number" min="1" placeholder="本次总时间预算（分钟，可选）"><input id="target" placeholder="修订目标计划 ID（可选）"><input id="version" type="number" min="1" placeholder="旧版本号"></div>
+<button id="send">发送</button><button id="reset">放弃重试，重新填写</button><button id="plans">查询计划</button><input id="planId" placeholder="计划 ID"><input id="planVersion" type="number" min="1" placeholder="版本（可选）"><button id="getPlan">读取版本</button>
+<pre id="receipt"></pre>
+<script>
+const $=id=>document.getElementById(id);let pending=null,lastReply=null;
+async function api(path,body){const response=await fetch(path,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+$('token').value,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});const data=await response.json();if(!response.ok)throw Error(data.code+': '+data.message);return data}
+function show(turn){lastReply=turn.reply;const article=document.createElement('article'),pre=document.createElement('pre');pre.textContent='你：'+turn.user_text+'\n\n'+turn.text;article.append(pre);if(turn.proposal_id){const button=document.createElement('button');button.textContent='确认保存此候选';button.onclick=async()=>{try{const p=await api('/v1/proposals/'+turn.proposal_id+'?'+new URLSearchParams({chat_id:$('chat').value,reply_message_id:turn.reply}));const r=await api('/v1/proposals/'+p.id+'/confirm',{chat_id:p.chat,reply_message_id:p.reply,payload_hash:p.payload_hash});$('receipt').textContent=JSON.stringify(r,null,2);button.textContent='已保存 · '+r.object_id+' · v'+r.result_version}catch(e){$('status').textContent=e.message}};article.append(button)}$('history').append(article)}
+async function load(){try{lastReply=null;$('history').replaceChildren();for(const t of await api('/v1/chats/'+encodeURIComponent($('chat').value)+'/turns'))show(t);$('status').textContent='历史已加载'}catch(e){$('status').textContent=e.message}}
+$('load').onclick=load;$('reset').onclick=()=>{pending=null;$('status').textContent='可填写新消息；既有任务与保存事实仍可从历史查询。'};
+$('send').onclick=async()=>{if(!pending){pending={path:'/v1/'+$('mode').value,body:{chat_id:$('chat').value,message_id:crypto.randomUUID(),reply_message_id:crypto.randomUUID(),parent_reply_message_id:lastReply,user_text:$('text').value}};if($('budget').value)pending.body.time_budget_minutes=Number($('budget').value);if($('target').value){pending.body.target_plan_id=$('target').value;pending.body.expected_version=Number($('version').value)}}$('send').disabled=true;$('status').textContent='正在处理，请等待；断线后可重试相同消息。';try{const t=await api(pending.path,pending.body);pending=null;$('text').value='';await load();$('status').textContent=t.status}catch(e){$('status').textContent=e.message+'；再次点击发送会重试原消息。'}finally{$('send').disabled=false}};
+$('plans').onclick=async()=>{try{$('receipt').textContent=JSON.stringify(await api('/v1/plans'),null,2)}catch(e){$('status').textContent=e.message}};
+$('getPlan').onclick=async()=>{try{$('receipt').textContent=JSON.stringify(await api('/v1/plans/'+encodeURIComponent($('planId').value)+($('planVersion').value?'?version='+$('planVersion').value:'')),null,2)}catch(e){$('status').textContent=e.message}};
+</script></html>

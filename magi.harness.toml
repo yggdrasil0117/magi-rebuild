@@ -1,0 +1,22 @@
+# 模块 003：集中配置与持久会话试验。目前只实现 Ollama 接入。
+# 所有相对路径以本文件所在目录为起点，与启动命令的位置无关。
+[model]
+provider = "ollama"
+name = "qwen3.5:4b"
+base_url = "http://127.0.0.1:11434"
+timeout_seconds = 60.0
+num_ctx = 8192
+num_predict = 512
+
+[tools]
+root = "docs"
+
+[storage]
+checkpoint_db = ".magi/harness.sqlite3"
+event_log = ".magi/harness-events.jsonl"
+business_db = ".magi/personal.sqlite3"
+
+[limits]
+# 每次用户输入的预算；不会随着历史会话长度累计。
+model_calls = 4
+tool_calls = 3

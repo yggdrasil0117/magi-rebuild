@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "magi"
+version = "0.1.0"
+description = "A personal AI assistant with on-demand three-persona deliberation."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+web = ["fastapi==0.121.0", "uvicorn==0.38.0", "httpx==0.28.1"]
+ollama = ["ollama==0.6.3"]
+harness = [
+    "deepagents==0.7.32",
+    "langchain-ollama==1.1.0",
+    "langgraph-checkpoint-sqlite==3.1.2",
+]
+dev = [
+    "pytest>=8,<9",
+    "ruff>=0.11,<1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"magi.web" = ["*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
