@@ -5,6 +5,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 
 from magi.harness.config import load_config
@@ -32,6 +33,21 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
 
     app = FastAPI(title="MAGI", lifespan=lifespan)
     app.state.service = service
+
+    @app.exception_handler(RequestValidationError)
+    async def invalid_request(request: Request, exc: RequestValidationError):
+        return JSONResponse(
+            status_code=422,
+            content={
+                "code": "INVALID_INPUT",
+                "message": "请求字段不符合要求，请检查输入内容、会话和版本号。",
+                "run_id": None,
+                "fields": [
+                    {"field": ".".join(map(str, e["loc"])), "type": e["type"]}
+                    for e in exc.errors()[:8]
+                ],
+            },
+        )
 
     def identity(authorization: str = Header(default="")):
         if not hmac.compare_digest(

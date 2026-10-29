@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import statistics
 import subprocess
 import time
 from collections import Counter
@@ -44,11 +45,100 @@ CASES = [
 ]
 
 
+def assess_result(snapshot, result):
+    """Check boundaries independently; semantic quality still needs review."""
+    personas = result.get("personas", [])
+    candidate = result.get("candidate")
+    completed = result.get("status") == "COMPLETED"
+    checks = {
+        "call_limit": type(result.get("calls")) is int and 0 <= result["calls"] <= 4,
+        "three_roles": [p.get("role") for p in personas]
+        == ["MELCHIOR", "BALTHASAR", "CASPER"],
+        "candidate_requires_completion": bool(candidate) == completed,
+        "all_roles_complete_before_candidate": not candidate
+        or all(p.get("status") == "COMPLETED" and p.get("opinion") for p in personas),
+        "known_evidence_only": all(
+            set(p.get("opinion", {}).get("evidence_refs", []))
+            <= set(snapshot["evidence_ids"])
+            for p in personas
+        ),
+    }
+    if candidate:
+        minutes = [s.get("minutes") for s in candidate.get("steps", [])]
+        checks["positive_step_minutes"] = bool(minutes) and all(
+            type(m) is int and m > 0 for m in minutes
+        )
+        checks["within_time_budget"] = (
+            checks["positive_step_minutes"]
+            and sum(minutes) <= snapshot["time_budget_minutes"]
+        )
+    return {"passed": all(checks.values()), "checks": checks}
+
+
+def summarize_report(report, seconds):
+    runs = report["runs"]
+    statuses = Counter(r["result"]["status"] for r in runs)
+    times = [r["result"]["seconds"] for r in runs if "seconds" in r["result"]]
+    diagnostics = []
+    failures = Counter()
+    for run in runs:
+        result = run["result"]
+        for persona in result.get("personas", []):
+            diagnostics.append(persona.get("diagnostics", {}))
+            if persona.get("error_code"):
+                failures[persona["error_code"]] += 1
+        if "synthesis_diagnostics" in result:
+            diagnostics.append(result["synthesis_diagnostics"])
+        if result.get("synthesis_error_code"):
+            failures[result["synthesis_error_code"]] += 1
+    known_usage = [
+        d
+        for d in diagnostics
+        if all(
+            type(d.get(k)) is int
+            for k in ("input_tokens", "output_tokens", "total_tokens")
+        )
+    ]
+    return {
+        "attempted": len(runs),
+        "planned": report["repeats"] * len(CASES) * 2,
+        "statuses": dict(statuses),
+        "failure_codes": dict(failures),
+        "boundary_checks_passed": sum(
+            r.get("boundary_checks", {}).get("passed", False) for r in runs
+        ),
+        "model_invocations": sum(r["result"].get("calls", 0) for r in runs),
+        "usage": {
+            "calls_with_usage": len(known_usage),
+            "calls_without_usage": max(
+                0, sum(r["result"].get("calls", 0) for r in runs) - len(known_usage)
+            ),
+            "known_input_tokens": sum(d["input_tokens"] for d in known_usage),
+            "known_output_tokens": sum(d["output_tokens"] for d in known_usage),
+            "known_total_tokens": sum(d["total_tokens"] for d in known_usage),
+        },
+        "run_seconds": {
+            "min": min(times),
+            "median": round(statistics.median(times), 3),
+            "max": max(times),
+        }
+        if times
+        else None,
+        "seconds": round(seconds, 3),
+        "semantic_quality": "not automatically graded; review every candidate against the snapshot",
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repeats", type=int, choices=range(1, 6), default=1)
     parser.add_argument("--label", choices=["baseline", "updated"], default="updated")
     parser.add_argument("--model", default=None)
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="show bounded invocation count without contacting a model",
+    )
     parser.add_argument(
         "--config",
         type=Path,
@@ -59,6 +149,19 @@ def main():
     settings = load_config(args.config)
     if args.model:
         settings = replace(settings, model=args.model)
+    if args.dry_run:
+        print(
+            json.dumps(
+                {
+                    "provider": settings.provider,
+                    "model": settings.model,
+                    "planned_runs": args.repeats * len(CASES) * 2,
+                    "max_model_invocations": args.repeats * len(CASES) * 8,
+                },
+                ensure_ascii=False,
+            )
+        )
+        return 0
     output_dir = root / ".magi" / "evaluations"
     output_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
@@ -120,6 +223,7 @@ def main():
                             "repeat": repeat,
                             "snapshot": snapshot,
                             "result": result,
+                            "boundary_checks": assess_result(snapshot, result),
                         }
                     )
                     output.write_text(
@@ -132,18 +236,18 @@ def main():
                     )
     finally:
         statuses = Counter(r["result"]["status"] for r in report["runs"])
-        report["summary"] = {
-            "attempted": len(report["runs"]),
-            "planned": args.repeats * len(CASES) * 2,
-            "statuses": dict(statuses),
-            "seconds": round(time.monotonic() - started, 3),
-        }
+        report["summary"] = summarize_report(report, time.monotonic() - started)
         output.write_text(
             json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
         )
         print(json.dumps(report["summary"], ensure_ascii=False), flush=True)
         print(output, flush=True)
-    return 0 if statuses.get("COMPLETED", 0) == report["summary"]["planned"] else 1
+    return (
+        0
+        if statuses.get("COMPLETED", 0) == report["summary"]["planned"]
+        and report["summary"]["boundary_checks_passed"] == report["summary"]["planned"]
+        else 1
+    )
 
 
 if __name__ == "__main__":

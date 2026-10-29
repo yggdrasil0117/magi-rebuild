@@ -1,0 +1,2293 @@
+{
+  "created_at": "2026-10-29T14:40:28.008517+00:00",
+  "label": "updated",
+  "model": "qwen3.8-max",
+  "provider": "qianwen",
+  "source_commit": "003c3d10dd4fd3d83b1a9d3573548525e411fd16",
+  "scope": "council only, fixed independent create/revision cases, real model",
+  "case_set_sha256": "4c79aadea18c229b8716e412ab37f088ca17f9a2e8586282ea2e49792d1b44e6",
+  "source_files_sha256": {
+    "src\\magi\\council\\generation.py": "6a9492f5bf737e266a8a7f61cf0dbe57aa0bd8c3793a2139b62488c5658d2d6f",
+    "src\\magi\\council\\service.py": "b7d9124e7819b2dcb2e3865af9469ba9d1615c1e4a6e351afc93a26347a91393",
+    "src\\magi\\council\\__init__.py": "4d53fd84f7621efee08590eda97459204d8dffa5d3abc72d27142b4f6ac933a9"
+  },
+  "num_ctx": 32768,
+  "repeats": 2,
+  "runs": [
+    {
+      "case": "research_job",
+      "phase": "create",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-research_job-create-0",
+        "logical_session_id": "eval-research_job",
+        "epoch": 0,
+        "question": "权衡论文实验和求职准备，给出本周可验证的简短行动计划，包含休息。",
+        "time_budget_minutes": 360,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "本周论文实验和求职准备共可用六小时，要保留休息。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": null
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 307,
+              "input_tokens": 385,
+              "output_tokens": 103,
+              "total_tokens": 488,
+              "finish_reason": "stop",
+              "output_chars": 224
+            },
+            "opinion": {
+              "view": "六小时需兼顾实验与求职，建议按3:2分配并预留1小时休息，确保可验证产出。",
+              "recommendation": "实验3小时跑通基线并记录指标；求职2小时完成简历初稿；休息1小时分段穿插。",
+              "concerns": [
+                "实验若环境未就绪可能超时",
+                "简历素材不足影响两小时内完稿"
+              ],
+              "unknowns": [
+                "论文实验当前具体进度未知",
+                "目标岗位类型尚未明确"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 5.312
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 307,
+              "input_tokens": 386,
+              "output_tokens": 101,
+              "total_tokens": 487,
+              "finish_reason": "stop",
+              "output_chars": 229
+            },
+            "opinion": {
+              "view": "六小时需兼顾实验与求职，负担较重，应拆分为短时段并强制休息以防透支。",
+              "recommendation": "每天两小时：一小时跑实验、半小时改简历、半小时休息，周末复盘验证进度。",
+              "concerns": [
+                "时间紧张易导致睡眠不足或焦虑加重",
+                "实验若失败可能挤占求职准备时间"
+              ],
+              "unknowns": [
+                "论文实验当前具体进展到哪一步",
+                "目标岗位类型及简历修改难度"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 41.782
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 307,
+              "input_tokens": 382,
+              "output_tokens": 110,
+              "total_tokens": 492,
+              "finish_reason": "stop",
+              "output_chars": 224
+            },
+            "opinion": {
+              "view": "六小时需兼顾实验与求职，机会成本高，应聚焦本周可验证的最小产出。",
+              "recommendation": "实验2h跑基线，求职2h改简历并投3岗，休息1h，留1h复盘调整。",
+              "concerns": [
+                "时间紧易两头落空，需严格按时段切换。",
+                "实验若卡壳可能挤占求职时间。"
+              ],
+              "unknowns": [
+                "论文实验当前具体进度未知。",
+                "目标求职岗位方向未明确。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.218
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "本周6小时实验+求职最小验证计划",
+          "steps": [
+            {
+              "action": "实验2h：跑通基线并记录核心指标，失败则记录卡点即止",
+              "done_when": "有基线指标或明确卡点文档",
+              "minutes": 120
+            },
+            {
+              "action": "求职2h：完成简历初稿并投递至少1个匹配岗位",
+              "done_when": "简历定稿且有投递记录截图",
+              "minutes": 120
+            },
+            {
+              "action": "穿插休息1h+复盘调整1h：分段休息防透支，周末汇总进度",
+              "done_when": "休息已执行且复盘笔记完成",
+              "minutes": 120
+            }
+          ],
+          "assumptions": [
+            "实验环境已基本就绪，2h内可跑通或定位问题",
+            "简历素材已有基础，2h可完成初稿",
+            "6h可在本周内灵活安排，含休息"
+          ],
+          "revision_reason": "无旧计划；综合三视角取最小可验证产出，严格6h预算含休息"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 1888,
+          "input_tokens": 929,
+          "output_tokens": 331,
+          "total_tokens": 1260,
+          "finish_reason": "stop",
+          "output_chars": 687,
+          "total_minutes": 360,
+          "time_budget_minutes": 360,
+          "seconds": 9.125
+        },
+        "agreement": [
+          "六小时需兼顾实验与求职，必须预留休息防透支",
+          "应聚焦本周可验证的最小产出，避免两头落空",
+          "实验若环境未就绪或卡壳可能挤占求职时间"
+        ],
+        "disagreements": [
+          "MELCHIOR建议3:2分配，CASPER建议2:2并留复盘",
+          "BALTHASAR主张每天拆分两小时，其余倾向集中时段",
+          "CASPER要求投3岗，MELCHIOR仅要求简历初稿"
+        ],
+        "unknowns": [
+          "论文实验当前具体进度与环境是否就绪",
+          "目标求职岗位方向及简历素材是否充足",
+          "每日可用时段分布是否允许集中执行"
+        ],
+        "calls": 4,
+        "seconds": 60.437
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    },
+    {
+      "case": "research_job",
+      "phase": "revision",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-research_job-revision-0",
+        "logical_session_id": "eval-research_job",
+        "epoch": 0,
+        "question": "实验卡住了，本周只剩两小时。对照旧计划缩减任务，说明保留和放弃的事项。",
+        "time_budget_minutes": 120,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "本周论文实验和求职准备共可用六小时，要保留休息。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": {
+          "title": "原计划",
+          "version": 1,
+          "body": "论文实验180分钟，求职准备120分钟，休息60分钟。"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 377,
+              "input_tokens": 423,
+              "output_tokens": 112,
+              "total_tokens": 535,
+              "finish_reason": "stop",
+              "output_chars": 242
+            },
+            "opinion": {
+              "view": "本周仅剩120分钟且实验卡住，需将原计划360分钟任务大幅缩减至可执行范围。",
+              "recommendation": "保留一项最小验证实验(60分钟)和休息(30分钟)，放弃其余实验与求职准备(30分钟)。",
+              "concerns": [
+                "实验卡住可能导致60分钟内无法完成最小验证",
+                "压缩求职时间可能影响整体进度"
+              ],
+              "unknowns": [
+                "实验具体卡在哪个环节",
+                "旧计划中各任务的优先级顺序"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.157
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 377,
+              "input_tokens": 424,
+              "output_tokens": 105,
+              "total_tokens": 529,
+              "finish_reason": "stop",
+              "output_chars": 228
+            },
+            "opinion": {
+              "view": "本周仅剩两小时且实验卡住，继续硬撑会加重负担并挤占求职与休息。",
+              "recommendation": "放弃本周实验推进，将120分钟全用于求职准备，另择时间休息。",
+              "concerns": [
+                "实验停滞可能引发焦虑，影响休息质量。",
+                "论文进度延后增加后续时间成本。"
+              ],
+              "unknowns": [
+                "实验卡点是否能在下周快速解决？",
+                "求职准备是否有不可推迟的截止日期？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.75
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 377,
+              "input_tokens": 420,
+              "output_tokens": 121,
+              "total_tokens": 541,
+              "finish_reason": "stop",
+              "output_chars": 253
+            },
+            "opinion": {
+              "view": "本周仅剩120分钟且实验卡住，需放弃原计划中求职与休息，将时间全用于突破瓶颈或止损。",
+              "recommendation": "保留60分钟排查实验卡点，若未解决则放弃剩余实验并转做求职准备，确保不超时。",
+              "concerns": [
+                "实验卡点可能无法在60分钟内解决，导致时间浪费。",
+                "完全放弃求职准备可能影响长期目标进度。"
+              ],
+              "unknowns": [
+                "实验具体卡在哪个环节？",
+                "求职准备是否有不可延期的截止日期？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.468
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "限时排查+止损转求职方案",
+          "steps": [
+            {
+              "action": "用45分钟集中排查实验卡点，记录问题与可能方向",
+              "done_when": "找到明确解决路径或确认短期无法突破",
+              "minutes": 45
+            },
+            {
+              "action": "若未突破则立即止损，转做求职简历或投递准备",
+              "done_when": "完成至少一项求职材料更新或投递",
+              "minutes": 60
+            },
+            {
+              "action": "强制休息恢复精力，避免焦虑影响后续效率",
+              "done_when": "完成15分钟闭眼或轻度活动休息",
+              "minutes": 15
+            }
+          ],
+          "assumptions": [
+            "实验卡点45分钟内可判断能否突破",
+            "求职准备无本周硬性截止日",
+            "休息对维持后续效率不可或缺"
+          ],
+          "revision_reason": "旧计划360分超时；保留最小实验排查与休息，缩减求职，放弃剩余实验推进"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2002,
+          "input_tokens": 991,
+          "output_tokens": 279,
+          "total_tokens": 1270,
+          "finish_reason": "stop",
+          "output_chars": 631,
+          "total_minutes": 120,
+          "time_budget_minutes": 120,
+          "seconds": 7.641
+        },
+        "agreement": [
+          "本周仅剩120分钟，原计划360分钟必须大幅缩减",
+          "实验卡住是核心瓶颈，需决定排查还是放弃",
+          "求职准备时间被严重压缩，需权衡取舍"
+        ],
+        "disagreements": [
+          "是否继续尝试突破实验卡点还是直接放弃",
+          "休息是否应纳入本周120分钟内",
+          "时间分配侧重实验排查还是求职准备"
+        ],
+        "unknowns": [
+          "实验具体卡在哪个环节及解决难度",
+          "求职准备是否有不可推迟的截止日期",
+          "下周是否有额外可用时间补偿"
+        ],
+        "calls": 4,
+        "seconds": 21.016
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    },
+    {
+      "case": "backend_agent",
+      "phase": "create",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-backend_agent-create-0",
+        "logical_session_id": "eval-backend_agent",
+        "epoch": 0,
+        "question": "比较两种学习投入，给出含休息的本周练习计划及完成条件。",
+        "time_budget_minutes": 240,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "本周有四小时学习时间，想同时学习后端开发和Agent，目标是能解释并修改自己的项目。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": null
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 322,
+              "input_tokens": 388,
+              "output_tokens": 114,
+              "total_tokens": 502,
+              "finish_reason": "stop",
+              "output_chars": 246
+            },
+            "opinion": {
+              "view": "后端重架构与调试，Agent重提示词与工具链；240分钟宜按6:4分配并穿插休息。",
+              "recommendation": "周一至周三各45分钟后端+15分休息，周四五各30分Agent+10分休息，周末整合验证。",
+              "concerns": [
+                "两方向切换频繁可能增加认知负荷",
+                "未明确具体项目代码库难以细化任务"
+              ],
+              "unknowns": [
+                "每日可用时段分布未知",
+                "当前后端与Agent的基础水平未知"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.406
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 322,
+              "input_tokens": 389,
+              "output_tokens": 116,
+              "total_tokens": 505,
+              "finish_reason": "stop",
+              "output_chars": 255
+            },
+            "opinion": {
+              "view": "240分钟需兼顾后端与Agent，负担较重；建议交替学习降低疲劳，成本可控且方向可逆。",
+              "recommendation": "每天60分钟：30分钟后端+30分钟Agent，中间休10分钟，四天完成；能解释并修改项目即达标。",
+              "concerns": [
+                "两领域切换频繁可能增加认知负担",
+                "四天内同时掌握两项技能时间偏紧"
+              ],
+              "unknowns": [
+                "两种学习投入的具体方式未明确",
+                "当前后端与Agent的基础水平未知"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.531
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 322,
+              "input_tokens": 385,
+              "output_tokens": 127,
+              "total_tokens": 512,
+              "finish_reason": "stop",
+              "output_chars": 274
+            },
+            "opinion": {
+              "view": "240分钟需兼顾后端与Agent，机会成本高，建议按项目依赖度分配主次。",
+              "recommendation": "后端150分钟、Agent60分钟、休息30分钟；完成条件为能独立解释并修改一处代码。",
+              "concerns": [
+                "双目标并行易分散精力，导致均无法达到可修改项目的深度。",
+                "未明确当前项目基础，时间分配可能偏离实际瓶颈。"
+              ],
+              "unknowns": [
+                "后端与Agent在现有项目中的具体关联程度未知。",
+                "用户偏好的单次专注时长与休息节奏未知。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.688
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "本周后端与Agent交替练习计划（含休息）",
+          "steps": [
+            {
+              "action": "后端学习90分钟+休息15分钟：阅读项目代码，尝试解释架构并修改一处逻辑",
+              "done_when": "能口头解释核心流程并成功运行修改后的代码",
+              "minutes": 105
+            },
+            {
+              "action": "Agent学习75分钟+休息15分钟：研究提示词与工具链，修改一个Agent行为",
+              "done_when": "能说明Agent调用链路并完成一次有效修改",
+              "minutes": 90
+            },
+            {
+              "action": "整合验证30分钟：将后端与Agent改动结合测试，记录学习笔记",
+              "done_when": "两项改动共存且项目可正常运行",
+              "minutes": 30
+            }
+          ],
+          "assumptions": [
+            "用户具备基础编程能力",
+            "项目已有可运行的后端与Agent代码",
+            "单次专注45-60分钟后需休息"
+          ],
+          "revision_reason": "无旧计划；综合三视角取折中分配，减少切换频次，明确以修改项目为完成条件"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2000,
+          "input_tokens": 975,
+          "output_tokens": 300,
+          "total_tokens": 1275,
+          "finish_reason": "stop",
+          "output_chars": 682,
+          "total_minutes": 225,
+          "time_budget_minutes": 240,
+          "seconds": 8.406
+        },
+        "agreement": [
+          "240分钟需兼顾后端与Agent，时间紧张",
+          "两方向频繁切换会增加认知负荷",
+          "完成条件应围绕能解释并修改项目代码"
+        ],
+        "disagreements": [
+          "时间分配比例：6:4、1:1或主次分明",
+          "日程结构：按天拆分还是按主题集中",
+          "休息节奏：穿插频率与单次时长不同"
+        ],
+        "unknowns": [
+          "当前后端与Agent的基础水平",
+          "每日可用时段分布",
+          "两方向在现有项目中的关联程度"
+        ],
+        "calls": 4,
+        "seconds": 22.031
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    },
+    {
+      "case": "backend_agent",
+      "phase": "revision",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-backend_agent-revision-0",
+        "logical_session_id": "eval-backend_agent",
+        "epoch": 0,
+        "question": "接口练习已完成，但Agent工具调用没看懂，只剩90分钟，请修订原计划并解释理由。",
+        "time_budget_minutes": 90,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "本周有四小时学习时间，想同时学习后端开发和Agent，目标是能解释并修改自己的项目。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": {
+          "title": "原计划",
+          "version": 1,
+          "body": "后端接口练习120分钟，Agent调用链练习90分钟，休息30分钟。"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 409,
+              "input_tokens": 432,
+              "output_tokens": 113,
+              "total_tokens": 545,
+              "finish_reason": "stop",
+              "output_chars": 262
+            },
+            "opinion": {
+              "view": "接口练习已完成，剩余90分钟应全用于Agent工具调用，原计划需取消接口部分并聚焦难点。",
+              "recommendation": "用30分钟阅读Agent工具调用文档与示例，60分钟动手复现一个最小调用链以验证理解。",
+              "concerns": [
+                "90分钟内若概念复杂可能无法完成动手复现",
+                "缺少具体项目代码参考可能导致练习脱离实际"
+              ],
+              "unknowns": [
+                "你当前使用的Agent框架是哪个",
+                "是否有可用的工具调用示例代码或文档"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 5.766
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 409,
+              "input_tokens": 433,
+              "output_tokens": 100,
+              "total_tokens": 533,
+              "finish_reason": "stop",
+              "output_chars": 237
+            },
+            "opinion": {
+              "view": "接口已完成，剩余90分钟应全用于理解Agent工具调用，取消原后端练习并保留休息。",
+              "recommendation": "建议60分钟拆解Agent调用示例加15分钟休息，避免疲劳影响理解。",
+              "concerns": [
+                "连续高强度学习新难点易致认知过载",
+                "跳过休息会降低后段学习效率"
+              ],
+              "unknowns": [
+                "Agent工具调用的具体卡点在哪一步",
+                "是否有可参考的简单示例代码"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.25
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 409,
+              "input_tokens": 429,
+              "output_tokens": 110,
+              "total_tokens": 539,
+              "finish_reason": "stop",
+              "output_chars": 249
+            },
+            "opinion": {
+              "view": "接口练习已完成，剩余90分钟应全投入Agent工具调用，放弃原计划中已完成的接口部分。",
+              "recommendation": "用30分钟看文档或示例理解概念，60分钟动手调试一个简单调用链，确保能解释原理。",
+              "concerns": [
+                "90分钟可能不足以从不懂到能修改项目",
+                "跳过休息可能导致疲劳影响理解效率"
+              ],
+              "unknowns": [
+                "Agent工具调用的具体卡点在哪里",
+                "是否有现成示例代码可供参考"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 3.984
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "90分钟Agent工具调用攻坚计划",
+          "steps": [
+            {
+              "action": "阅读Agent工具调用文档与示例，梳理核心概念",
+              "done_when": "能用自己的话解释工具调用流程",
+              "minutes": 30
+            },
+            {
+              "action": "休息恢复精力",
+              "done_when": "休息结束准备动手",
+              "minutes": 10
+            },
+            {
+              "action": "动手调试一个最小工具调用链并尝试修改参数",
+              "done_when": "成功运行并能解释每一步作用",
+              "minutes": 50
+            }
+          ],
+          "assumptions": [
+            "有可用的Agent框架文档或示例代码",
+            "最小调用链可在50分钟内跑通",
+            "休息10分钟足以恢复专注力"
+          ],
+          "revision_reason": "接口已完成故放弃旧后端120分钟；缩减Agent练习至50分钟以容纳10分钟休息；总时长严格匹配90分钟新预算。"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2059,
+          "input_tokens": 984,
+          "output_tokens": 272,
+          "total_tokens": 1256,
+          "finish_reason": "stop",
+          "output_chars": 645,
+          "total_minutes": 90,
+          "time_budget_minutes": 90,
+          "seconds": 7.672
+        },
+        "agreement": [
+          "接口练习已完成，原计划120分钟后端部分应全部放弃",
+          "剩余90分钟应聚焦Agent工具调用理解",
+          "需包含休息以避免认知过载影响学习效率"
+        ],
+        "disagreements": [
+          "阅读文档与动手复现的时间分配比例不同",
+          "是否必须保留15分钟休息存在分歧",
+          "动手阶段是60分钟还是更短未统一"
+        ],
+        "unknowns": [
+          "当前使用的具体Agent框架是什么",
+          "Agent工具调用的具体卡点在哪一步",
+          "是否有现成示例代码或项目可参考"
+        ],
+        "calls": 4,
+        "seconds": 21.672
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    },
+    {
+      "case": "weekend",
+      "phase": "create",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-weekend-create-0",
+        "logical_session_id": "eval-weekend",
+        "epoch": 0,
+        "question": "比较必要性与负担，给出简短安排，每步可判断完成，包含休息。",
+        "time_budget_minutes": 180,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "周末有三小时，要采购生活用品、整理房间，也希望充分休息。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": null
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 298,
+              "input_tokens": 385,
+              "output_tokens": 112,
+              "total_tokens": 497,
+              "finish_reason": "stop",
+              "output_chars": 244
+            },
+            "opinion": {
+              "view": "采购与整理为必要任务，但连续执行负担大；180分钟内穿插休息可平衡效率与恢复。",
+              "recommendation": "先采购60分钟，休息30分钟；再整理45分钟，休息15分钟；最后自由休息30分钟。",
+              "concerns": [
+                "采购超时将压缩后续整理或休息时间",
+                "整理范围未定可能导致任务无法按时完成"
+              ],
+              "unknowns": [
+                "采购地点距离与排队时间未知",
+                "房间需整理的物品量与复杂度未知"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.297
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 298,
+              "input_tokens": 386,
+              "output_tokens": 130,
+              "total_tokens": 516,
+              "finish_reason": "stop",
+              "output_chars": 269
+            },
+            "opinion": {
+              "view": "三小时内兼顾采购、整理与休息，需按必要性排序并设明确完成标准，避免过度消耗。",
+              "recommendation": "先采购必需品(40分)，再整理重点区域(40分)，中间及最后各休息20-30分钟，每步达标即止。",
+              "concerns": [
+                "采购超时或冲动消费会挤压后续任务与休息时间。",
+                "整理若追求完美易导致体力透支，影响恢复。"
+              ],
+              "unknowns": [
+                "生活用品的具体清单是否已提前列好？",
+                "房间当前杂乱程度是否超出40分钟可处理范围？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.781
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 298,
+              "input_tokens": 382,
+              "output_tokens": 113,
+              "total_tokens": 495,
+              "finish_reason": "stop",
+              "output_chars": 239
+            },
+            "opinion": {
+              "view": "三小时内兼顾采购、整理与休息，需按必要性排序并设每步完成标准以防超时。",
+              "recommendation": "先采购必需品(60分)，再整理高频区(45分)，最后彻底休息(75分)，每步达标即止。",
+              "concerns": [
+                "采购若遇排队易超时，挤压后续休息",
+                "整理若无明确停止标准，易陷入细节耗尽精力"
+              ],
+              "unknowns": [
+                "生活用品清单是否已提前列好",
+                "房间当前杂乱程度如何"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.203
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "周末三小时平衡安排",
+          "steps": [
+            {
+              "action": "按清单采购必需品，限时50分钟含路程，买齐即回",
+              "done_when": "清单物品购齐或满50分钟立即返回",
+              "minutes": 50
+            },
+            {
+              "action": "休息30分钟，喝水放松恢复体力",
+              "done_when": "静坐或躺卧满30分钟",
+              "minutes": 30
+            },
+            {
+              "action": "整理桌面与地面等高频区，限时40分钟，达标即止",
+              "done_when": "高频区整洁或满40分钟立即停止",
+              "minutes": 40
+            }
+          ],
+          "assumptions": [
+            "已提前列出简短采购清单",
+            "仅整理高频使用区域而非全屋",
+            "采购往返路程在可控范围内"
+          ],
+          "revision_reason": "无旧计划；综合三方取中位时长，确保含休息且总计120分钟不超180预算"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 1953,
+          "input_tokens": 970,
+          "output_tokens": 284,
+          "total_tokens": 1254,
+          "finish_reason": "stop",
+          "output_chars": 611,
+          "total_minutes": 120,
+          "time_budget_minutes": 180,
+          "seconds": 7.969
+        },
+        "agreement": [
+          "采购与整理为必要任务，但连续执行负担大，需穿插休息",
+          "每步应设明确完成标准，达标即止以防超时",
+          "按必要性排序，优先处理必需品和高频区域"
+        ],
+        "disagreements": [
+          "采购时长建议40至60分钟不等",
+          "休息总时长与分布方式存在差异",
+          "整理范围界定不同：重点区域或高频区"
+        ],
+        "unknowns": [
+          "采购地点距离与排队时间未知",
+          "房间当前杂乱程度与物品量未知",
+          "生活用品清单是否已提前列好"
+        ],
+        "calls": 4,
+        "seconds": 21.25
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    },
+    {
+      "case": "weekend",
+      "phase": "revision",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-weekend-revision-0",
+        "logical_session_id": "eval-weekend",
+        "epoch": 0,
+        "question": "突然下雨而且感觉疲惫，只剩60分钟，采购可以配送。请对照原计划缩减任务并保留休息。",
+        "time_budget_minutes": 60,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "周末有三小时，要采购生活用品、整理房间，也希望充分休息。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": {
+          "title": "原计划",
+          "version": 1,
+          "body": "采购60分钟，整理房间90分钟，休息30分钟。"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 372,
+              "input_tokens": 423,
+              "output_tokens": 108,
+              "total_tokens": 531,
+              "finish_reason": "stop",
+              "output_chars": 235
+            },
+            "opinion": {
+              "view": "原计划需180分钟，现仅60分钟且疲惫下雨，应取消整理，采购改配送，保留休息。",
+              "recommendation": "立即下单配送采购（约10分钟），剩余50分钟用于休息，取消整理房间任务。",
+              "concerns": [
+                "配送可能因雨天延迟，压缩休息时间",
+                "整理房间任务被完全取消，需另找时间"
+              ],
+              "unknowns": [
+                "配送实际到达时间是否可控",
+                "用户是否有足够精力处理收货"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.344
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 372,
+              "input_tokens": 424,
+              "output_tokens": 97,
+              "total_tokens": 521,
+              "finish_reason": "stop",
+              "output_chars": 220
+            },
+            "opinion": {
+              "view": "仅剩60分钟且疲惫下雨，应取消整理房间，改采购为配送以节省体力。",
+              "recommendation": "安排配送采购约15分钟，剩余45分钟全部用于休息恢复精力。",
+              "concerns": [
+                "雨天配送可能延迟，压缩休息时间。",
+                "整理房间任务需另找时间完成。"
+              ],
+              "unknowns": [
+                "配送具体到达时间不确定。",
+                "当前疲劳程度是否影响后续安排。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.297
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 372,
+              "input_tokens": 420,
+              "output_tokens": 108,
+              "total_tokens": 528,
+              "finish_reason": "stop",
+              "output_chars": 236
+            },
+            "opinion": {
+              "view": "下雨疲惫且仅剩60分钟，应利用配送替代外出采购，将时间优先用于休息。",
+              "recommendation": "取消外出采购改配送，休息45分钟，仅用15分钟做最轻量整理或完全休息。",
+              "concerns": [
+                "配送可能产生额外费用，需权衡机会成本。",
+                "房间整理延后可能影响后续周末安排。"
+              ],
+              "unknowns": [
+                "配送预计送达时间是否可控？",
+                "当前疲劳程度是否允许做任何整理？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.297
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "雨天疲惫60分钟缩减计划",
+          "steps": [
+            {
+              "action": "手机下单配送采购生活用品",
+              "done_when": "订单提交成功并显示预计送达时间",
+              "minutes": 10
+            },
+            {
+              "action": "闭眼或躺下充分休息恢复精力",
+              "done_when": "累计休息满45分钟且感觉稍好",
+              "minutes": 45
+            },
+            {
+              "action": "预留缓冲应对可能的收货或延迟",
+              "done_when": "60分钟预算用尽或物品已签收",
+              "minutes": 5
+            }
+          ],
+          "assumptions": [
+            "配送平台正常接单且可送达",
+            "用户有手机和网络可立即下单",
+            "休息环境安静不受打扰"
+          ],
+          "revision_reason": "原计划180分钟现仅60分钟且下雨疲惫，放弃整理(90分)与外出采购(60分)，改配送(10分)并保留休息(45+5分)。"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 1965,
+          "input_tokens": 965,
+          "output_tokens": 274,
+          "total_tokens": 1239,
+          "finish_reason": "stop",
+          "output_chars": 604,
+          "total_minutes": 60,
+          "time_budget_minutes": 60,
+          "seconds": 7.953
+        },
+        "agreement": [
+          "取消整理房间任务，原计划90分钟无法执行",
+          "采购改配送以节省体力并避雨",
+          "保留休息作为核心优先级"
+        ],
+        "disagreements": [
+          "下单耗时估计10至15分钟不等",
+          "Casper建议留15分钟轻量整理，其余主张全休",
+          "休息时间分配45至50分钟有差异"
+        ],
+        "unknowns": [
+          "雨天配送实际送达时间是否可控",
+          "当前疲劳程度能否处理收货",
+          "配送是否产生额外费用"
+        ],
+        "calls": 4,
+        "seconds": 20.891
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    },
+    {
+      "case": "research_job",
+      "phase": "create",
+      "repeat": 1,
+      "snapshot": {
+        "run_id": "eval-research_job-create-1",
+        "logical_session_id": "eval-research_job",
+        "epoch": 0,
+        "question": "权衡论文实验和求职准备，给出本周可验证的简短行动计划，包含休息。",
+        "time_budget_minutes": 360,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "本周论文实验和求职准备共可用六小时，要保留休息。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": null
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 307,
+              "input_tokens": 385,
+              "output_tokens": 128,
+              "total_tokens": 513,
+              "finish_reason": "stop",
+              "output_chars": 261
+            },
+            "opinion": {
+              "view": "六小时需兼顾实验与求职，建议按3:2分配并预留1小时休息，确保可验证产出。",
+              "recommendation": "实验3小时跑通基线并记录指标；求职2小时完成简历定稿与一次投递；休息1小时分段穿插。",
+              "concerns": [
+                "实验若环境未就绪，3小时可能无法产出有效指标。",
+                "简历若无现成底稿，2小时内难以高质量定稿。"
+              ],
+              "unknowns": [
+                "论文实验当前进度与具体待完成任务未知。",
+                "目标岗位类型及简历现有完成度未知。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 5.968
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 307,
+              "input_tokens": 386,
+              "output_tokens": 100,
+              "total_tokens": 486,
+              "finish_reason": "stop",
+              "output_chars": 224
+            },
+            "opinion": {
+              "view": "六小时需兼顾实验与求职，建议按三二一分配并强制休息以防透支。",
+              "recommendation": "实验3小时、求职2小时、休息1小时；周末用实验产出和投递数验证。",
+              "concerns": [
+                "时间紧张易导致睡眠不足或焦虑加重",
+                "频繁切换任务会增加认知负担降低效率"
+              ],
+              "unknowns": [
+                "论文实验当前具体进度与阻塞点",
+                "目标岗位类型及简历准备程度"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.313
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 307,
+              "input_tokens": 382,
+              "output_tokens": 118,
+              "total_tokens": 500,
+              "finish_reason": "stop",
+              "output_chars": 246
+            },
+            "opinion": {
+              "view": "六小时需兼顾实验与求职，机会成本高，应聚焦本周可验证的最小产出。",
+              "recommendation": "实验2h跑基线，求职2h改简历并投3岗，休息2h；周末复盘结果。",
+              "concerns": [
+                "时间紧，任一任务延期会挤压另一项的机会成本。",
+                "未明确哪项对长期目标更关键，易分散精力。"
+              ],
+              "unknowns": [
+                "论文实验当前进度与本周最低交付标准未知。",
+                "求职目标岗位类型和所需材料尚不明确。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.484
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "本周360分钟实验求职平衡计划",
+          "steps": [
+            {
+              "action": "实验：跑通基线或记录阻塞点，输出指标或问题清单",
+              "done_when": "获得一组基线数据或明确列出环境阻塞项",
+              "minutes": 150
+            },
+            {
+              "action": "求职：针对目标岗修改简历并完成至少1次投递",
+              "done_when": "简历更新完毕且收到平台投递确认",
+              "minutes": 120
+            },
+            {
+              "action": "分段休息与周末复盘：每工作50分钟休10分钟，周末汇总结果",
+              "done_when": "累计休息达90分钟且完成复盘记录",
+              "minutes": 90
+            }
+          ],
+          "assumptions": [
+            "实验环境基本可用，无需从零搭建",
+            "已有简历底稿可供快速修改",
+            "总预算严格限制为360分钟含休息"
+          ],
+          "revision_reason": "无旧计划；综合三方取中位时长(实验150/求职120/休息90)确保不超360分钟预算"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 1941,
+          "input_tokens": 961,
+          "output_tokens": 327,
+          "total_tokens": 1288,
+          "finish_reason": "stop",
+          "output_chars": 682,
+          "total_minutes": 360,
+          "time_budget_minutes": 360,
+          "seconds": 9.375
+        },
+        "agreement": [
+          "六小时需同时覆盖实验与求职，并强制安排休息",
+          "产出须以可验证指标衡量（基线结果或投递数）",
+          "任务切换频繁会增加认知负担，应减少上下文切换"
+        ],
+        "disagreements": [
+          "实验分配时长：3小时跑通基线 vs 2小时最小产出",
+          "休息时长：1小时分段穿插 vs 2小时集中恢复",
+          "求职目标：简历定稿投1次 vs 改简历投3岗"
+        ],
+        "unknowns": [
+          "论文实验当前进度与环境是否就绪",
+          "目标岗位类型及简历现有完成度",
+          "哪项任务对长期目标优先级更高"
+        ],
+        "calls": 4,
+        "seconds": 24.14
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    },
+    {
+      "case": "research_job",
+      "phase": "revision",
+      "repeat": 1,
+      "snapshot": {
+        "run_id": "eval-research_job-revision-1",
+        "logical_session_id": "eval-research_job",
+        "epoch": 0,
+        "question": "实验卡住了，本周只剩两小时。对照旧计划缩减任务，说明保留和放弃的事项。",
+        "time_budget_minutes": 120,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "本周论文实验和求职准备共可用六小时，要保留休息。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": {
+          "title": "原计划",
+          "version": 1,
+          "body": "论文实验180分钟，求职准备120分钟，休息60分钟。"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 377,
+              "input_tokens": 423,
+              "output_tokens": 116,
+              "total_tokens": 539,
+              "finish_reason": "stop",
+              "output_chars": 251
+            },
+            "opinion": {
+              "view": "本周仅剩120分钟且实验卡住，原计划360分钟不可行，须按优先级大幅缩减。",
+              "recommendation": "保留60分钟排查或记录实验卡点，40分钟求职准备，20分钟休息；放弃剩余实验执行。",
+              "concerns": [
+                "实验卡住未解决可能导致下周进度继续延误",
+                "缩减后求职准备时间不足原计划的三分之一"
+              ],
+              "unknowns": [
+                "实验卡点是否能在60分钟内定位原因",
+                "求职准备是否有不可推迟的截止日期"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.453
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 377,
+              "input_tokens": 424,
+              "output_tokens": 95,
+              "total_tokens": 519,
+              "finish_reason": "stop",
+              "output_chars": 221
+            },
+            "opinion": {
+              "view": "本周仅剩两小时且实验卡住，需大幅缩减原计划以控制负担和成本。",
+              "recommendation": "保留一小时排查实验卡点、半小时休息，放弃剩余实验与全部求职准备。",
+              "concerns": [
+                "实验卡点可能无法在两小时内解决",
+                "完全搁置求职准备会影响后续进度"
+              ],
+              "unknowns": [
+                "实验具体卡在哪个环节",
+                "旧计划中未完成的求职任务优先级如何"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 3.704
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 377,
+              "input_tokens": 420,
+              "output_tokens": 131,
+              "total_tokens": 551,
+              "finish_reason": "stop",
+              "output_chars": 269
+            },
+            "opinion": {
+              "view": "本周仅剩120分钟且实验卡住，需放弃原计划中求职与休息，将时间全用于突破瓶颈或止损。",
+              "recommendation": "保留60分钟排查实验卡点，若未解决则用剩余60分钟整理数据；放弃本周求职准备和休息时段。",
+              "concerns": [
+                "实验若持续卡住，投入全部时间可能仍无产出。",
+                "完全放弃求职准备会压缩后续求职机会窗口。"
+              ],
+              "unknowns": [
+                "实验卡住的具体原因是否能在短时间内定位。",
+                "下周是否有额外时间补偿被放弃的求职任务。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.75
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "120分钟实验止损与精简计划",
+          "steps": [
+            {
+              "action": "排查实验卡点并记录日志，若解决则推进，否则整理已有数据",
+              "done_when": "完成卡点分析文档或数据备份",
+              "minutes": 60
+            },
+            {
+              "action": "休息恢复精力",
+              "done_when": "休息结束",
+              "minutes": 20
+            },
+            {
+              "action": "处理最紧急的一项求职任务（如投递或简历微调）",
+              "done_when": "完成一项求职动作",
+              "minutes": 40
+            }
+          ],
+          "assumptions": [
+            "实验卡点可在60分钟内完成初步诊断或止损记录",
+            "存在至少一项可压缩至40分钟的求职任务",
+            "20分钟休息足以维持后续专注力"
+          ],
+          "revision_reason": "旧计划超时且实验受阻；保留核心排查与必要休息，缩减求职至单任务，放弃剩余实验执行"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2019,
+          "input_tokens": 995,
+          "output_tokens": 307,
+          "total_tokens": 1302,
+          "finish_reason": "stop",
+          "output_chars": 675,
+          "total_minutes": 120,
+          "time_budget_minutes": 120,
+          "seconds": 8.484
+        },
+        "agreement": [
+          "原计划360分钟不可行，须按120分钟预算大幅缩减",
+          "保留约60分钟排查实验卡点或记录问题"
+        ],
+        "disagreements": [
+          "是否保留求职准备：MELCHIOR建议40分钟，BALTHASAR与CASPER建议放弃",
+          "休息安排分歧：MELCHIOR留20分钟，BALTHASAR留30分钟，CASPER建议取消",
+          "剩余60分钟用途：继续排查、整理数据还是转做求职"
+        ],
+        "unknowns": [
+          "实验卡点能否在60分钟内定位原因",
+          "求职准备是否有本周不可推迟的截止日期",
+          "下周是否有额外时间补偿被放弃的任务"
+        ],
+        "calls": 4,
+        "seconds": 21.391
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    },
+    {
+      "case": "backend_agent",
+      "phase": "create",
+      "repeat": 1,
+      "snapshot": {
+        "run_id": "eval-backend_agent-create-1",
+        "logical_session_id": "eval-backend_agent",
+        "epoch": 0,
+        "question": "比较两种学习投入，给出含休息的本周练习计划及完成条件。",
+        "time_budget_minutes": 240,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "本周有四小时学习时间，想同时学习后端开发和Agent，目标是能解释并修改自己的项目。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": null
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 322,
+              "input_tokens": 388,
+              "output_tokens": 119,
+              "total_tokens": 507,
+              "finish_reason": "stop",
+              "output_chars": 252
+            },
+            "opinion": {
+              "view": "后端重基础与调试，Agent重框架与提示词；240分钟宜按6:4分配并穿插休息。",
+              "recommendation": "周一至周三各练后端45分钟休10分钟，周四五各练Agent40分钟休10分钟，周末复习整合。",
+              "concerns": [
+                "两方向并行易分散精力导致均不深入",
+                "未明确具体项目代码库难以定制练习"
+              ],
+              "unknowns": [
+                "两种学习投入的具体定义与衡量标准",
+                "每日可用时间段及连续专注时长上限"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.703
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 322,
+              "input_tokens": 389,
+              "output_tokens": 126,
+              "total_tokens": 515,
+              "finish_reason": "stop",
+              "output_chars": 262
+            },
+            "opinion": {
+              "view": "后端重基础积累，Agent重快速实验；240分钟宜按6:4分配并穿插休息以防疲劳。",
+              "recommendation": "周一至周三各练后端45分钟休15分钟，周四五各练Agent40分钟休10分钟，完成条件为能解释并修改项目。",
+              "concerns": [
+                "双目标并行易致认知超载与精力透支。",
+                "未预留缓冲时间，突发事务可能打断计划。"
+              ],
+              "unknowns": [
+                "两种学习投入的具体定义尚不明确。",
+                "当前项目技术栈与复杂度未知。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.656
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 322,
+              "input_tokens": 385,
+              "output_tokens": 117,
+              "total_tokens": 502,
+              "finish_reason": "stop",
+              "output_chars": 252
+            },
+            "opinion": {
+              "view": "后端与Agent各占一半易致切换损耗，建议按项目依赖定主次，保留休息以维持专注。",
+              "recommendation": "主项2.5h辅项1h休息0.5h；完成条件为能口头解释核心逻辑并独立修改一处功能。",
+              "concerns": [
+                "两方向并行可能分散精力，均难达可修改深度",
+                "未明确哪个方向是当前项目的瓶颈"
+              ],
+              "unknowns": [
+                "两种学习投入的具体方式或比例偏好",
+                "当前项目中后端与Agent的依赖关系"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.328
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "本周后端与Agent主次练习计划（240分钟）",
+          "steps": [
+            {
+              "action": "确定主次：分析项目中后端与Agent依赖关系，选定主项(150min)辅项(60min)，含休息30min",
+              "done_when": "明确主辅方向并列出对应代码文件清单",
+              "minutes": 30
+            },
+            {
+              "action": "主项深度练习：阅读核心逻辑，尝试修改一处功能，每45分钟休息10分钟",
+              "done_when": "能口头解释主项核心流程并成功提交一处修改",
+              "minutes": 150
+            },
+            {
+              "action": "辅项快速实验与整合：跑通Agent提示词或接口，最后10分钟总结复盘",
+              "done_when": "辅项Demo运行成功且能说明其与主项的交互方式",
+              "minutes": 60
+            }
+          ],
+          "assumptions": [
+            "用户本周可灵活安排240分钟学习时间",
+            "项目已有可运行的基础代码库",
+            "单次专注上限约45-50分钟需休息"
+          ],
+          "revision_reason": "无旧计划；综合三视角取主辅制替代均分，将总预算严格拆分为30+150+60=240分钟，含休息。"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 1991,
+          "input_tokens": 980,
+          "output_tokens": 366,
+          "total_tokens": 1346,
+          "finish_reason": "stop",
+          "output_chars": 756,
+          "total_minutes": 240,
+          "time_budget_minutes": 240,
+          "seconds": 10.907
+        },
+        "agreement": [
+          "后端重基础调试，Agent重框架提示词，两者认知模式不同",
+          "240分钟需按主次分配并穿插休息以防疲劳",
+          "完成条件应聚焦于能解释核心逻辑并独立修改项目代码"
+        ],
+        "disagreements": [
+          "时间分配比例：6:4还是按项目依赖定主次",
+          "每日练习时长与休息间隔的具体数值不一致",
+          "是否预留缓冲时间应对突发事务"
+        ],
+        "unknowns": [
+          "当前项目的具体技术栈、代码库及复杂度",
+          "两种学习投入的明确定义与衡量标准",
+          "每日可用时间段及连续专注时长上限"
+        ],
+        "calls": 4,
+        "seconds": 24.594
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    },
+    {
+      "case": "backend_agent",
+      "phase": "revision",
+      "repeat": 1,
+      "snapshot": {
+        "run_id": "eval-backend_agent-revision-1",
+        "logical_session_id": "eval-backend_agent",
+        "epoch": 0,
+        "question": "接口练习已完成，但Agent工具调用没看懂，只剩90分钟，请修订原计划并解释理由。",
+        "time_budget_minutes": 90,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "本周有四小时学习时间，想同时学习后端开发和Agent，目标是能解释并修改自己的项目。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": {
+          "title": "原计划",
+          "version": 1,
+          "body": "后端接口练习120分钟，Agent调用链练习90分钟，休息30分钟。"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 409,
+              "input_tokens": 432,
+              "output_tokens": 119,
+              "total_tokens": 551,
+              "finish_reason": "stop",
+              "output_chars": 266
+            },
+            "opinion": {
+              "view": "接口练习已完成，剩余90分钟应全用于Agent工具调用，原计划需取消接口部分并聚焦难点。",
+              "recommendation": "用30分钟阅读Agent调用文档与示例，60分钟动手调试一个最小工具调用流程。",
+              "concerns": [
+                "90分钟内若概念未理清，可能无法完成动手调试。",
+                "缺少具体项目代码参考，练习可能脱离实际。"
+              ],
+              "unknowns": [
+                "Agent工具调用的具体框架或库未明确。",
+                "是否有可用的示例代码或文档链接未知。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.657
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 409,
+              "input_tokens": 433,
+              "output_tokens": 106,
+              "total_tokens": 539,
+              "finish_reason": "stop",
+              "output_chars": 255
+            },
+            "opinion": {
+              "view": "接口练习已完成，剩余90分钟应聚焦Agent工具调用理解并保障休息，避免疲劳影响吸收。",
+              "recommendation": "建议60分钟拆解Agent调用示例，15分钟动手改代码，留15分钟休息。",
+              "concerns": [
+                "时间紧可能导致Agent概念未消化就强行编码",
+                "连续学习无休息会增加认知负担降低效率"
+              ],
+              "unknowns": [
+                "原计划中Agent练习的具体材料是什么",
+                "当前疲劳程度是否允许高强度学习"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.453
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 409,
+              "input_tokens": 429,
+              "output_tokens": 111,
+              "total_tokens": 540,
+              "finish_reason": "stop",
+              "output_chars": 246
+            },
+            "opinion": {
+              "view": "接口已完成，剩余90分钟应全投Agent工具调用，放弃原计划中冗余的接口练习。",
+              "recommendation": "用30分钟看文档理解概念，60分钟动手调试一个简单工具调用示例。",
+              "concerns": [
+                "时间紧，若卡在环境配置可能无法完成实操。",
+                "原计划含休息，压缩后易疲劳影响理解。"
+              ],
+              "unknowns": [
+                "你当前使用的Agent框架是哪个？",
+                "是否有现成可运行的工具调用示例代码？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.203
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "90分钟Agent工具调用攻坚计划",
+          "steps": [
+            {
+              "action": "阅读Agent工具调用文档与最小示例，理清概念流程",
+              "done_when": "能口头解释工具调用的输入输出链路",
+              "minutes": 30
+            },
+            {
+              "action": "动手调试一个最小工具调用流程并尝试修改参数",
+              "done_when": "成功运行一次工具调用并理解改动效果",
+              "minutes": 45
+            },
+            {
+              "action": "休息并回顾笔记，整理未解决的疑问",
+              "done_when": "完成休息且列出后续待查问题清单",
+              "minutes": 15
+            }
+          ],
+          "assumptions": [
+            "已有可用的Agent框架文档或示例代码",
+            "环境已配置好无需额外安装依赖",
+            "30分钟阅读足以建立基本概念框架"
+          ],
+          "revision_reason": "接口已完成故放弃原120分钟接口练习；原90分钟Agent练习缩减为75分钟以插入15分钟休息；总时长严格匹配新预算90分钟。"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2079,
+          "input_tokens": 997,
+          "output_tokens": 290,
+          "total_tokens": 1287,
+          "finish_reason": "stop",
+          "output_chars": 679,
+          "total_minutes": 90,
+          "time_budget_minutes": 90,
+          "seconds": 8.125
+        },
+        "agreement": [
+          "接口练习已完成，原计划120分钟接口部分应全部放弃",
+          "剩余90分钟应聚焦Agent工具调用理解与实操",
+          "需包含休息以避免疲劳影响吸收"
+        ],
+        "disagreements": [
+          "阅读文档与动手调试的时间分配比例不同",
+          "是否保留15分钟休息存在分歧",
+          "动手环节侧重拆解示例还是直接改代码"
+        ],
+        "unknowns": [
+          "使用的具体Agent框架或库未明确",
+          "是否有现成可运行的工具调用示例代码",
+          "当前疲劳程度是否允许高强度学习"
+        ],
+        "calls": 4,
+        "seconds": 21.438
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    },
+    {
+      "case": "weekend",
+      "phase": "create",
+      "repeat": 1,
+      "snapshot": {
+        "run_id": "eval-weekend-create-1",
+        "logical_session_id": "eval-weekend",
+        "epoch": 0,
+        "question": "比较必要性与负担，给出简短安排，每步可判断完成，包含休息。",
+        "time_budget_minutes": 180,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "周末有三小时，要采购生活用品、整理房间，也希望充分休息。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": null
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 298,
+              "input_tokens": 385,
+              "output_tokens": 107,
+              "total_tokens": 492,
+              "finish_reason": "stop",
+              "output_chars": 236
+            },
+            "opinion": {
+              "view": "三小时内完成采购与整理负担较重，应按必要性优先并穿插休息以防疲劳。",
+              "recommendation": "先采购必需品(60分)，休息(20分)，再整理房间(60分)，最后休息(40分)。",
+              "concerns": [
+                "采购若遇排队可能超时影响后续安排",
+                "连续劳动不休息易导致疲劳降低效率"
+              ],
+              "unknowns": [
+                "需采购物品的具体数量与距离",
+                "房间当前杂乱程度及整理所需时间"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.312
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 298,
+              "input_tokens": 386,
+              "output_tokens": 104,
+              "total_tokens": 490,
+              "finish_reason": "stop",
+              "output_chars": 229
+            },
+            "opinion": {
+              "view": "采购与整理均为必要生活事务，但连续执行易疲劳，需穿插休息以控制负担。",
+              "recommendation": "先采购60分钟，休息30分钟；再整理60分钟，最后休息30分钟，每步完成即打勾。",
+              "concerns": [
+                "采购超时可能压缩后续休息时间",
+                "整理房间范围不清易导致过度劳累"
+              ],
+              "unknowns": [
+                "采购清单是否已提前列好",
+                "房间整理的具体优先级是什么"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 3.86
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 298,
+              "input_tokens": 382,
+              "output_tokens": 114,
+              "total_tokens": 496,
+              "finish_reason": "stop",
+              "output_chars": 238
+            },
+            "opinion": {
+              "view": "三小时内兼顾采购、整理与休息，需按必要性排序并设明确完成标准，避免过度消耗。",
+              "recommendation": "先采购必需品(40分)，再整理高频区(40分)，中间及末尾各休息20-30分，每步达标即止。",
+              "concerns": [
+                "追求完美易超时，需接受部分完成即可",
+                "连续劳作不休息会降低整体效率"
+              ],
+              "unknowns": [
+                "采购清单是否已提前列好",
+                "房间当前杂乱程度如何"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.422
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "必要优先周末安排(180分钟)",
+          "steps": [
+            {
+              "action": "采购必需品：按清单买齐核心物品，达标即止",
+              "done_when": "清单物品购齐或满60分钟立即停止",
+              "minutes": 60
+            },
+            {
+              "action": "休息恢复：坐下喝水放松，不处理任何事务",
+              "done_when": "休息满30分钟",
+              "minutes": 30
+            },
+            {
+              "action": "整理高频区：仅清理桌面与地面等常用区域",
+              "done_when": "高频区整洁或满60分钟即停，随后休息30分钟",
+              "minutes": 90
+            }
+          ],
+          "assumptions": [
+            "采购清单已提前列好",
+            "仅整理高频使用区域而非全屋",
+            "接受部分完成，不追求完美"
+          ],
+          "revision_reason": "无旧计划；综合三方意见取60+30+90(含末休)恰好180分钟，平衡必要性与负担"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 1903,
+          "input_tokens": 940,
+          "output_tokens": 298,
+          "total_tokens": 1238,
+          "finish_reason": "stop",
+          "output_chars": 628,
+          "total_minutes": 180,
+          "time_budget_minutes": 180,
+          "seconds": 8.14
+        },
+        "agreement": [
+          "三小时内兼顾采购、整理与休息负担较重，需按必要性优先",
+          "连续劳动易疲劳，必须穿插休息",
+          "每步应设明确完成标准，达标即止避免超时"
+        ],
+        "disagreements": [
+          "采购时长：两方建议60分钟，一方建议40分钟",
+          "休息分配：末尾休息20至40分钟不等",
+          "整理范围：全面整理还是仅高频区域"
+        ],
+        "unknowns": [
+          "采购清单是否已列好及商店距离",
+          "房间当前杂乱程度与整理优先级",
+          "采购排队等不可控耗时因素"
+        ],
+        "calls": 4,
+        "seconds": 20.734
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    },
+    {
+      "case": "weekend",
+      "phase": "revision",
+      "repeat": 1,
+      "snapshot": {
+        "run_id": "eval-weekend-revision-1",
+        "logical_session_id": "eval-weekend",
+        "epoch": 0,
+        "question": "突然下雨而且感觉疲惫，只剩60分钟，采购可以配送。请对照原计划缩减任务并保留休息。",
+        "time_budget_minutes": 60,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "周末有三小时，要采购生活用品、整理房间，也希望充分休息。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": {
+          "title": "原计划",
+          "version": 1,
+          "body": "采购60分钟，整理房间90分钟，休息30分钟。"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 372,
+              "input_tokens": 423,
+              "output_tokens": 99,
+              "total_tokens": 522,
+              "finish_reason": "stop",
+              "output_chars": 224
+            },
+            "opinion": {
+              "view": "原计划180分钟需缩至60分钟，采购改配送可省时间，疲惫下雨应优先保留休息。",
+              "recommendation": "取消整理房间，采购改为配送下单约10分钟，剩余50分钟用于休息。",
+              "concerns": [
+                "配送可能无法在60分钟内送达",
+                "雨天配送时效存在不确定性"
+              ],
+              "unknowns": [
+                "配送平台当前预计送达时间",
+                "是否还有其他必须今日完成事项"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.312
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 372,
+              "input_tokens": 424,
+              "output_tokens": 96,
+              "total_tokens": 520,
+              "finish_reason": "stop",
+              "output_chars": 221
+            },
+            "opinion": {
+              "view": "仅剩60分钟且疲惫下雨，应取消整理房间，改采购为配送以节省体力并保留休息。",
+              "recommendation": "立即下单配送采购，剩余时间全部用于休息恢复精力。",
+              "concerns": [
+                "雨天配送可能延迟，影响休息时长。",
+                "突然缩减计划可能带来心理负担。"
+              ],
+              "unknowns": [
+                "配送具体到达时间未知。",
+                "当前疲劳程度是否需更长休息未知。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.25
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 372,
+              "input_tokens": 420,
+              "output_tokens": 102,
+              "total_tokens": 522,
+              "finish_reason": "stop",
+              "output_chars": 228
+            },
+            "opinion": {
+              "view": "仅剩60分钟且疲惫下雨，应取消整理和外出采购，改配送并全时休息。",
+              "recommendation": "立即下单配送采购，将全部60分钟用于休息，整理房间延后另排。",
+              "concerns": [
+                "雨天配送可能延迟，影响物品到位时间。",
+                "整理任务推迟会增加后续周末负担。"
+              ],
+              "unknowns": [
+                "配送预计到达时间是否在本周内？",
+                "当前疲劳程度是否需要更长恢复？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.672
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "雨天疲惫60分钟应急计划",
+          "steps": [
+            {
+              "action": "手机下单配送采购生活用品",
+              "done_when": "订单提交成功并确认配送中",
+              "minutes": 10
+            },
+            {
+              "action": "闭眼或躺下休息恢复精力",
+              "done_when": "累计休息满50分钟",
+              "minutes": 50
+            }
+          ],
+          "assumptions": [
+            "配送无需本人在60分钟内签收",
+            "整理房间可安全推迟不影响生活",
+            "10分钟足够完成线上下单操作"
+          ],
+          "revision_reason": "原计划180分钟缩至60分钟；放弃整理因疲惫下雨；缩减采购为配送省外出；保留休息但调至50分钟含下单耗时。"
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 1945,
+          "input_tokens": 949,
+          "output_tokens": 228,
+          "total_tokens": 1177,
+          "finish_reason": "stop",
+          "output_chars": 524,
+          "total_minutes": 60,
+          "time_budget_minutes": 60,
+          "seconds": 6.891
+        },
+        "agreement": [
+          "取消整理房间任务，延后处理",
+          "采购改为配送下单以节省体力与时间",
+          "优先保留休息应对疲惫和下雨"
+        ],
+        "disagreements": [
+          "休息时间分配：50分钟还是全部60分钟",
+          "是否需关注配送在60分钟内送达的可能性",
+          "计划缩减是否带来心理负担存在分歧"
+        ],
+        "unknowns": [
+          "配送平台当前预计送达时间",
+          "实际疲劳程度是否需更长恢复",
+          "是否还有其他必须今日完成事项"
+        ],
+        "calls": 4,
+        "seconds": 20.125
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    }
+  ],
+  "summary": {
+    "attempted": 12,
+    "planned": 12,
+    "statuses": {
+      "COMPLETED": 12
+    },
+    "failure_codes": {},
+    "boundary_checks_passed": 12,
+    "model_invocations": 48,
+    "usage": {
+      "calls_with_usage": 48,
+      "calls_without_usage": 0,
+      "known_input_tokens": 26228,
+      "known_output_tokens": 7564,
+      "known_total_tokens": 33792
+    },
+    "run_seconds": {
+      "min": 20.125,
+      "median": 21.414,
+      "max": 60.437
+    },
+    "seconds": 299.75,
+    "semantic_quality": "not automatically graded; review every candidate against the snapshot"
+  },
+  "analysis_note": "Boundary and usage analysis applied after all raw runs completed; no extra model calls. Semantic review is separate."
+}

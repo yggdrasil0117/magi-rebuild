@@ -1,0 +1,102 @@
+{
+  "method": "human review of all 12 candidates against their frozen snapshots; no additional model evaluator",
+  "rubric": [
+    "current feedback addressed",
+    "time scope preserved",
+    "rest retained and minutes unambiguous",
+    "unsupported premises labeled as assumptions",
+    "revision reason agrees with steps"
+  ],
+  "not_a_general_success_rate": true,
+  "summary": {
+    "clear_with_assumptions": 7,
+    "needs_clarification": 5,
+    "all_six_feedback_candidates_address_changed_constraints": true
+  },
+  "reviews": [
+    {
+      "case": "research_job",
+      "phase": "create",
+      "repeat": 0,
+      "verdict": "clear_with_assumptions",
+      "reason": "120+120+120=360；实验、求职与休息/复盘均有完成条件；环境与简历基础仅作为假设。"
+    },
+    {
+      "case": "research_job",
+      "phase": "revision",
+      "repeat": 0,
+      "verdict": "clear_with_assumptions",
+      "reason": "回应实验受阻和120分钟约束，45+60+15=120，保留休息；无硬截止日是待确认假设。"
+    },
+    {
+      "case": "backend_agent",
+      "phase": "create",
+      "repeat": 0,
+      "verdict": "clear_with_assumptions",
+      "reason": "105分钟含90学习+15休息，90分钟含75学习+15休息，另30整合；共225分钟，不必填满240上限。"
+    },
+    {
+      "case": "backend_agent",
+      "phase": "revision",
+      "repeat": 0,
+      "verdict": "needs_clarification",
+      "reason": "步骤为阅读30+休息10+调试50；理由说Agent练习缩至50分钟，需明确50仅指动手调试而非全部学习。"
+    },
+    {
+      "case": "weekend",
+      "phase": "create",
+      "repeat": 0,
+      "verdict": "clear_with_assumptions",
+      "reason": "采购50+休息30+整理40=120，不超180；采购清单和路程为假设，余量可保留。"
+    },
+    {
+      "case": "weekend",
+      "phase": "revision",
+      "repeat": 0,
+      "verdict": "needs_clarification",
+      "reason": "10分钟配送下单+45休息+5缓冲=60，已回应下雨疲惫；理由却把45+5都称休息，缓冲不应直接等同休息。"
+    },
+    {
+      "case": "research_job",
+      "phase": "create",
+      "repeat": 1,
+      "verdict": "needs_clarification",
+      "reason": "数值150+120+90=360；最后90分钟同时要求累计休息90分钟及复盘，复盘用时归属不明确。"
+    },
+    {
+      "case": "research_job",
+      "phase": "revision",
+      "repeat": 1,
+      "verdict": "clear_with_assumptions",
+      "reason": "诊断60+休息20+求职单任务40=120；明确放弃剩余实验推进，未按旧360分钟继续安排。"
+    },
+    {
+      "case": "backend_agent",
+      "phase": "create",
+      "repeat": 1,
+      "verdict": "needs_clarification",
+      "reason": "数值30+150+60=240；30分钟用于确定主次，又声明含休息30分钟，另有每45分钟休10分钟，休息归属需明确。"
+    },
+    {
+      "case": "backend_agent",
+      "phase": "revision",
+      "repeat": 1,
+      "verdict": "clear_with_assumptions",
+      "reason": "阅读30+调试45+休息回顾15=90，接口已完成后不再重复安排接口练习；环境就绪为假设。"
+    },
+    {
+      "case": "weekend",
+      "phase": "create",
+      "repeat": 1,
+      "verdict": "clear_with_assumptions",
+      "reason": "60采购+30休息+90整理/末休=180；最后一步明确整理60随后休息30，时长可核对。"
+    },
+    {
+      "case": "weekend",
+      "phase": "revision",
+      "repeat": 1,
+      "verdict": "needs_clarification",
+      "reason": "10下单+50休息=60，已放弃外出与整理；理由的“50分钟含下单耗时”与步骤分配表述不一致。"
+    }
+  ]
+}

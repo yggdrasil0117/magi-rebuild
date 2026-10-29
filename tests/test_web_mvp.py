@@ -317,3 +317,23 @@ def test_interrupted_run_preserves_finished_persona_without_replay(env):
     assert turn["status"] == "INTERRUPTED"
     assert len(turn["result"]["personas"]) == 1
     assert len(calls) == 1
+
+
+def test_invalid_http_input_has_useful_code_without_echoing_private_values(env):
+    settings, service, session, calls = env
+    token = "test-token-which-is-long-enough"
+    with TestClient(create_app(settings, token=token, service=service)) as client:
+        response = client.post(
+            "/v1/chat",
+            headers={"Authorization": "Bearer " + token},
+            json=request().model_dump()
+            | {"user_text": "", "private": "PRIVATE-INVALID-VALUE"},
+        )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["code"] == "INVALID_INPUT" and payload["message"]
+    assert "PRIVATE-INVALID-VALUE" not in json.dumps(payload)
+    assert {e["field"] for e in payload["fields"]} == {"body.user_text", "body.private"}
+    assert not service.history("study")
+    session.ask.assert_not_called()
+    assert not calls
