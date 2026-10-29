@@ -37,14 +37,16 @@ MAGI 将建设为受 EVA 启发的长期个人 AI 助手：在持续对话中陪
 
 ## Web MVP 启动（模块 005）
 
-使用现有 `.venv-harness`，先安装 Web 增量依赖，再启动单 worker 服务：
+使用现有 `.venv-harness`，先安装千问与 Web 增量依赖，再启动单 worker 服务：
 
 ```powershell
-.\.venv-harness\Scripts\python.exe -m pip install -r requirements-web.lock.txt
+.\.venv-harness\Scripts\python.exe -m pip install -r requirements-qianwen.lock.txt
 .\scripts\start_magi.ps1
 ```
 
-启动窗口生成本次凭据；打开 [本机 MAGI 聊天页](http://127.0.0.1:8765)，填入凭据、会话名，加载历史后开始聊天。三人格模式可填总时间预算（分钟）；修订时填原计划 ID 和版本号。生成成功后点击“确认保存此候选”；查询区可读取旧版本。模型输出本身不是保存证据。
+默认使用千问AI平台 `qwen3.8-max`，不运行本地 Ollama；未设置 `DASHSCOPE_API_KEY` 时，脚本会隐藏输入并仅传给当前进程，不保存密钥。云端接入与实测见 [模块 006](docs/MAGI_模块总结_006_千问接入与生成校验.md)。需要手动选择本地模型时，运行 `.\scripts\start_magi.ps1 -Config magi.harness.toml`。
+
+启动窗口另行生成 MAGI 本机网页访问凭据；它与千问 API Key 不同。打开 [本机 MAGI 聊天页](http://127.0.0.1:8765)，填入凭据、会话名，加载历史后开始聊天。三人格模式可填总时间预算（分钟）；修订时填原计划 ID 和版本号。生成成功后点击“确认保存此候选”；查询区可读取旧版本。模型输出本身不是保存证据。
 
 首选界面 Open WebUI 的独立安装、Pipe/Action 导入、完整命令示例见 [集成说明](integrations/openwebui/README.md)。服务只监听本机；用启动窗口 Ctrl+C 停止。启动脚本受策略限制时可使用 `powershell -ExecutionPolicy Bypass -File .\scripts\start_magi.ps1`。
 
@@ -94,7 +96,7 @@ python3.12 -m venv .venv
 
 输入 `/exit` 退出，再运行相同命令恢复会话。`--message "你好"` 可发送一次消息后退出，`--history` 查看同一会话历史且不请求模型。
 
-模型和预算位于 [magi.harness.toml](magi.harness.toml)。只开放 `docs` 下的原有只读文件工具；默认写入、shell、子代理均未开放。checkpoint 和事件位于被 Git 忽略的 `.magi`。当前只支持 Ollama 接入，长上下文超过保守容量预算时明确拒绝，未完成的执行不自动重放。详细解释与限制见模块 003 总结。
+模型和预算位于 [magi.harness.toml](magi.harness.toml)。只开放 `docs` 下的原有只读文件工具；默认写入、shell、子代理均未开放。checkpoint 和事件位于被 Git 忽略的 `.magi`。模块 003 最初仅接入 Ollama；当前也提供独立千问配置。长上下文超过保守容量预算时明确拒绝，未完成的执行不自动重放。详细解释与限制见模块 003 总结。
 
 `requirements-harness.lock.txt` 是 Windows Python 3.12.3 的试验版本快照；直接依赖也在 `[harness]` 可选组中声明。安装软件包不会自动下载模型。
 

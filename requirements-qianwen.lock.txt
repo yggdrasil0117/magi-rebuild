@@ -1,0 +1,5 @@
+-r requirements-web.lock.txt
+langchain-openai==1.7.3
+openai==3.41.0
+tiktoken==0.14.0
+regex==2026.9.29

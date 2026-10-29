@@ -1,10 +1,11 @@
-"""Configuration for the local Ollama harness experiment.
+"""Configuration for local Ollama and the verified Qianwen cloud adapter.
 
-This boundary centralizes settings; it does not implement a second model provider.
+Credentials are read from environment variables at the model boundary.
 Paths in TOML are relative to the configuration file, never the shell directory.
 """
 
 import math
+import re
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,10 +26,15 @@ class HarnessConfig:
     num_predict: int = 512
     max_model_calls: int = 4
     max_tool_calls: int = 3
+    api_key_env: str = "DASHSCOPE_API_KEY"
 
     def __post_init__(self) -> None:
-        if self.provider != "ollama":
-            raise ValueError("当前试验仅接入 ollama，第二提供方尚未实现")
+        if self.provider not in {"ollama", "qianwen"}:
+            raise ValueError("不支持的 model.provider；可选 ollama、qianwen")
+        if not isinstance(self.api_key_env, str) or not re.fullmatch(
+            r"[A-Za-z_][A-Za-z0-9_]*", self.api_key_env
+        ):
+            raise ValueError("model.api_key_env 必须是环境变量名称，不能填写密钥")
         _nonempty_string(self.model, "model.name")
         _nonempty_string(self.base_url, "model.base_url")
         try:
@@ -46,6 +52,13 @@ class HarnessConfig:
             or (port is not None and port == 0)
         ):
             raise ValueError("model.base_url 必须是无凭据的 HTTP(S) 服务地址")
+        if self.provider == "qianwen" and (
+            url.scheme != "https"
+            or url.hostname != "maas.qianwenaiapi.com"
+            or url.path.rstrip("/") != "/compatible-mode/v1"
+            or port not in {None, 443}
+        ):
+            raise ValueError("qianwen 当前仅验证中国站官方 HTTPS Base URL")
         if (
             type(self.timeout_seconds) not in {int, float}
             or not math.isfinite(self.timeout_seconds)
@@ -107,6 +120,7 @@ def load_config(path: Path) -> HarnessConfig:
             "timeout_seconds": "timeout_seconds",
             "num_ctx": "num_ctx",
             "num_predict": "num_predict",
+            "api_key_env": "api_key_env",
         },
         "storage": {
             "checkpoint_db": "db_path",

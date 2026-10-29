@@ -12,6 +12,7 @@ dependencies = []
 
 [project.optional-dependencies]
 web = ["fastapi==0.121.0", "uvicorn==0.38.0", "httpx==0.28.1"]
+qianwen = ["langchain-openai==1.7.3", "openai==3.41.0"]
 ollama = ["ollama==0.6.3"]
 harness = [
     "deepagents==0.7.32",

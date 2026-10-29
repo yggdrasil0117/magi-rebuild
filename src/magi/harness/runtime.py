@@ -280,7 +280,7 @@ def open_session(
     # Public profile registration is process-wide. This trial runs one Ollama
     # configuration per process; it is not a shared multi-provider web service.
     register_harness_profile(
-        "ollama",
+        "ollama" if settings.provider == "ollama" else "openai",
         HarnessProfile(
             base_system_prompt="",
             excluded_tools=EXCLUDED_TOOLS,

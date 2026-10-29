@@ -16,7 +16,7 @@ from magi.web.service import WebError, WebService
 
 def create_app(settings=None, *, token=None, owner=None, service=None):
     settings = settings or load_config(
-        Path(os.getenv("MAGI_CONFIG", "magi.harness.toml"))
+        Path(os.getenv("MAGI_CONFIG", "magi.qianwen.toml"))
     )
     token = token or os.getenv("MAGI_API_TOKEN", "")
     owner = owner or os.getenv("MAGI_OWNER", "local")

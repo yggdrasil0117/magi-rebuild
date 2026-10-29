@@ -7,7 +7,9 @@
 在仓库根目录的两个 PowerShell 窗口运行：
 
 ```powershell
-# 窗口一：MAGI，凭据由启动脚本生成并仅在本窗口显示
+# 窗口一：MAGI，默认千问；首次安装云端增量依赖
+.\.venv-harness\Scripts\python.exe -m pip install -r requirements-qianwen.lock.txt
+# 千问密钥隐藏输入；另行生成的本机网页凭据仅在本窗口显示
 .\scripts\start_magi.ps1
 
 # 首次安装 Open WebUI，使用独立环境

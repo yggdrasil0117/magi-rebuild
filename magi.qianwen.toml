@@ -1,0 +1,21 @@
+# 千问AI平台中国站。只填写环境变量名，不填写 API Key。
+[model]
+provider = "qianwen"
+name = "qwen3.8-max"
+base_url = "https://maas.qianwenaiapi.com/compatible-mode/v1"
+api_key_env = "DASHSCOPE_API_KEY"
+timeout_seconds = 60.0
+num_ctx = 32768
+num_predict = 768
+
+[tools]
+root = "docs"
+
+[storage]
+checkpoint_db = ".magi/qianwen-harness.sqlite3"
+event_log = ".magi/qianwen-events.jsonl"
+business_db = ".magi/personal.sqlite3"
+
+[limits]
+model_calls = 4
+tool_calls = 3

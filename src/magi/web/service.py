@@ -214,6 +214,7 @@ class WebService:
                         "snapshot": snapshot,
                         "snapshot_hash": digest(snapshot),
                         "model": self.settings.model,
+                        "provider": self.settings.provider,
                     }
                     with self.store.transaction() as db:
                         db.execute(
@@ -225,6 +226,7 @@ class WebService:
                 result["snapshot"] = snapshot
                 result["snapshot_hash"] = digest(snapshot)
                 result["model"] = self.settings.model
+                result["provider"] = self.settings.provider
                 text, status = render(result), result["status"]
                 if result["candidate"] and status == "COMPLETED":
                     candidate = Candidate(**result["candidate"])

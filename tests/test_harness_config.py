@@ -39,7 +39,7 @@ def test_paths_are_relative_to_config_file_not_working_directory(tmp_path, monke
         ('[storage]\ncheckpoint = "x"', "未知字段"),
         ("[limits]\nmodel_call = 2", "未知字段"),
         ('tools = "docs"', "必须是配置表"),
-        ('[model]\nprovider = "other"', "第二提供方尚未实现"),
+        ('[model]\nprovider = "other"', "不支持的 model.provider"),
         ('[model]\nname = " "', "非空字符串"),
         ("[model]\nname = 123", "非空字符串"),
         ('[model]\nbase_url = "file:///tmp/model"', "HTTP"),

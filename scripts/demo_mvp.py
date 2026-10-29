@@ -1,5 +1,6 @@
 """Real Ollama + real HTTP restart demonstration; isolated temporary databases."""
 
+import argparse
 import json
 import tempfile
 from dataclasses import replace
@@ -14,6 +15,9 @@ from magi.web.app import create_app
 
 def main():
     root = Path(__file__).resolve().parents[1]
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, default=root / "magi.qianwen.toml")
+    args = parser.parse_args()
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
     output = root / ".magi" / f"demo-evidence-{stamp}.json"
     output.parent.mkdir(exist_ok=True)
@@ -23,7 +27,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="magi-mvp-") as directory:
         data = Path(directory)
         settings = replace(
-            load_config(root / "magi.harness.toml"),
+            load_config(args.config),
             db_path=data / "checkpoint.db",
             business_db_path=data / "personal.db",
             events_path=data / "events.jsonl",
