@@ -1,4 +1,4 @@
-param([string]$Config = "magi.qianwen.toml")
+﻿param([string]$Config = "magi.qianwen.toml")
 $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 $profileJson = & .\.venv-harness\Scripts\python.exe -c "import json,sys; from pathlib import Path; from magi.harness.config import load_config; c=load_config(Path(sys.argv[1])); print(json.dumps({'provider':c.provider,'api_key_env':c.api_key_env}))" $Config
