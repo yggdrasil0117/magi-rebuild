@@ -5,6 +5,38 @@ from copy import deepcopy
 import httpx
 from pydantic import ValidationError
 
+from magi.council.sources import source_options
+
+
+class CouncilDeadlineExceeded(TimeoutError):
+    """整轮剩余时间耗尽，区别于单次 HTTP 请求超时。"""
+
+
+def timeout_diagnostics(exc):
+    """只记录超时类型，不记录异常正文、请求头、URL 或密钥。"""
+    current, seen = exc, set()
+    phase = "unknown"
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        for cls, label in (
+            (httpx.ConnectTimeout, "connect"),
+            (httpx.ReadTimeout, "read"),
+            (httpx.WriteTimeout, "write"),
+            (httpx.PoolTimeout, "pool"),
+        ):
+            if isinstance(current, cls):
+                phase = label
+                break
+        if phase != "unknown":
+            break
+        current = current.__cause__ or current.__context__
+    return {
+        "timeout_scope": "workflow"
+        if isinstance(exc, CouncilDeadlineExceeded)
+        else "request",
+        "timeout_phase": phase,
+    }
+
 
 def generation_schema(model, snapshot):
     """从业务模型派生本轮生成约束，不改变已存旧计划的读取规则。
@@ -56,6 +88,14 @@ def generation_schema(model, snapshot):
                 dict.fromkeys([*result.get("required", []), "minutes"])
             )
         if "source_excerpts" in properties:
+            # 只让模型选择目录编号，原文由程序补入。旧业务模型仍保留摘录字段。
+            properties.pop("source_excerpts")
+            ids = [item["id"] for item in source_options(snapshot)]
+            properties["source_ids"]["items"] = (
+                {"type": "string", "enum": ids} if ids else {"type": "string"}
+            )
+            if not ids:
+                properties["source_ids"]["maxItems"] = 0
             result["required"] = list(properties)
         return result
 
@@ -126,6 +166,8 @@ def failure_details(exc):
         "candidate exceeds explicit time budget": "TIME_BUDGET_EXCEEDED",
         "candidate lacks step minutes": "MISSING_STEP_MINUTES",
         "unmatched source excerpt": "UNMATCHED_SOURCE_EXCERPT",
+        "unknown source selection": "UNKNOWN_SOURCE_SELECTION",
+        "mixed source formats": "MIXED_SOURCE_FORMATS",
         "council tools are forbidden": "FORBIDDEN_TOOL",
     }.get(message, "MODEL_FAILURE"), []
 
@@ -143,10 +185,26 @@ FAILURE_MESSAGES = {
     "TIME_BUDGET_EXCEEDED": "候选计划的总时长超过本次预算",
     "MISSING_STEP_MINUTES": "候选步骤未填写预计用时，无法核对预算",
     "UNMATCHED_SOURCE_EXCERPT": "候选的用户陈述摘录无法匹配本轮原文或有效记忆",
+    "UNKNOWN_SOURCE_SELECTION": "候选选择了本轮目录中不存在或重复的原文编号",
+    "MIXED_SOURCE_FORMATS": "候选混用了原文编号与手写摘录，未作为完整结果接受",
     "FORBIDDEN_TOOL": "模型请求了审议阶段不允许的工具",
     "MODEL_FAILURE": "模型调用未完成",
 }
 
 
-def failure_message(code):
-    return FAILURE_MESSAGES.get(code, "本阶段未完成")
+def failure_message(code, diagnostics=None):
+    """生成中文失败说明；超时只展示能确认的阶段，不猜测平台根因。"""
+    message = FAILURE_MESSAGES.get(code, "本阶段未完成")
+    if code == "TIMEOUT" and diagnostics:
+        scope = (
+            "整轮期限" if diagnostics.get("timeout_scope") == "workflow" else "单次请求"
+        )
+        phase = {
+            "connect": "连接",
+            "read": "读取响应",
+            "write": "发送请求",
+            "pool": "等待连接",
+            "unknown": "阶段未知",
+        }.get(diagnostics.get("timeout_phase"), "阶段未知")
+        message += f"：{scope}，{phase}"
+    return message

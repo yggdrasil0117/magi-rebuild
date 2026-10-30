@@ -23,7 +23,13 @@ def build_model(settings: HarnessConfig):
             base_url=settings.base_url,
             api_key=key,
             temperature=0,
-            timeout=settings.timeout_seconds,
+            # 读取上限沿用配置；连接、发送与连接池等待单独限时，不自动重试。
+            timeout=httpx.Timeout(
+                settings.timeout_seconds,
+                connect=min(10.0, settings.timeout_seconds),
+                write=min(10.0, settings.timeout_seconds),
+                pool=min(5.0, settings.timeout_seconds),
+            ),
             max_retries=0,
             use_responses_api=False,
             extra_body={"enable_thinking": False, "max_tokens": settings.num_predict},

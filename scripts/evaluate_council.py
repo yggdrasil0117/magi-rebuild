@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from magi.council.service import Council
+from magi.council.sources import source_options
 from magi.harness.config import load_config
 
 CASES = [
@@ -115,6 +116,17 @@ def assess_result(snapshot, result):
         ),
     }
     if candidate:
+        options = {o["id"]: o for o in source_options(snapshot)}
+        selected = candidate.get("source_ids", [])
+        checks["selected_sources_resolved"] = not selected or (
+            len(selected) == len(set(selected))
+            and all(key in options for key in selected)
+            and candidate.get("source_excerpts")
+            == [
+                {k: options[key][k] for k in ("evidence_ref", "quote")}
+                for key in selected
+            ]
+        )
         steps = candidate.get("steps", [])
         checks["executable_steps"] = bool(steps) and all(
             isinstance(s.get("action"), str)
@@ -159,16 +171,27 @@ def summarize_report(report, seconds):
     times = [r["result"]["seconds"] for r in runs if "seconds" in r["result"]]
     diagnostics = []
     failures = Counter()
+    timeouts = Counter()
     for run in runs:
         result = run["result"]
         for persona in result.get("personas", []):
             diagnostics.append(persona.get("diagnostics", {}))
             if persona.get("error_code"):
                 failures[persona["error_code"]] += 1
+                if persona["error_code"] == "TIMEOUT":
+                    d = persona.get("diagnostics", {})
+                    timeouts[
+                        f"{d.get('timeout_scope', 'unknown')}:{d.get('timeout_phase', 'unknown')}"
+                    ] += 1
         if "synthesis_diagnostics" in result:
             diagnostics.append(result["synthesis_diagnostics"])
         if result.get("synthesis_error_code"):
             failures[result["synthesis_error_code"]] += 1
+            if result["synthesis_error_code"] == "TIMEOUT":
+                d = result.get("synthesis_diagnostics", {})
+                timeouts[
+                    f"{d.get('timeout_scope', 'unknown')}:{d.get('timeout_phase', 'unknown')}"
+                ] += 1
     known_usage = [
         d
         for d in diagnostics
@@ -182,6 +205,7 @@ def summarize_report(report, seconds):
         "planned": report.get("planned_runs", report["repeats"] * len(CASES) * 2),
         "statuses": dict(statuses),
         "failure_codes": dict(failures),
+        "timeouts_by_scope_and_phase": dict(timeouts),
         "boundary_checks_passed": sum(
             r.get("boundary_checks", {}).get("passed", False) for r in runs
         ),

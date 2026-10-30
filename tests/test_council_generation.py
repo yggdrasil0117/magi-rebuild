@@ -14,6 +14,7 @@ from magi.council.service import (
     Synthesis,
     render,
 )
+from magi.council.sources import source_options
 from magi.harness.config import HarnessConfig
 
 OPINION = {
@@ -79,7 +80,8 @@ def test_generation_schema_limits_known_refs_and_preserves_business_title():
     assert "$ref" not in json.dumps(synthesis)
     assert candidate["properties"]["steps"]["maxItems"] == 6
     assert "kind" not in step["required"]
-    assert "source_excerpts" in candidate["required"]
+    assert "source_excerpts" not in candidate["properties"]
+    assert "source_ids" in candidate["required"]
     assert "unknowns" in candidate["required"]
     # Read historical candidates under the original domain contract.
     old = SYNTHESIS["candidate"] | {
@@ -121,6 +123,18 @@ def test_actual_model_receives_grounded_schema_without_execution_ids(
     )
     assert "TRACE-ID-NOT-EVIDENCE" not in seen["messages"][1].text
     assert json.loads(seen["messages"][1].text) == model_snapshot(snapshot())
+    council._invoke(
+        "综合",
+        json.dumps({"snapshot": snapshot(), "opinions": []}),
+        Synthesis,
+        1536,
+        60,
+    )
+    data = json.loads(seen["messages"][1].text)
+    assert data["snapshot"]["source_options"] == source_options(snapshot())
+    props = seen["format"]["properties"]["candidate"]["properties"]
+    assert "source_excerpts" not in props
+    assert props["source_ids"]["items"]["enum"] == ["source:0"]
 
 
 @pytest.mark.parametrize(
@@ -210,3 +224,105 @@ def test_success_retains_usage_and_four_call_limit(settings):
     assert result["status"] == "COMPLETED" and result["calls"] == 4
     assert result["synthesis_diagnostics"]["total_minutes"] == 30
     assert result["synthesis_diagnostics"]["prompt_eval_count"] == 500
+
+
+def test_selected_source_is_resolved_from_original_instead_of_model_copy(settings):
+    def invoke(system, payload, schema, *args):
+        if schema is Opinion:
+            return json.dumps(OPINION)
+        result = json.loads(json.dumps(SYNTHESIS))
+        result["candidate"]["source_ids"] = ["source:0"]
+        return json.dumps(result)
+
+    result = Council(settings, invoke).run(snapshot())
+    assert result["status"] == "COMPLETED"
+    assert result["candidate"]["source_excerpts"] == [
+        {"evidence_ref": "user:current", "quote": snapshot()["question"]}
+    ]
+
+
+@pytest.mark.parametrize(
+    "ids,excerpts,code",
+    [
+        (["source:404"], [], "UNKNOWN_SOURCE_SELECTION"),
+        (["source:0", "source:0"], [], "UNKNOWN_SOURCE_SELECTION"),
+        (
+            ["source:0"],
+            [{"evidence_ref": "user:current", "quote": "只剩30分钟"}],
+            "MIXED_SOURCE_FORMATS",
+        ),
+    ],
+)
+def test_invalid_source_selection_is_not_repaired(settings, ids, excerpts, code):
+    def invoke(system, payload, schema, *args):
+        if schema is Opinion:
+            return json.dumps(OPINION)
+        value = json.loads(json.dumps(SYNTHESIS))
+        value["candidate"].update(source_ids=ids, source_excerpts=excerpts)
+        return json.dumps(value)
+
+    result = Council(settings, invoke).run(snapshot())
+    assert result["candidate"] is None and result["synthesis_error_code"] == code
+
+
+def test_source_catalog_is_bounded_and_never_invents_quotes():
+    snap = snapshot() | {"question": "原文。" * 2000}
+    options = source_options(snap)
+    assert len(options) == 24
+    assert all(
+        o["quote"] in snap["question"] and len(o["quote"]) <= 160 for o in options
+    )
+    assert source_options(snap | {"evidence_ids": []}) == []
+
+
+@pytest.mark.parametrize(
+    "exception,phase",
+    [
+        ("ConnectTimeout", "connect"),
+        ("ReadTimeout", "read"),
+        ("WriteTimeout", "write"),
+        ("PoolTimeout", "pool"),
+    ],
+)
+def test_timeout_diagnostics_follow_cause_without_leaking_details(
+    settings, exception, phase
+):
+    import httpx
+
+    def invoke(*args):
+        try:
+            raise getattr(httpx, exception)("private-request-secret")
+        except httpx.TimeoutException as exc:
+            raise TimeoutError("private-sdk-error") from exc
+
+    result = Council(settings, invoke).run(snapshot())
+    assert result["candidate"] is None and result["calls"] == 3
+    assert all(p["diagnostics"]["timeout_phase"] == phase for p in result["personas"])
+    assert all(
+        p["diagnostics"]["timeout_scope"] == "request" for p in result["personas"]
+    )
+    assert "private" not in json.dumps(result)
+
+
+@pytest.mark.parametrize("late_stage", ["persona", "synthesis"])
+def test_results_arriving_after_workflow_deadline_are_not_accepted(
+    settings, monkeypatch, late_stage
+):
+    now = [0.0]
+    monkeypatch.setattr("magi.council.service.time.monotonic", lambda: now[0])
+
+    def invoke(system, payload, schema, *args):
+        if (schema is Opinion) == (late_stage == "persona"):
+            now[0] += 241
+        return json.dumps(OPINION if schema is Opinion else SYNTHESIS)
+
+    result = Council(settings, invoke).run(snapshot())
+    assert result["candidate"] is None
+    if late_stage == "persona":
+        assert result["calls"] == 1
+        assert all(
+            p["diagnostics"]["timeout_scope"] == "workflow" for p in result["personas"]
+        )
+    else:
+        assert result["calls"] == 4
+        assert result["synthesis_diagnostics"]["timeout_scope"] == "workflow"

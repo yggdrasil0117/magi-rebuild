@@ -188,6 +188,25 @@ def test_general_plan_save_restart_and_revision_without_time_fields(env):
     assert restarted.plans.get(old.id, 1).body == old.body
 
 
+def test_selected_original_source_is_frozen_and_saved(env):
+    _, service, _, _ = env
+    original = service.council.invoke
+
+    def invoke(system, payload, schema, *args):
+        raw = original(system, payload, schema, *args)
+        if schema is not Opinion:
+            value = json.loads(raw)
+            value["candidate"].pop("source_excerpts")
+            value["candidate"]["source_ids"] = ["source:0"]
+            return json.dumps(value)
+        return raw
+
+    service.council.invoke = invoke
+    turn = service.turn(request(), "council")
+    saved = confirm(service, turn)
+    assert request().user_text in service.plans.get(saved["object_id"]).body
+
+
 @pytest.mark.parametrize(
     "change",
     [{"chat_id": "other"}, {"reply_message_id": "wrong"}, {"payload_hash": "0" * 64}],

@@ -63,6 +63,16 @@ def test_missing_key_fails_without_network(settings, monkeypatch):
         build_model(settings)
 
 
+def test_cloud_timeout_has_bounded_connection_phases(settings, monkeypatch):
+    monkeypatch.setenv("DASHSCOPE_API_KEY", "fake-test-key")
+    model = build_model(settings)
+    assert model.request_timeout.read == 60
+    assert model.request_timeout.connect == 10
+    assert model.request_timeout.write == 10
+    assert model.request_timeout.pool == 5
+    assert model.max_retries == 0
+
+
 @pytest.mark.parametrize(
     "url",
     [

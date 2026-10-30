@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-30",
+  "method": "manual review of all seven accepted candidates; no additional model evaluator",
+  "summary": {"clear_with_assumptions": 3, "needs_clarification": 4, "no_candidate": 1},
+  "reviews": [
+    {"case":"travel_cost","phase":"create","verdict":"clear_with_assumptions","reason":"No invented quote or time estimate. Necessity is checked before reservations. Given component prices are treated as reservation caps; approval roles and cross-item flexibility still require user confirmation. No automatic money validator is claimed."},
+    {"case":"travel_cost","phase":"revision","verdict":"no_candidate","reason":"BALTHASAR request failed with connect timeout; no synthesis or saveable candidate."},
+    {"case":"purchase_choice","phase":"create","verdict":"needs_clarification","reason":"A is within budget and compatible, but the plan assumes equipment delivery and deployment even though product type is unspecified. Its stable operation/no faults completion condition also lacks an observation window or acceptance cases."},
+    {"case":"purchase_choice","phase":"revision","verdict":"clear_with_assumptions","reason":"Drops over-budget A, verifies B compatibility before purchase, and labels availability of an alternative as an assumption. No mandatory minute estimate."},
+    {"case":"software_debug","phase":"create","verdict":"clear_with_assumptions","reason":"Collects request details, logs and reproduction instead of asserting a root cause. Access and safe test-environment reproduction are assumptions; actual execution would still require environment and log-redaction decisions."},
+    {"case":"software_debug","phase":"revision","verdict":"needs_clarification","reason":"Final condition now allows a root-cause conclusion or evidence-gap list, improving on 010. However, step three still requires ruling out connection-pool exhaustion; the diagnostic should allow confirming exhaustion rather than presupposing its exclusion."},
+    {"case":"backend_agent","phase":"create","verdict":"needs_clarification","reason":"20+80+10+80+10+40=240 and rest is explicit. Both rest steps say cumulative rest reaches ten minutes, leaving unclear whether the second step requires an additional ten minutes. Labels and arithmetic do not settle this prose ambiguity."},
+    {"case":"backend_agent","phase":"revision","verdict":"needs_clarification","reason":"30+45+15=90; completed interface work is removed and failed debugging can be recorded. But it cancels rest on the assumption that review replaces rest. This consequential tradeoff needs user confirmation; the general prompt did not reliably resolve it."}
+  ],
+  "limitations": ["small single batch, no long-term reliability claim", "different accepted subset from 010, so semantic grade counts are not an improvement rate", "selected source is authentic text but may be irrelevant or misinterpreted", "important tradeoffs and uncertain completion conditions remain unresolved"]
+}
