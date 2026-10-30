@@ -319,6 +319,7 @@ def test_http_identity_and_history(env):
         assert client.get("/health").status_code == 200
         assert client.get("/").status_code == 200
         assert client.get("/app.js").status_code == 200
+        assert client.get("/memory.js").status_code == 200
         assert client.get("/v1/plans").status_code == 401
         headers = {"Authorization": "Bearer " + token}
         response = client.post("/v1/chat", json=request().model_dump(), headers=headers)
@@ -457,6 +458,147 @@ def test_unconfirmed_proposal_cannot_be_exported_as_a_saved_plan(env):
         )
         assert response.status_code == 404
     assert not service.plans.list_current()
+
+
+def test_web_memory_confirmation_versions_replay_and_delete(env):
+    settings, service, _, calls = env
+    token = "memory-token-which-is-long-enough"
+    headers = {"Authorization": "Bearer " + token}
+    create = dict(
+        key="回答偏好", value="先解释原理", request_id="create-1", confirmed=True
+    )
+    with TestClient(create_app(settings, token=token, service=service)) as client:
+        assert client.get("/v1/memories").status_code == 401
+        assert client.post("/v1/memories", json=create).status_code == 401
+        for confirmation in (False, 1, "true", None):
+            assert (
+                client.post(
+                    "/v1/memories",
+                    headers=headers,
+                    json=create | {"confirmed": confirmation},
+                ).status_code
+                == 422
+            )
+        assert (
+            client.post(
+                "/v1/memories", headers=headers, json=create | {"source": "model"}
+            ).status_code
+            == 422
+        )
+        result = client.post("/v1/memories", headers=headers, json=create).json()
+        receipt = result["receipt"]
+        memory_id = receipt["object_id"]
+        assert result["context_epoch"] == 1
+        replay = client.post("/v1/memories", headers=headers, json=create).json()
+        assert replay["receipt"]["duplicate"] and replay["context_epoch"] == 1
+        assert replay["receipt"]["operation_id"] == receipt["operation_id"]
+        assert (
+            client.post(
+                "/v1/memories", headers=headers, json=create | {"value": "改掉原内容"}
+            ).status_code
+            == 409
+        )
+        update = dict(
+            value="先举例再解释",
+            expected_version=1,
+            request_id="update-1",
+            confirmed=True,
+        )
+        path = f"/v1/memories/{memory_id}"
+        changed = client.post(path + "/update", headers=headers, json=update).json()
+        assert (
+            changed["receipt"]["result_version"] == 2 and changed["context_epoch"] == 2
+        )
+        assert (
+            client.post(
+                path + "/update", headers=headers, json=update | {"request_id": "stale"}
+            ).status_code
+            == 409
+        )
+        delete = dict(expected_version=2, request_id="delete-1", confirmed=True)
+        deleted = client.post(path + "/delete", headers=headers, json=delete).json()
+        assert deleted["context_epoch"] == 3
+        assert client.post(path + "/delete", headers=headers, json=delete).json()[
+            "receipt"
+        ]["duplicate"]
+        assert client.get("/v1/memories", headers=headers).json()["items"] == []
+    stored = service.memories.get(memory_id)
+    assert (
+        stored.status == "DELETED"
+        and stored.value is None
+        and stored.source == "explicit_web"
+    )
+    assert service.memories.current_epoch() == 3 and not calls
+
+
+def test_memory_write_uses_same_gate_as_deliberation(env):
+    settings, service, _, _ = env
+    token = "memory-token-which-is-long-enough"
+    service.gate.acquire()
+    try:
+        with TestClient(create_app(settings, token=token, service=service)) as client:
+            response = client.post(
+                "/v1/memories",
+                headers={"Authorization": "Bearer " + token},
+                json=dict(key="偏好", value="简洁", request_id="busy", confirmed=True),
+            )
+            assert response.status_code == 429
+    finally:
+        service.gate.release()
+    assert service.memories.current_epoch() == 0 and not service.memories.list_active()
+
+
+def test_web_memory_change_rebinds_context_and_rejects_old_candidate(env):
+    settings, service, _, calls = env
+    first = service.turn(request(), "council")
+    old_binding = service.context.resolve_binding(service.logical_id("study"))
+    token = "memory-token-which-is-long-enough"
+    with TestClient(create_app(settings, token=token, service=service)) as client:
+        client.post(
+            "/v1/memories",
+            headers={"Authorization": "Bearer " + token},
+            json=dict(
+                key="回答风格", value="先解释原理", request_id="context", confirmed=True
+            ),
+        ).raise_for_status()
+    with pytest.raises(PersonalError):
+        confirm(service, first)
+    service.turn(request("2"), "council")
+    latest = service.context.resolve_binding(service.logical_id("study"))
+    assert latest.epoch == 1 and latest.thread_id != old_binding.thread_id
+    assert json.loads(calls[4][0])["memories"][0]["value"] == "先解释原理"
+
+
+def test_memory_read_after_restart_and_session_scope_not_exposed(env):
+    settings, service, _, _ = env
+    service.memories.add(
+        key="会话专属",
+        value="不在全局页面显示",
+        scope="session:other",
+        request_id="session",
+    )
+    created = service.memories.add(
+        key="全局", value="可见", scope="global", request_id="global"
+    )
+    restarted = WebService(
+        settings,
+        "owner",
+        council=service.council,
+        session_factory=service.session_factory,
+    )
+    restarted.recover()
+    token = "memory-token-which-is-long-enough"
+    with TestClient(create_app(settings, token=token, service=restarted)) as client:
+        headers = {"Authorization": "Bearer " + token}
+        items = client.get("/v1/memories", headers=headers).json()["items"]
+        assert [m["id"] for m in items] == [created.object_id]
+        session_id = service.memories.list_active("session:other")[0].id
+        response = client.post(
+            f"/v1/memories/{session_id}/delete",
+            headers=headers,
+            json=dict(expected_version=1, request_id="bad-scope", confirmed=True),
+        )
+        assert response.status_code == 422
 
 
 def test_other_owner_cannot_access_proposal_or_turn(env):

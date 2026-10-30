@@ -27,7 +27,11 @@ async function connect() {
 function showPlans(open) {
   $('plansPanel').hidden = !open;
   $('togglePlans').setAttribute('aria-expanded', String(open));
-  if (open) $('plansPanel').scrollIntoView({behavior: 'smooth', block: 'start'});
+  if (open) {
+    $('memoriesPanel').hidden = true;
+    $('toggleMemories').setAttribute('aria-expanded', 'false');
+    $('plansPanel').scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
 }
 
 // 所有业务接口共用当前页面凭据；读取计划和对比不会请求模型。

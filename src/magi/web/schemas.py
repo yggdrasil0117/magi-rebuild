@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Request(BaseModel):
@@ -20,3 +20,31 @@ class Confirmation(Request):
     chat_id: str = Field(min_length=1, max_length=80)
     reply_message_id: str = Field(min_length=1, max_length=120)
     payload_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+class MemoryConfirmation(Request):
+    """显式确认的记忆命令；请求ID由页面生成，重试必须保留。"""
+
+    request_id: str = Field(min_length=1, max_length=120)
+    confirmed: bool = Field(strict=True)
+
+    @field_validator("confirmed")
+    @classmethod
+    def require_confirmation(cls, value):
+        """拒绝未确认请求，不把缺省值、字符串或数字当作用户确认。"""
+        if not value:
+            raise ValueError("explicit confirmation required")
+        return value
+
+
+class MemoryCreate(MemoryConfirmation):
+    key: str = Field(min_length=1, max_length=80)
+    value: str = Field(min_length=1, max_length=4000)
+
+
+class MemoryVersion(MemoryConfirmation):
+    expected_version: int = Field(ge=1, strict=True)
+
+
+class MemoryUpdate(MemoryVersion):
+    value: str = Field(min_length=1, max_length=4000)

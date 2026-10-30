@@ -11,6 +11,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from magi.council.service import Candidate, Council, candidate_body, render
 from magi.harness.runtime import open_personal_session
 from magi.personal.context import ContextService
+from magi.personal.memory import MemoryService
 from magi.personal.models import PersonalError
 from magi.personal.plans import PlanService
 from magi.personal.store import PersonalStore
@@ -36,10 +37,52 @@ class WebService:
         self.settings, self.owner = settings, owner
         self.store = PersonalStore(settings.business_db_path)
         self.plans = PlanService(self.store)
+        self.memories = MemoryService(self.store)
         self.context = ContextService(self.store)
         self.gate = Lock()
         self.council = council or Council(settings)
         self.session_factory = session_factory or open_personal_session
+
+    def change_memory(self, action, command, memory_id=None):
+        """显式网页操作复用记忆事务，与审议共享串行门，避免生成中途改变背景。
+
+        网页只管理全局记忆；不把聊天文本或模型建议自动提升为有效记忆。
+        请求ID绑定当前用户并隔离CLI命名空间，重复请求复用原回执。
+        """
+        if command.confirmed is not True:
+            raise WebError("INVALID_INPUT", "请先确认记忆修改", 422)
+        if not self.gate.acquire(blocking=False):
+            raise WebError("BUSY", "正在处理其他任务，请完成后再修改记忆", 429)
+        try:
+            request_id = "web-memory:" + digest([self.owner, command.request_id])
+            if action == "add":
+                receipt = self.memories.add(
+                    key=command.key,
+                    scope="global",
+                    value=command.value,
+                    request_id=request_id,
+                    source="explicit_web",
+                )
+            else:
+                if self.memories.get(memory_id).scope != "global":
+                    raise WebError("INVALID_INPUT", "网页仅管理全局记忆", 422)
+                params = dict(
+                    expected_version=command.expected_version, request_id=request_id
+                )
+                if action == "update":
+                    receipt = self.memories.update(
+                        memory_id, value=command.value, **params
+                    )
+                elif action == "delete":
+                    receipt = self.memories.delete(memory_id, **params)
+                else:
+                    raise WebError("INVALID_INPUT", "不支持的记忆操作", 422)
+            return {
+                "receipt": asdict(receipt),
+                "context_epoch": self.memories.current_epoch(),
+            }
+        finally:
+            self.gate.release()
 
     def recover(self):
         with self.store.transaction() as db:

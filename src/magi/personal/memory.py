@@ -92,10 +92,10 @@ class MemoryService:
         request_id: str,
         source: str = "explicit_cli",
     ) -> Receipt:
-        if source != "explicit_cli":
+        if source not in {"explicit_cli", "explicit_web"}:
             raise PersonalError(
                 ErrorCode.INVALID_INPUT,
-                "only explicit_cli can create an ACTIVE memory in module 004A",
+                "memory creation requires an explicit user entry point",
             )
         key, scope, value = (
             _text(key, "key", MAX_KEY_LENGTH),

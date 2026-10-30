@@ -8,6 +8,7 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 </style>
 <h1>MAGI</h1><p>说说你的想法，需要权衡时，再交给三人格一起分析。</p>
 <button id="togglePlans" aria-expanded="false">我的计划</button>
+<button id="toggleMemories" aria-expanded="false">个人记忆</button>
 <details id="settings"><summary>设置</summary>
 <p><small>首次使用，填写启动终端提供的本机服务凭据。凭据仅留在当前页面，刷新后需重新连接。</small></p>
 <label>本机服务凭据 <input id="token" type="password" autocomplete="off"></label><button id="connect">连接</button>
@@ -35,5 +36,19 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 <div id="comparison" hidden><p id="comparisonStatus"></p><div class="columns"><article><h4 id="beforeTitle"></h4><pre id="beforeBody"></pre></article><article><h4 id="afterTitle"></h4><pre id="afterBody"></pre></article></div><details open><summary>文本差异（- 原内容，+ 新内容）</summary><pre id="diff"></pre></details></div>
 </div>
 </section>
+<section id="memoriesPanel" aria-labelledby="memoriesTitle" hidden>
+<h2 id="memoriesTitle">个人记忆</h2>
+<p class="muted">这里只保存你明确确认的背景与偏好，后续交流会使用。保存计划不会自动添加记忆。</p>
+<button id="newMemory">添加记忆</button><button id="refreshMemories">刷新列表</button><button id="closeMemories">返回聊天</button>
+<p id="memoryStatus" role="status" aria-live="polite"></p><div id="memoryList"></div>
+<div id="memoryEditor" hidden><h3 id="memoryEditorTitle">添加记忆</h3>
+<label for="memoryKey">名称（例如“回答偏好”）</label><input id="memoryKey" maxlength="80">
+<label for="memoryValue">内容</label><textarea id="memoryValue" maxlength="4000" placeholder="例如：解释技术问题时先说明原理，再给代码。"></textarea>
+<button id="previewMemory">检查并确认</button><button id="cancelMemoryEdit">取消</button></div>
+<div id="memoryReview" hidden><h3>确认这项更改</h3><pre id="memoryPreview"></pre>
+<p class="muted">更改会影响后续交流，已有计划会标记需复核，未保存的旧候选需要重新生成。删除记忆不会清除历史聊天或旧计划。</p>
+<button id="confirmMemory">确认保存</button><button id="cancelMemoryReview">取消</button></div>
+</section>
 <script src="/app.js"></script>
+<script src="/memory.js"></script>
 </html>

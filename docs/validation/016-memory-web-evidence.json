@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-30",
+  "method": "real Edge via Playwright CLI; real FastAPI, memory transactions and SQLite; simulated Council and checkpoint",
+  "cloud_calls": 0,
+  "pytest": {
+    "passed": 283,
+    "warnings": 1,
+    "seconds": 19.59
+  },
+  "checks": {
+    "preview_no_memory_write_epoch_zero": true,
+    "create_only_after_confirmation": true,
+    "update_preview_shows_before_and_after": true,
+    "cancel_delete_preserves_active_v2_epoch2": true,
+    "confirmed_delete_sets_deleted_v3_epoch3": true,
+    "next_snapshot_uses_updated_memory": true,
+    "next_snapshot_excludes_deleted_memory": true,
+    "api_replay_and_version_conflict": true,
+    "api_write_serialized_with_deliberation": true,
+    "service_restart_reads_existing_memory": true
+  },
+  "observed_before_confirmation": {
+    "memory_rows": 0,
+    "epoch": 0
+  },
+  "observed_after_cancel_delete": {
+    "status": "ACTIVE",
+    "version": 2,
+    "epoch": 2
+  },
+  "final_memory_rows": [
+    [
+      "回答偏好",
+      "DELETED",
+      3,
+      null,
+      "explicit_web"
+    ]
+  ],
+  "final_epoch": 3,
+  "operations": 6,
+  "operations_note": "3 demo seed plan operations plus 3 confirmed memory operations; no plan confirmation in browser",
+  "snapshots": [
+    {
+      "epoch": 2,
+      "memories": [
+        {
+          "key": "回答偏好",
+          "scope": "global",
+          "value": "先给具体例子，再解释原理。"
+        }
+      ]
+    },
+    {
+      "epoch": 3,
+      "memories": []
+    }
+  ],
+  "cleanup": "dedicated browser closed and API process 165484 stopped",
+  "limitations": [
+    "global memory only; no session memory editing in UI",
+    "no automatic extraction or RAG",
+    "deleting does not purge history or plan copies",
+    "old-epoch saved plans still follow existing needs-review restriction",
+    "no live cloud or mobile-specific UI test in this round"
+  ]
+}

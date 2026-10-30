@@ -13,7 +13,13 @@ from magi.harness.config import load_config
 from magi.personal.export import plan_markdown
 from magi.personal.locking import ApplicationLock
 from magi.personal.models import PersonalError
-from magi.web.schemas import Confirmation, TurnInput
+from magi.web.schemas import (
+    Confirmation,
+    MemoryCreate,
+    MemoryUpdate,
+    MemoryVersion,
+    TurnInput,
+)
 from magi.web.service import WebError, WebService
 
 
@@ -96,6 +102,12 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
             Path(__file__).with_name("app.js"), media_type="text/javascript"
         )
 
+    @app.get("/memory.js")
+    def memory_javascript():
+        return FileResponse(
+            Path(__file__).with_name("memory.js"), media_type="text/javascript"
+        )
+
     @app.get("/health")
     def health():
         with service.store.connect() as db:
@@ -103,6 +115,26 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
         return {"status": "ready", "single_worker": True}
 
     guarded = [Depends(identity)]
+
+    @app.get("/v1/memories", dependencies=guarded)
+    def memories():
+        """只读当前有效的全局记忆；不含已删除正文与其他会话专属内容。"""
+        return {
+            "items": [asdict(m) for m in service.memories.list_active("global")],
+            "context_epoch": service.memories.current_epoch(),
+        }
+
+    @app.post("/v1/memories", dependencies=guarded)
+    def create_memory(body: MemoryCreate):
+        return service.change_memory("add", body)
+
+    @app.post("/v1/memories/{memory_id}/update", dependencies=guarded)
+    def update_memory(memory_id: str, body: MemoryUpdate):
+        return service.change_memory("update", body, memory_id)
+
+    @app.post("/v1/memories/{memory_id}/delete", dependencies=guarded)
+    def delete_memory(memory_id: str, body: MemoryVersion):
+        return service.change_memory("delete", body, memory_id)
 
     @app.post("/v1/chat", dependencies=guarded)
     def chat(body: TurnInput):
