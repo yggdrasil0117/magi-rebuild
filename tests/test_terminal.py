@@ -1,8 +1,11 @@
 """终端业务边界：复用真实 API 与临时业务库，模型和 checkpoint 离线模拟。"""
 
+import shutil
 import socket
+import subprocess
 import threading
 import time
+from pathlib import Path
 
 import pytest
 import uvicorn
@@ -151,3 +154,32 @@ def test_terminal_plain_output_and_loading_library(capsys):
     Terminal(None, "study").say("模型\x1b[2J\x07文本")
     assert "\x1b" not in capsys.readouterr().out
     assert safe_text("中文\n下一行") == "中文\n下一行"
+
+
+def test_windows_powershell_launcher_enters_magi_module():
+    """实际用 Windows PowerShell 启动，防止编码吞掉参数后误入 Python REPL。"""
+    powershell = shutil.which("powershell.exe")
+    if not powershell:
+        pytest.skip("仅在安装 Windows PowerShell 的环境验证")
+    root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [
+            powershell,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(root / "scripts/start_terminal.ps1"),
+            "-Help",
+        ],
+        cwd=root,
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        timeout=15,
+    )
+    assert result.returncode == 0
+    assert b"--chat" in result.stdout and b"--no-color" in result.stdout
+    assert b">>>" not in result.stdout
+    # 两个含中文的入口都须在 PowerShell 5.1 中按 UTF-8 读取。
+    for name in ("start_terminal.ps1", "start_magi.ps1"):
+        assert (root / "scripts" / name).read_bytes().startswith(b"\xef\xbb\xbf")
