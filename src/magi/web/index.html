@@ -30,7 +30,7 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 <details><summary>按 ID 读取</summary><input id="planId" aria-label="查询计划 ID" placeholder="计划 ID"><input id="planVersion" aria-label="查询版本" type="number" min="1" placeholder="版本（可选）"><button id="getPlan">读取版本</button></details>
 <div id="planDetail" hidden>
 <h3 id="planTitle"></h3><details><summary>版本信息</summary><p id="planMeta" class="muted"></p></details><p id="planWarning" class="warning" hidden>个人背景已变化，请重新核对这份计划。</p>
-<label>查看版本 <select id="viewVersion"></select></label><button id="feedback">对最新版提交反馈</button><pre id="planBody"></pre>
+<label>查看版本 <select id="viewVersion"></select></label><button id="feedback">对最新版提交反馈</button><button id="downloadPlan">下载此版本（Markdown）</button><pre id="planBody"></pre>
 <h3>版本对比</h3><label>原版本 <select id="fromVersion"></select></label><label>对照版本 <select id="toVersion"></select></label><button id="compare">比较版本</button>
 <div id="comparison" hidden><p id="comparisonStatus"></p><div class="columns"><article><h4 id="beforeTitle"></h4><pre id="beforeBody"></pre></article><article><h4 id="afterTitle"></h4><pre id="afterBody"></pre></article></div><details open><summary>文本差异（- 原内容，+ 新内容）</summary><pre id="diff"></pre></details></div>
 </div>

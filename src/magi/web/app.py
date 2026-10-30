@@ -7,9 +7,10 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 
 from magi.harness.config import load_config
+from magi.personal.export import plan_markdown
 from magi.personal.locking import ApplicationLock
 from magi.personal.models import PersonalError
 from magi.web.schemas import Confirmation, TurnInput
@@ -139,6 +140,20 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
     def versions(plan_id: str):
         """读取真实版本目录，供网页选择；此接口不请求模型或写入计划。"""
         return service.plans.list_versions(plan_id)
+
+    @app.get("/v1/plans/{plan_id}/export", dependencies=guarded)
+    def export_plan(plan_id: str, version: int = Query(ge=1)):
+        """下载用户明确选择的已保存版本，不接收任意路径或导出未确认候选。"""
+        saved = service.plans.get(plan_id, version)
+        return Response(
+            content=plan_markdown(saved),
+            media_type="text/markdown",
+            headers={
+                "Content-Disposition": f'attachment; filename="magi-plan-{saved.id}-v{saved.version}.md"',
+                "Cache-Control": "no-store",
+                "X-Content-Type-Options": "nosniff",
+            },
+        )
 
     @app.get("/v1/plans/{plan_id}/compare", dependencies=guarded)
     def compare(

@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-30",
+  "scope": "P1 Markdown export of explicitly selected saved plan version, not autonomous task execution",
+  "browser": "real Edge via Playwright CLI; real HTTP and SQLite; seeded demo plans; no model requests",
+  "cloud_calls": 0,
+  "pytest": {
+    "passed": 279,
+    "warnings": 1,
+    "seconds": 19.48
+  },
+  "checks": {
+    "v1_and_v2_browser_downloads_match_saved_versions": true,
+    "body_digest_verified": true,
+    "authentication_required": true,
+    "explicit_version_required": true,
+    "unconfirmed_proposal_not_exportable": true,
+    "repeat_export_stable_after_revision_and_epoch_change": true,
+    "no_plan_write_or_model_call_on_export": true
+  },
+  "downloaded_files": [
+    {
+      "version": 1,
+      "file": "015-plan-v1.md",
+      "sha256": "1ae2614d80f173f1e4691ff8e3a5862ab09bc4c63f954903b018a287e774a3e1"
+    },
+    {
+      "version": 2,
+      "file": "015-plan-v2.md",
+      "sha256": "1225191fa8f9efa33d09093c495c2fcc373f0847d77f1e175d349a706d6b6cfe"
+    }
+  ],
+  "operations_after_downloads": 3,
+  "operations_note": "all three are demo seed operations; exports add none",
+  "cleanup": "dedicated browser closed; API process 148128 stopped",
+  "limits": [
+    "Markdown only, no DOCX/PDF or generated research report",
+    "no independent factual verification of exported advice",
+    "no autonomous execution or arbitrary server file writes",
+    "no mobile-specific download or failed-download fault injection in this round"
+  ]
+}

@@ -393,6 +393,72 @@ def test_plan_version_directory_and_compare_are_authenticated_read_only(env):
     assert not calls and service.plans.get(plan_id).version == 2
 
 
+def test_export_is_authenticated_and_bound_to_an_immutable_saved_version(env):
+    settings, service, _, calls = env
+    created = service.plans.create(
+        title="中文标题<script>\n第二行",
+        body="第一版内容\n保留休息",
+        request_id="export-1",
+        source_epoch=0,
+    )
+    headers = {"Authorization": "Bearer export-token-which-is-long-enough"}
+    with TestClient(
+        create_app(settings, token="export-token-which-is-long-enough", service=service)
+    ) as client:
+        path = f"/v1/plans/{created.object_id}/export"
+        assert client.get(path + "?version=1").status_code == 401
+        first = client.get(path + "?version=1", headers=headers)
+        assert first.status_code == 200
+        assert "text/markdown" in first.headers["content-type"]
+        assert "charset=utf-8" in first.headers["content-type"]
+        assert (
+            first.headers["content-disposition"]
+            == f'attachment; filename="magi-plan-{created.object_id}-v1.md"'
+        )
+        assert first.headers["cache-control"] == "no-store"
+        assert "第一版内容\n保留休息" in first.text
+        assert "版本：v1" in first.text and created.object_id in first.text
+        assert "<script>" not in first.text
+        service.plans.update(
+            created.object_id,
+            expected_version=1,
+            title="修订版",
+            body="第二版内容",
+            request_id="export-2",
+            source_epoch=0,
+        )
+        bump_epoch(service)
+        assert client.get(path + "?version=1", headers=headers).content == first.content
+        second = client.get(path + "?version=2", headers=headers)
+        assert "第二版内容" in second.text and "版本：v2" in second.text
+        assert client.get(path, headers=headers).status_code == 422
+        assert client.get(path + "?version=0", headers=headers).status_code == 422
+        assert client.get(path + "?version=99", headers=headers).status_code == 404
+        assert (
+            client.get(
+                "/v1/plans/missing/export?version=1", headers=headers
+            ).status_code
+            == 404
+        )
+    with service.store.connect() as db:
+        assert db.execute("SELECT COUNT(*) FROM operations").fetchone()[0] == 2
+    assert not calls and service.plans.get(created.object_id).version == 2
+
+
+def test_unconfirmed_proposal_cannot_be_exported_as_a_saved_plan(env):
+    settings, service, _, _ = env
+    turn = service.turn(request(), "council")
+    headers = {"Authorization": "Bearer export-token-which-is-long-enough"}
+    with TestClient(
+        create_app(settings, token="export-token-which-is-long-enough", service=service)
+    ) as client:
+        response = client.get(
+            f"/v1/plans/{turn['proposal_id']}/export?version=1", headers=headers
+        )
+        assert response.status_code == 404
+    assert not service.plans.list_current()
+
+
 def test_other_owner_cannot_access_proposal_or_turn(env):
     settings, service, _, _ = env
     turn = service.turn(request(), "council")

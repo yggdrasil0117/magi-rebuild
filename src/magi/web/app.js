@@ -1,6 +1,7 @@
 const $ = id => document.getElementById(id);
 let pending = null, lastReply = null, selectedPlan = null, viewTicket = 0, sending = false;
 let connected = false;
+let selectedVersion = null, exporting = false;
 
 // 只切换交互状态；实际请求仍使用原来的两种后端模式。
 function setMode(mode) {
@@ -30,16 +31,18 @@ function showPlans(open) {
 }
 
 // 所有业务接口共用当前页面凭据；读取计划和对比不会请求模型。
-async function api(path, body) {
+async function request(path, body) {
   const response = await fetch(path, {
     method: body ? 'POST' : 'GET',
     headers: {Authorization: 'Bearer ' + $('token').value, 'Content-Type': 'application/json'},
     ...(body ? {body: JSON.stringify(body)} : {})
   });
-  const data = await response.json();
-  if (!response.ok) throw Error(data.code + ': ' + data.message);
-  return data;
+  if (!response.ok) { const data = await response.json(); throw Error(data.code + ': ' + data.message); }
+  return response;
 }
+
+// JSON业务响应与文件下载共用认证，凭据不进入URL。
+async function api(path, body) { return (await request(path, body)).json(); }
 
 // 展示一轮历史；保存按钮确认的是该轮冻结候选，不根据当前输入框重新生成。
 function show(turn) {
@@ -138,6 +141,8 @@ function fillVersions(id, versions, selected) {
 async function selectPlan(id, version = null) {
   const ticket = ++viewTicket;
   selectedPlan = null;
+  selectedVersion = null;
+  $('downloadPlan').disabled = true;
   $('planDetail').hidden = true;
   $('comparison').hidden = true;
   $('planStatus').textContent = '正在读取已保存版本…';
@@ -146,6 +151,8 @@ async function selectPlan(id, version = null) {
     const [plan, versions] = await Promise.all([api(base + (version ? '?version=' + version : '')), api(base + '/versions')]);
     if (ticket !== viewTicket) return; // 忽略较早选择的迟到响应，避免显示错计划。
     selectedPlan = plan.id;
+    selectedVersion = plan.version;
+    $('downloadPlan').disabled = exporting;
     $('planTitle').textContent = plan.title;
     $('planMeta').textContent = '计划 ' + plan.id + ' · 正在查看 v' + plan.version + ' · 读取时最新版 v' + versions[0].version;
     $('planBody').textContent = plan.body;
@@ -157,6 +164,26 @@ async function selectPlan(id, version = null) {
     $('planDetail').hidden = false;
     $('planStatus').textContent = versions.length < 2 ? '目前只有一个版本，修订并确认后即可对比。' : '共 ' + versions.length + ' 个已保存版本';
   } catch (e) { if (ticket === viewTicket) $('planStatus').textContent = e.message; }
+}
+
+// 点击时冻结计划和版本；即使随后切换详情，下载内容也不会漂移成其他版本。
+async function downloadPlan() {
+  if (!selectedPlan || !selectedVersion || exporting) return;
+  const id = selectedPlan, version = selectedVersion;
+  exporting = true;
+  $('downloadPlan').disabled = true;
+  try {
+    const response = await request('/v1/plans/' + encodeURIComponent(id) + '/export?version=' + version);
+    const url = URL.createObjectURL(await response.blob()), link = document.createElement('a');
+    link.href = url;
+    link.download = 'magi-plan-' + id + '-v' + version + '.md';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    $('status').textContent = '已开始下载 v' + version + ' 的文档。';
+  } catch (e) { $('status').textContent = '文档下载未完成：' + e.message; }
+  finally { exporting = false; $('downloadPlan').disabled = !selectedVersion; }
 }
 
 // 比较两份已保存正文；用户改变选择后不再展示旧请求的对比结果。
@@ -217,6 +244,7 @@ $('getPlan').onclick = () => selectPlan($('planId').value.trim(), Number($('plan
 $('compare').onclick = compareVersions;
 $('fromVersion').onchange = $('toVersion').onchange = () => { $('comparison').hidden = true; };
 $('feedback').onclick = beginFeedback;
+$('downloadPlan').onclick = downloadPlan;
 $('exitRevision').onclick = () => { exitRevision(); setMode('chat'); };
 $('mode').onchange = () => setMode($('mode').value);
 $('reset').onclick = () => { if (!sending) { pending = null; $('reset').hidden = true; $('status').textContent = '可以修改后重新发送。已发生的处理仍可在历史中查看。'; } };
