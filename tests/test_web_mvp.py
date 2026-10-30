@@ -103,6 +103,8 @@ def test_full_create_restart_feedback_versions(env):
     receipt = confirm(service, first)
     assert receipt["committed"] and receipt["result_version"] == 1
     assert confirm(service, first)["duplicate"]
+    saved = service.proposal(first["proposal_id"], "study", first["reply"])["saved"]
+    assert saved["object_id"] == receipt["object_id"] and saved["result_version"] == 1
     assert service.turn(request("2"), "council")["id"] == first["id"]
     assert len(calls) == 4
     restarted = WebService(

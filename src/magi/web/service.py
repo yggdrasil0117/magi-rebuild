@@ -310,7 +310,14 @@ class WebService:
             ).fetchone()
         if row is None:
             raise WebError("NOT_FOUND", "候选与当前用户、会话或回复不匹配", 404)
-        return dict(row)
+        # 保存状态来自已提交操作，而不是聊天中的“已保存”文字；刷新后也可恢复。
+        with self.store.connect() as db:
+            saved = db.execute(
+                "SELECT result_id AS object_id,result_version,operation_id FROM operations "
+                "WHERE request_id=? AND status='SUCCEEDED'",
+                ("proposal:" + proposal_id + ":save",),
+            ).fetchone()
+        return {**dict(row), "saved": dict(saved) if saved else None}
 
     def confirm(self, proposal_id, confirmation):
         if not self.gate.acquire(blocking=False):

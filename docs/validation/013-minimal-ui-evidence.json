@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-30",
+  "method": "real Edge via Playwright CLI; real FastAPI and SQLite; simulated model and checkpoint",
+  "cloud_calls": 0,
+  "pytest": {
+    "passed": 277,
+    "warnings": 1,
+    "seconds": 18.03
+  },
+  "checks": {
+    "primary_chat_input_only": true,
+    "settings_and_advanced_fields_collapsed": true,
+    "connection_loads_history": true,
+    "daily_chat_without_extra_fields": true,
+    "one_toggle_deliberation": true,
+    "candidate_details_collapsed": true,
+    "explicit_save": true,
+    "saved_state_restored_after_reload": true,
+    "view_saved_candidate_does_not_resubmit_save": true,
+    "feedback_prepares_mode_and_target": true,
+    "exit_revision_restores_daily_mode": true,
+    "mobile_390_no_overflow": true
+  },
+  "final_operations": 4,
+  "turn_modes": [
+    [
+      "chat",
+      "COMPLETED"
+    ],
+    [
+      "council",
+      "COMPLETED"
+    ]
+  ],
+  "artifacts": [
+    "013-start.png",
+    "013-chat.png",
+    "013-mobile.png"
+  ],
+  "cleanup": "dedicated browser closed and API process 120232 stopped",
+  "limits": [
+    "no live model or Open WebUI validation",
+    "requires service credential after refresh; no silent login",
+    "no user usability study or EVA art redesign",
+    "retry-cancel button visibility adjusted after screenshots; syntax checked, fault injection not performed"
+  ]
+}

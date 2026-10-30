@@ -6,24 +6,30 @@
 <style>
 body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;margin:30px auto;padding:0 20px}h1{letter-spacing:.15em}input,select,textarea,button{font:inherit;background:#1d2b36;color:inherit;border:1px solid #587180;border-radius:6px;padding:8px;margin:4px;max-width:100%;box-sizing:border-box}textarea{width:100%;min-height:110px}button{cursor:pointer}button:disabled{opacity:.5;cursor:wait}pre{white-space:pre-wrap;overflow-wrap:anywhere}article,section{border:1px solid #455b69;border-radius:10px;margin-top:20px;padding:16px}small,.muted{color:#a9c4cf}#status,#revisionNote,.warning{color:#ffcd84}.columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.columns article{margin:0}#planList{padding-left:20px}#planList button{text-align:left}label{display:inline-block}input[type=number]{width:180px}[hidden]{display:none!important}@media(max-width:700px){.columns{grid-template-columns:1fr}body{padding:0 12px;margin:16px auto}}
 </style>
-<h1>MAGI</h1><p>个人决策与行动 · 日常交流 → 三人格权衡 → 确认计划 → 反馈修订</p>
-<p><small>凭据只保存在当前页面内存。计划以已确认保存的版本为准，最终决策由你做出。</small></p>
-<label>服务凭据 <input id="token" type="password" placeholder="服务凭据" autocomplete="off"></label>
+<h1>MAGI</h1><p>说说你的想法，需要权衡时，再交给三人格一起分析。</p>
+<button id="togglePlans" aria-expanded="false">我的计划</button>
+<details id="settings"><summary>设置</summary>
+<p><small>首次使用，填写启动终端提供的本机服务凭据。凭据仅留在当前页面，刷新后需重新连接。</small></p>
+<label>本机服务凭据 <input id="token" type="password" autocomplete="off"></label><button id="connect">连接</button>
+<details><summary>开发者选项</summary>
 <label>会话 <input id="chat" value="study"></label><button id="load">加载历史</button>
-<label>模式 <select id="mode"><option value="chat">日常助手</option><option value="deliberations">三人格审议</option></select></label>
-<div id="history"></div><p id="status" role="status" aria-live="polite"></p>
-<p id="revisionNote" hidden></p>
-<label for="text">你的目标、约束，或执行反馈</label><textarea id="text" placeholder="你的目标、约束，或执行反馈"></textarea>
 <label>时间预算 <input id="budget" type="number" min="1" max="10080" placeholder="分钟，可选"></label>
-<details><summary>手动指定修订目标</summary><input id="target" aria-label="修订目标计划 ID" placeholder="修订目标计划 ID（可选）"><input id="version" aria-label="修订基准版本" type="number" min="1" placeholder="旧版本号"></details>
-<button id="send">发送</button><button id="reset">放弃重试，重新填写</button><button id="exitRevision" hidden>退出修订</button>
-<details><summary>最近一次保存回执</summary><pre id="receipt"></pre></details>
-<section aria-labelledby="plansTitle">
+<input id="target" aria-label="修订目标计划 ID" placeholder="修订目标计划 ID（可选）"><input id="version" aria-label="修订基准版本" type="number" min="1" placeholder="旧版本号">
+<pre id="receipt"></pre>
+</details></details>
+<p id="status" role="status" aria-live="polite">先在设置中连接本机服务，就可以开始聊天。</p>
+<p id="welcome" class="muted">可以聊日常问题，也可以说说你的目标、遇到的困难，或计划执行得怎么样。</p><div id="history"></div>
+<p id="revisionNote" hidden></p>
+<label for="text">想聊些什么？</label><textarea id="text" placeholder="直接说出你的问题，或告诉我现在的想法…"></textarea>
+<select id="mode" hidden><option value="chat">日常助手</option><option value="deliberations">三人格审议</option></select>
+<button id="analyze" aria-pressed="false">三人格分析：关闭</button><button id="send">发送</button><button id="reset" hidden>取消这次发送</button><button id="exitRevision" hidden>退出修订</button>
+<p id="modeHint" class="muted">默认日常聊天。需要比较方案或形成计划时，开启三人格分析。</p>
+<section id="plansPanel" aria-labelledby="plansTitle" hidden>
 <h2 id="plansTitle">已保存计划</h2><p class="muted">查看实际保存的内容、比较版本，或选择计划提交新的执行反馈。</p>
-<button id="plans">刷新计划列表</button><p id="planStatus" role="status"></p><ul id="planList"></ul>
+<button id="plans">刷新列表</button><button id="closePlans">返回聊天</button><p id="planStatus" role="status"></p><ul id="planList"></ul>
 <details><summary>按 ID 读取</summary><input id="planId" aria-label="查询计划 ID" placeholder="计划 ID"><input id="planVersion" aria-label="查询版本" type="number" min="1" placeholder="版本（可选）"><button id="getPlan">读取版本</button></details>
 <div id="planDetail" hidden>
-<h3 id="planTitle"></h3><p id="planMeta" class="muted"></p><p id="planWarning" class="warning" hidden>个人背景已变化，请重新核对这份计划。</p>
+<h3 id="planTitle"></h3><details><summary>版本信息</summary><p id="planMeta" class="muted"></p></details><p id="planWarning" class="warning" hidden>个人背景已变化，请重新核对这份计划。</p>
 <label>查看版本 <select id="viewVersion"></select></label><button id="feedback">对最新版提交反馈</button><pre id="planBody"></pre>
 <h3>版本对比</h3><label>原版本 <select id="fromVersion"></select></label><label>对照版本 <select id="toVersion"></select></label><button id="compare">比较版本</button>
 <div id="comparison" hidden><p id="comparisonStatus"></p><div class="columns"><article><h4 id="beforeTitle"></h4><pre id="beforeBody"></pre></article><article><h4 id="afterTitle"></h4><pre id="afterBody"></pre></article></div><details open><summary>文本差异（- 原内容，+ 新内容）</summary><pre id="diff"></pre></details></div>
