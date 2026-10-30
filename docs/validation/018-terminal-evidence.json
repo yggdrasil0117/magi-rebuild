@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-30",
+  "scope": "CLI UI client; existing MAGI HTTP backend; temporary SQLite; mocked models and checkpoints",
+  "attempts": [
+    {"check": "initial targeted pytest", "result": "2 failed, 6 passed", "reason": "test credential shorter than backend minimum; corrected test setup"},
+    {"check": "sandbox targeted pytest", "result": "interrupted after hang", "reason": "Windows asyncio socketpair initialization blocked"},
+    {"check": "sandbox diagnostic pytest with faulthandler_timeout=15", "result": "interrupted after captured stack", "reason": "socket.accept in asyncio event-loop initialization before application test execution"},
+    {"check": "targeted pytest with local sockets available", "result": "8 passed", "seconds": 3.39},
+    {"check": "full pytest with local sockets available", "result": "312 passed", "seconds": 23.02, "warnings": 3},
+    {"check": "targeted pytest after reference palette adjustment", "result": "8 passed", "seconds": 3.39, "warnings": 3},
+    {"check": "ruff check and format --check on new Python files", "result": "passed"},
+    {"check": "PowerShell launcher parser", "result": "passed"},
+    {"check": "python -m magi.terminal --help", "result": "passed"},
+    {"check": "git diff --check", "result": "passed"}
+  ],
+  "verified": [
+    "shared backend history and explicit candidate confirmation",
+    "lost generation response retry reuses request without extra model calls",
+    "cancel confirmation does not create plan",
+    "lost save receipt retry creates only one version",
+    "new client restores saved status from backend",
+    "real loopback urllib to Uvicorn HTTP and authentication rejection",
+    "nonlocal endpoint rejection and terminal control character filtering"
+  ],
+  "not_verified": [
+    "real cloud model content quality",
+    "interactive terminal font, animation and visual acceptance",
+    "browser regression",
+    "backend process restart and real checkpoint persistence"
+  ],
+  "reference": "https://github.com/Ax1i1om/NERV-CODE/blob/main/README.md",
+  "reference_scope": "Read README palette and UI description only; no core source imported"
+}
