@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 
 class ClosingConnection(sqlite3.Connection):
@@ -196,6 +196,26 @@ class PersonalStore:
                 );
                 CREATE INDEX memory_suggestions_owner ON memory_suggestions(owner,chat,status);
                 UPDATE schema_meta SET version=4;
+                COMMIT;
+                """
+            )
+        if version < 5:
+            # 工具产物独立于计划版本；预览也需持久化，避免重试重新生成内容。
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE task_documents (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    request_id TEXT NOT NULL,
+                    plan_id TEXT NOT NULL REFERENCES plans(id),
+                    version INTEGER NOT NULL,
+                    content TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK(status IN ('PREVIEW','CREATED')),
+                    UNIQUE(owner,request_id)
+                );
+                UPDATE schema_meta SET version=5;
                 COMMIT;
                 """
             )

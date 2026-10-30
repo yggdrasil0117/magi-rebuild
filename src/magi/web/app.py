@@ -15,6 +15,8 @@ from magi.personal.locking import ApplicationLock
 from magi.personal.models import PersonalError
 from magi.web.schemas import (
     Confirmation,
+    DocumentConfirm,
+    DocumentPreview,
     MemoryCreate,
     MemorySuggestionConfirm,
     MemoryUpdate,
@@ -180,6 +182,33 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
     @app.get("/v1/plans", dependencies=guarded)
     def plans():
         return [asdict(p) for p in service.plans.list_current()]
+
+    @app.post("/v1/plans/{plan_id}/documents", dependencies=guarded)
+    def preview_document(plan_id: str, body: DocumentPreview):
+        """仅保存预览，用户尚未授权创建文件。"""
+        return service.document_action(
+            "preview", plan_id, body.version, body.request_id
+        )
+
+    @app.get("/v1/plans/{plan_id}/documents", dependencies=guarded)
+    def list_documents(plan_id: str, version: int = Query(ge=1)):
+        """恢复所选版本的工具记录，供刷新后重新查看与确认。"""
+        with service.store.connect() as db:
+            rows = db.execute(
+                "SELECT id FROM task_documents WHERE owner=? AND plan_id=? AND version=? ORDER BY rowid DESC LIMIT 20",
+                (service.owner, plan_id, version),
+            ).fetchall()
+        return [service.documents.get(row["id"]) for row in rows]
+
+    @app.get("/v1/documents/{document_id}", dependencies=guarded)
+    def get_document(document_id: str):
+        """只读持久预览；CREATED状态是历史记录，不重新验证外部编辑。"""
+        return service.documents.get(document_id)
+
+    @app.post("/v1/documents/{document_id}/confirm", dependencies=guarded)
+    def confirm_document(document_id: str, body: DocumentConfirm):
+        """只有显式确认才发布文件，重试使用同一文档和摘要。"""
+        return service.document_action("confirm", document_id, body.payload_hash)
 
     @app.get("/v1/plans/{plan_id}", dependencies=guarded)
     def plan(plan_id: str, version: int | None = None):

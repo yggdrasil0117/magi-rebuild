@@ -1,0 +1,21 @@
+{
+  "round": 19,
+  "mode": "real Edge + FastAPI + SQLite + filesystem; no model calls",
+  "preview_before_confirm_no_directory": true,
+  "refresh_restored_preview": true,
+  "process_restart_restored_created": true,
+  "repeat_confirmation_verified_same_file": true,
+  "document_count": 1,
+  "file_count": 1,
+  "document_id": "082882369c4a439195d56b810abe21ac",
+  "plan_id": "a0811ae343674568ac3f6b72938ee74e",
+  "version": 2,
+  "payload_hash": "cefe236c53bd6c52288a11e17e696b61468c78bbd9375b3fa361b31c0b056e23",
+  "context_epoch": 0,
+  "schema_version": 5,
+  "limitations": [
+    "fixed template, not AI task decomposition",
+    "not a power-loss or mobile-browser test"
+  ],
+  "warnings": "Chromium password field outside form notice only"
+}

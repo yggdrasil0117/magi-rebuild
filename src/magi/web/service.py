@@ -13,6 +13,7 @@ from magi.council.generation import failure_details, timeout_diagnostics
 from magi.council.service import Candidate, Council, candidate_body, render
 from magi.harness.runtime import open_personal_session
 from magi.personal.context import ContextService
+from magi.personal.documents import TaskDocuments
 from magi.personal.extraction import MemoryExtractor
 from magi.personal.memory import MemoryService
 from magi.personal.models import PersonalError
@@ -57,6 +58,17 @@ class WebService:
         self.suggestions = MemorySuggestions(self.store, owner)
         self.memory_extractor = memory_extractor or MemoryExtractor(settings)
         self.extraction_gate = Lock()
+        self.documents = TaskDocuments(self.store, owner)
+
+    def document_action(self, action, *args):
+        """本机文件操作与其他业务修改串行；I/O失败保持可重试状态，不伪造成功。"""
+        with self.gate:
+            try:
+                return getattr(self.documents, action)(*args)
+            except OSError as exc:
+                raise WebError(
+                    "DOCUMENT_IO_ERROR", "文件操作未完成，请检查输出目录后重试", 409
+                ) from exc
 
     def propose_memory(self, turn_id):
         """回答后的独立有界提取；失败不改原回答、不重放，模型等待不占聊天串行门。"""

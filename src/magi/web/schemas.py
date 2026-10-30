@@ -62,3 +62,25 @@ class MemorySuggestionConfirm(Request):
         if not value:
             raise ValueError("explicit confirmation required")
         return value
+
+
+class DocumentPreview(Request):
+    """预览请求必须指定不可变计划版本；请求ID供断线重试去重。"""
+
+    request_id: str = Field(min_length=1, max_length=120)
+    version: int = Field(ge=1, strict=True)
+
+
+class DocumentConfirm(Request):
+    """严格确认布尔值和预览摘要共同约束文件创建。"""
+
+    confirmed: bool = Field(strict=True)
+    payload_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+    @field_validator("confirmed")
+    @classmethod
+    def require_confirmation(cls, value):
+        """缺失、false或非布尔值均不能授权工具写文件。"""
+        if not value:
+            raise ValueError("explicit confirmation required")
+        return value

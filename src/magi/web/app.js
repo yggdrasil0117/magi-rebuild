@@ -145,6 +145,9 @@ function fillVersions(id, versions, selected) {
 // version为空时读最新版；指定版本时读不可变历史，并防止迟到响应覆盖新选择。
 async function selectPlan(id, version = null) {
   const ticket = ++viewTicket;
+  taskDocument = null;
+  documentRequest = null;
+  $('documentPanel').hidden = true;
   selectedPlan = null;
   selectedVersion = null;
   $('downloadPlan').disabled = true;
@@ -168,7 +171,50 @@ async function selectPlan(id, version = null) {
     $('compare').disabled = versions.length < 2;
     $('planDetail').hidden = false;
     $('planStatus').textContent = versions.length < 2 ? '目前只有一个版本，修订并确认后即可对比。' : '共 ' + versions.length + ' 个已保存版本';
+    const documents = await api(base + '/documents?version=' + plan.version);
+    if (ticket === viewTicket && documents.length) showTaskDocument(documents[0]);
   } catch (e) { if (ticket === viewTicket) $('planStatus').textContent = e.message; }
+}
+
+let taskDocument = null, documentRequest = null, documentBusy = false;
+
+// 预览来自服务端持久快照；只用textContent展示，不执行Markdown或HTML。
+function showTaskDocument(document) {
+  taskDocument = document;
+  $('documentPanel').hidden = false;
+  $('documentPath').textContent = '输入计划版本：v' + document.version + '；输出位置：' + document.path;
+  $('documentContent').textContent = document.content;
+  $('confirmDocument').textContent = document.status === 'CREATED' ? '核对已创建文件' : '确认在本机创建文件';
+  $('documentStatus').textContent = document.status === 'CREATED' ? '记录显示此前已创建；再次确认可核对文件，外部编辑不会被覆盖。' : '尚未创建文件，请核对预览。';
+}
+
+// 断线保留请求ID；切换计划后的迟到结果不能覆盖当前预览。
+async function prepareTaskDocument() {
+  if (!selectedPlan || !selectedVersion || documentBusy) return;
+  const ticket = viewTicket, id = selectedPlan;
+  documentRequest ||= {request_id: crypto.randomUUID(), version: selectedVersion};
+  documentBusy = true;
+  try {
+    const result = await api('/v1/plans/' + encodeURIComponent(id) + '/documents', documentRequest);
+    if (ticket === viewTicket) showTaskDocument(result);
+  } catch (e) { if (ticket === viewTicket) $('planStatus').textContent = '工作单预览失败：' + e.message; }
+  finally { documentBusy = false; }
+}
+
+// 确认仅使用展示的文档编号和摘要；重复点击不产生第二份文件。
+async function confirmTaskDocument() {
+  if (!taskDocument || documentBusy) return;
+  const document = taskDocument, ticket = viewTicket;
+  documentBusy = true;
+  $('confirmDocument').disabled = true;
+  try {
+    const result = await api('/v1/documents/' + document.id + '/confirm', {confirmed: true, payload_hash: document.payload_hash});
+    if (ticket === viewTicket) {
+      showTaskDocument(result);
+      $('documentStatus').textContent = '已核对文件创建成功：' + result.path + '。计划任务尚未执行。';
+    }
+  } catch (e) { if (ticket === viewTicket) $('documentStatus').textContent = '文件创建或核对未完成：' + e.message + '；可重试同一文档。'; }
+  finally { documentBusy = false; $('confirmDocument').disabled = false; }
 }
 
 // 点击时冻结计划和版本；即使随后切换详情，下载内容也不会漂移成其他版本。
@@ -250,6 +296,8 @@ $('compare').onclick = compareVersions;
 $('fromVersion').onchange = $('toVersion').onchange = () => { $('comparison').hidden = true; };
 $('feedback').onclick = beginFeedback;
 $('downloadPlan').onclick = downloadPlan;
+$('prepareDocument').onclick = prepareTaskDocument;
+$('confirmDocument').onclick = confirmTaskDocument;
 $('exitRevision').onclick = () => { exitRevision(); setMode('chat'); };
 $('mode').onchange = () => setMode($('mode').value);
 $('reset').onclick = () => { if (!sending) { pending = null; $('reset').hidden = true; $('status').textContent = '可以修改后重新发送。已发生的处理仍可在历史中查看。'; } };
