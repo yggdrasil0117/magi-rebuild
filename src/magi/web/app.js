@@ -58,6 +58,24 @@ function show(turn) {
     .split('\n\n候选 ID：')[0].replace(/\n调用 \d+\/4 · 耗时 [^\n]+/g, '');
   pre.textContent = '你：' + turn.user_text + '\n\n' + answer;
   article.append(pre);
+  // 按真实数据库产物显示入口；回答中出现“已生成”不构成工具执行证据。
+  for (const document of turn.documents || []) {
+    const button = window.document.createElement('button');
+    button.textContent = document.status === 'CREATED' ? '查看工作单创建记录 · v' + document.version : '查看待确认工作单 · v' + document.version;
+    button.onclick = async () => {
+      button.disabled = true;
+      try {
+        showPlans(true);
+        await loadPlans();
+        await selectPlan(document.plan_id, document.version);
+        const ticket = viewTicket;
+        const saved = await api('/v1/documents/' + document.id);
+        if (ticket === viewTicket && selectedPlan === document.plan_id && selectedVersion === document.version) showTaskDocument(saved);
+      } catch (e) { $('status').textContent = '工作单读取未完成：' + e.message; }
+      finally { button.disabled = false; }
+    };
+    article.append(button);
+  }
   if (turn.proposal_id) {
     const details = document.createElement('details'), summary = document.createElement('summary'), full = document.createElement('pre');
     summary.textContent = '查看三人格讨论与运行详情';
@@ -212,6 +230,7 @@ async function confirmTaskDocument() {
     if (ticket === viewTicket) {
       showTaskDocument(result);
       $('documentStatus').textContent = '已核对文件创建成功：' + result.path + '。计划任务尚未执行。';
+      await load(); // 从真实状态刷新聊天中的待确认/已创建入口，不触发新一轮推理。
     }
   } catch (e) { if (ticket === viewTicket) $('documentStatus').textContent = '文件创建或核对未完成：' + e.message + '；可重试同一文档。'; }
   finally { documentBusy = false; $('confirmDocument').disabled = false; }

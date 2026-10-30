@@ -1,0 +1,115 @@
+{
+  "mode": "real model; independent temporary databases; no retries or confirmations",
+  "model": "qwen3.8-max",
+  "cases": [
+    {
+      "case": "prepare",
+      "input": "请为已保存的“后端接口练习”计划准备任务工作单预览，版本使用当前已保存版本。现在不要创建文件。",
+      "status": "COMPLETED",
+      "answer": "已为“后端接口练习”计划（版本 1）准备好任务工作单预览，预览 ID 为 `5e0a1c38570b4786bb706172c22ec35c`。\n\n本次调用仅生成待确认预览，未创建任何文件。请点击回复下方的查看按钮核对内容，确认无误后在页面完成正式创建；聊天中的确认不能替代页面授权。",
+      "documents": [
+        {
+          "id": "5e0a1c38570b4786bb706172c22ec35c",
+          "plan_id": "1950ed82ad70496985d121fb68ee2cc1",
+          "version": 1,
+          "status": "PREVIEW"
+        }
+      ],
+      "seconds": 7.078,
+      "model_calls_recorded": 3,
+      "tool_calls": [
+        {
+          "name": "magi_list_plans",
+          "args": {}
+        },
+        {
+          "name": "magi_prepare_task_document",
+          "args": {
+            "plan_id": "1950ed82ad70496985d121fb68ee2cc1",
+            "version": 1
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "magi_list_plans",
+          "content": "[{\"id\": \"1950ed82ad70496985d121fb68ee2cc1\", \"title\": \"后端接口练习\", \"version\": 1, \"needs_review\": false}]"
+        },
+        {
+          "name": "magi_prepare_task_document",
+          "content": "{\"document_id\": \"5e0a1c38570b4786bb706172c22ec35c\", \"plan_id\": \"1950ed82ad70496985d121fb68ee2cc1\", \"version\": 1, \"status\": \"PREVIEW\", \"file_created_by_this_call\": false, \"next_step\": \"预览已准备。请用户点击回复下方查看按钮，核对后在页面确认创建；本工具没有创建文件。\"}"
+        }
+      ],
+      "known_usage": [
+        {
+          "input_tokens": 986,
+          "output_tokens": 16,
+          "total_tokens": 1002,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {}
+        },
+        {
+          "input_tokens": 1073,
+          "output_tokens": 67,
+          "total_tokens": 1140,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {}
+        },
+        {
+          "input_tokens": 1280,
+          "output_tokens": 95,
+          "total_tokens": 1375,
+          "input_token_details": {
+            "cache_read": 1024
+          },
+          "output_token_details": {}
+        }
+      ],
+      "preview_count": 1,
+      "context_epoch": 0,
+      "created_file_count": 0,
+      "branch_matches": true
+    },
+    {
+      "case": "ordinary",
+      "input": "你好，简单打个招呼即可，不查询资料、不调用工具。",
+      "status": "COMPLETED",
+      "answer": "你好！很高兴见到你。如果之后有学习、科研或求职方面的想法需要梳理，随时可以找我聊聊。祝你今天心情愉快！",
+      "documents": [],
+      "seconds": 2.594,
+      "model_calls_recorded": 1,
+      "tool_calls": [],
+      "tool_results": [],
+      "known_usage": [
+        {
+          "input_tokens": 972,
+          "output_tokens": 29,
+          "total_tokens": 1001,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {}
+        }
+      ],
+      "preview_count": 0,
+      "context_epoch": 0,
+      "created_file_count": 0,
+      "branch_matches": true
+    }
+  ],
+  "source": {
+    "baseline_commit": "958e9dadc7f24001c70e8f9c6a05e7703ef8e300",
+    "sha256": {
+      "src/magi/harness/runtime.py": "9fbc3da04cc28f76b6ebdef684a3e3518bdbdca87acd953b5263d56a95b11af9",
+      "src/magi/web/document_tools.py": "ab20279e6dfb934737401c0aa4568fe10670665d044c5c2f7c41f65b3f6e71d1",
+      "src/magi/web/service.py": "6e41ac9554fd74a59d33169e68556605150dc2f1db6777dbf0b332cffdb9fb9b",
+      "src/magi/personal/documents.py": "2690e129d586cf503ffd68af8742bd706ca1f46214617b5cd25fd009d145ef57",
+      "src/magi/personal/store.py": "382aca60427e2aacefd7cd51fe9ef2a8047b244ce24cc9e4a05c4b03d92d3822",
+      "scripts/evaluate_document_calling.py": "a4bb51fc53f41b2f4458e89125fa6900c8b77a7b6fcbd7ef6e4f133bf4591cfa"
+    }
+  }
+}

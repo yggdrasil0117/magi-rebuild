@@ -1,0 +1,24 @@
+{
+  "round": 20,
+  "mode": "real Edge + scripted model + real Deep Agents graph + FastAPI + SQLite + filesystem",
+  "real_model_calls": 0,
+  "preview_before_confirmation_no_directory": true,
+  "refresh_restored_same_linked_preview": true,
+  "chat_button_updated_after_confirmation": true,
+  "tool_calls": [
+    "magi_list_plans",
+    "magi_prepare_task_document"
+  ],
+  "model_responses": 3,
+  "document_count": 1,
+  "file_count": 1,
+  "turn_id": "6eaf5b6d6edd4578b3272e9e8a3c942b",
+  "document_id": "99e1c8bdfc1e4705b31f073d1f3d4ea0",
+  "payload_hash": "6db4329a924b5f5b8efef6f66504c7f58cdc4cdb81e161c7d308b693a3d70749",
+  "context_epoch": 0,
+  "schema_version": 6,
+  "limitations": [
+    "no mobile or browser process crash test",
+    "model selection accuracy is evaluated separately with cloud cases"
+  ]
+}

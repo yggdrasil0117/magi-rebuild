@@ -20,6 +20,7 @@ from magi.personal.models import PersonalError
 from magi.personal.plans import PlanService
 from magi.personal.store import PersonalStore
 from magi.personal.suggestions import MemorySuggestions
+from magi.web.document_tools import build_document_tool
 
 
 def digest(value):
@@ -190,17 +191,29 @@ class WebService:
         result = dict(row)
         result["result"] = json.loads(result.pop("result_json") or "null")
         result["run_id"] = result["id"] if result["mode"] == "council" else None
+        result["documents"] = self.documents.for_turn(turn_id)
         return result
 
     def history(self, chat):
+        """恢复当前owner会话及真实工具产物，不能根据模型回答推断文件已创建。"""
         with self.store.connect() as db:
-            return [
+            turns = [
                 dict(r)
                 for r in db.execute(
                     "SELECT id,message,user_text,text,status,proposal_id,reply FROM web_turns WHERE owner=? AND chat=? ORDER BY created_at,id",
                     (self.owner, chat),
                 )
             ]
+            by_turn = {}
+            for row in db.execute(
+                "SELECT d.id,d.plan_id,d.version,d.status,d.source_turn_id FROM task_documents d JOIN web_turns t ON t.id=d.source_turn_id WHERE d.owner=? AND t.owner=? AND t.chat=? ORDER BY d.rowid",
+                (self.owner, self.owner, chat),
+            ):
+                item = dict(row)
+                by_turn.setdefault(item.pop("source_turn_id"), []).append(item)
+            for turn in turns:
+                turn["documents"] = by_turn.get(turn["id"], [])
+            return turns
 
     def _sync(self, turn):
         binding = self.context.resolve_binding(self.logical_id(turn["chat"]))
@@ -291,7 +304,13 @@ class WebService:
             if mode == "chat":
                 if request.target_plan_id or request.expected_version:
                     raise WebError("INVALID_INPUT", "反馈修订请使用三人格模式", 422)
-                with self.session_factory(self.settings, logical) as session:
+                # 只给真实日常会话注入当前轮次工具；测试替身与三人格只读续接保持原约定。
+                options = {}
+                if self.session_factory is open_personal_session:
+                    options["extra_tools"] = [
+                        build_document_tool(self.documents, turn_id)
+                    ]
+                with self.session_factory(self.settings, logical, **options) as session:
                     text = session.ask(request.user_text)
                 status, synced = "COMPLETED", 1
             else:

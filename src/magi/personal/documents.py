@@ -64,15 +64,37 @@ class TaskDocuments:
         with self.store.connect() as db:
             return self._view(self._get(db, document_id))
 
-    def preview(self, plan_id, version, request_id):
+    def for_turn(self, turn_id):
+        """从真实关联记录恢复工具产物摘要，不依赖模型是否声称准备成功。"""
+        with self.store.connect() as db:
+            return [
+                dict(row)
+                for row in db.execute(
+                    "SELECT id,plan_id,version,status FROM task_documents WHERE owner=? AND source_turn_id=? ORDER BY rowid",
+                    (self.owner, turn_id),
+                )
+            ]
+
+    def preview(self, plan_id, version, request_id, *, source_turn_id=None):
         """同请求绑定同版本；预览仅写业务记录，不创建输出目录或文件。"""
         with self.store.transaction() as db:
+            if source_turn_id is not None:
+                turn = db.execute(
+                    "SELECT id FROM web_turns WHERE id=? AND owner=? AND mode='chat' AND status='RUNNING'",
+                    (source_turn_id, self.owner),
+                ).fetchone()
+                if turn is None:
+                    raise PersonalError(ErrorCode.NOT_FOUND, "没有可关联的当前聊天轮次")
             old = db.execute(
                 "SELECT * FROM task_documents WHERE owner=? AND request_id=?",
                 (self.owner, request_id),
             ).fetchone()
             if old:
-                if old["plan_id"] != plan_id or old["version"] != version:
+                if (
+                    old["plan_id"] != plan_id
+                    or old["version"] != version
+                    or old["source_turn_id"] != source_turn_id
+                ):
                     raise PersonalError(
                         ErrorCode.IDEMPOTENCY_CONFLICT, "请求已绑定其他版本"
                     )
@@ -81,7 +103,7 @@ class TaskDocuments:
             content = worksheet(plan)
             document_id = uuid4().hex
             db.execute(
-                "INSERT INTO task_documents VALUES (?,?,?,?,?,?,?, 'PREVIEW')",
+                "INSERT INTO task_documents(id,owner,request_id,plan_id,version,content,payload_hash,status,source_turn_id) VALUES (?,?,?,?,?,?,?, 'PREVIEW',?)",
                 (
                     document_id,
                     self.owner,
@@ -90,6 +112,7 @@ class TaskDocuments:
                     version,
                     content,
                     checksum(content),
+                    source_turn_id,
                 ),
             )
             return self._view(self._get(db, document_id))

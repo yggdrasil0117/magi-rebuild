@@ -104,7 +104,7 @@ def test_transaction_rolls_back_memory_and_epoch_on_failure(service, monkeypatch
 def test_schema_version_is_preserved_across_reopen(tmp_path):
     store = PersonalStore(tmp_path / "personal.sqlite3")
     with store.connect() as connection:
-        assert connection.execute("SELECT version FROM schema_meta").fetchone()[0] == 5
+        assert connection.execute("SELECT version FROM schema_meta").fetchone()[0] == 6
     with sqlite3.connect(store.path) as connection:
         connection.execute("UPDATE schema_meta SET version=99")
     with pytest.raises(RuntimeError, match="newer"):

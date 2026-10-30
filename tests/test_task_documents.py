@@ -193,4 +193,4 @@ def test_schema4_upgrade_preserves_plan(setup):
         db.execute("UPDATE schema_meta SET version=4")
     assert service.plans.get(plan_id).body == "实现接口；完成条件：响应符合约定。"
     with service.store.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 5
+        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 6

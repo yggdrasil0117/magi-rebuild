@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 
 class ClosingConnection(sqlite3.Connection):
@@ -216,6 +216,17 @@ class PersonalStore:
                     UNIQUE(owner,request_id)
                 );
                 UPDATE schema_meta SET version=5;
+                COMMIT;
+                """
+            )
+        if version < 6:
+            # 来源轮次由服务端绑定，不靠模型文字或客户端自报证明工具调用。
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                ALTER TABLE task_documents ADD COLUMN source_turn_id TEXT REFERENCES web_turns(id);
+                CREATE INDEX task_documents_turn ON task_documents(owner,source_turn_id);
+                UPDATE schema_meta SET version=6;
                 COMMIT;
                 """
             )
