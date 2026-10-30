@@ -128,7 +128,8 @@ def test_explicit_allocations_survive_generation_and_render(
 ):
     result = run_candidate(tmp_path, candidate_for(blocks), time_budget_minutes=budget)
     assert result["status"] == "COMPLETED" and result["calls"] == 4
-    assert list(result["synthesis_diagnostics"]["minutes_by_kind"].values()) == totals
+    actual = result["synthesis_diagnostics"]["minutes_by_kind"]
+    assert [actual.get(k, 0) for k in ("work", "rest", "review", "buffer")] == totals
     body = candidate_body(Candidate(**result["candidate"]))
     assert f"合计 {sum(totals)} 分钟" in body
     assert "用户陈述依据" in body and "模型假设" in body and "待确认事项" in body
@@ -137,7 +138,6 @@ def test_explicit_allocations_survive_generation_and_render(
 @pytest.mark.parametrize(
     "mutation,code",
     [
-        ("missing_kind", "MISSING_STEP_KIND"),
         ("missing_minutes", "MISSING_STEP_MINUTES"),
         ("invented_quote", "UNMATCHED_SOURCE_EXCERPT"),
         ("invented_source", "UNMATCHED_SOURCE_EXCERPT"),
@@ -148,9 +148,7 @@ def test_explicit_allocations_survive_generation_and_render(
 )
 def test_inconsistent_candidate_has_no_saveable_result(tmp_path, mutation, code):
     candidate = candidate_for([("work", "定位", 30, "记录卡点")])
-    if mutation == "missing_kind":
-        del candidate["steps"][0]["kind"]
-    elif mutation == "missing_minutes":
+    if mutation == "missing_minutes":
         del candidate["steps"][0]["minutes"]
     elif mutation == "invented_quote":
         candidate["source_excerpts"][0]["quote"] = "环境已经就绪"
@@ -161,13 +159,13 @@ def test_inconsistent_candidate_has_no_saveable_result(tmp_path, mutation, code)
     elif mutation == "over_budget":
         candidate["steps"][0]["minutes"] = 91
     else:
-        candidate["steps"][0]["kind"] = "rest_and_work"
+        candidate["steps"][0]["kind"] = 123
     result = run_candidate(tmp_path, candidate)
     assert result["status"] == "PARTIAL" and result["candidate"] is None
     assert result["synthesis_error_code"] == code and result["calls"] == 4
 
 
-def test_no_budget_still_requires_minutes_and_memory_quote_is_allowed(tmp_path):
+def test_no_budget_allows_missing_minutes_and_memory_quote_is_allowed(tmp_path):
     candidate = candidate_for([("review", "复盘", 12, "写出下一步")])
     candidate["source_excerpts"] = [
         {"evidence_ref": "memory:style", "quote": "解释依据"}
@@ -178,14 +176,15 @@ def test_no_budget_still_requires_minutes_and_memory_quote_is_allowed(tmp_path):
     )
     del candidate["steps"][0]["minutes"]
     assert (
-        run_candidate(tmp_path, candidate, time_budget_minutes=None)["candidate"]
-        is None
+        run_candidate(tmp_path, candidate, time_budget_minutes=None)["status"]
+        == "COMPLETED"
     )
     schema = generation_schema(
         Synthesis, {"time_budget_minutes": None, "evidence_ids": []}
     )
     step = schema["properties"]["candidate"]["properties"]["steps"]["items"]
-    assert "minutes" in step["required"] and "kind" in step["required"]
+    assert "minutes" not in step["required"] and "kind" not in step["required"]
+    assert {"type": "null"} in step["properties"]["minutes"]["anyOf"]
 
 
 def test_historical_candidate_remains_readable_without_inventing_categories():
@@ -194,8 +193,8 @@ def test_historical_candidate_remains_readable_without_inventing_categories():
     del candidate["source_excerpts"]
     del candidate["unknowns"]
     body = candidate_body(Candidate(**candidate))
-    assert "旧版候选" in body
-    assert "程序汇总" not in body
+    assert "旧版候选" not in body
+    assert "未分类 20 分钟" in body
 
 
 @pytest.mark.parametrize("minutes", [True, "30", 1.5])
@@ -204,3 +203,68 @@ def test_minutes_are_actual_integers(tmp_path, minutes):
     result = run_candidate(tmp_path, candidate)
     assert result["candidate"] is None
     assert result["synthesis_error_code"] == "INVALID_FIELDS"
+
+
+@pytest.mark.parametrize(
+    "action,done,label",
+    [
+        ("比较两种采购方案", "列出选择理由和缺失报价", "采购比较"),
+        ("定位接口错误", "记录最小复现和报错位置", "debug"),
+        ("明确出行需求", "确认目的地与同行者要求", None),
+    ],
+)
+def test_general_plans_do_not_require_time_or_fixed_categories(
+    tmp_path, action, done, label
+):
+    candidate = candidate_for([("work", action, 30, done)])
+    step = candidate["steps"][0]
+    step.pop("minutes")
+    step.pop("kind")
+    if label is not None:
+        step["kind"] = label
+    candidate["source_excerpts"] = []
+    result = run_candidate(
+        tmp_path, candidate, question=action, time_budget_minutes=None
+    )
+    assert result["status"] == "COMPLETED" and result["calls"] == 4
+    body = candidate_body(Candidate(**result["candidate"]))
+    assert action in body and done in body
+    assert "合计" not in body and "旧版候选" not in body
+    assert result["synthesis_diagnostics"]["minutes_by_kind"] == {}
+
+
+def test_explicit_budget_needs_minutes_but_not_categories(tmp_path):
+    candidate = candidate_for([("work", "定位", 30, "记录卡点")])
+    del candidate["steps"][0]["kind"]
+    result = run_candidate(tmp_path, candidate)
+    assert result["status"] == "COMPLETED"
+    assert result["synthesis_diagnostics"]["total_minutes"] == 30
+    assert result["synthesis_diagnostics"]["minutes_by_kind"] == {"未分类": 30}
+
+
+def test_partial_optional_estimates_do_not_present_a_complete_total(tmp_path):
+    candidate = candidate_for(
+        [("debug", "定位", 30, "找到复现"), ("实现", "修复", None, "验证复现消失")]
+    )
+    result = run_candidate(tmp_path, candidate, time_budget_minutes=None)
+    assert result["status"] == "COMPLETED"
+    body = candidate_body(Candidate(**result["candidate"]))
+    assert "部分步骤未估时" in body and "合计" not in body
+    assert result["synthesis_diagnostics"]["minutes_by_kind"] == {}
+
+
+def test_explicit_null_optional_fields_and_old_minimal_candidate(tmp_path):
+    candidate = candidate_for([("work", "比较", 30, "记录取舍")])
+    candidate["steps"][0].update(minutes=None, kind=None)
+    assert (
+        run_candidate(tmp_path, candidate, time_budget_minutes=None)["status"]
+        == "COMPLETED"
+    )
+    for key in ("minutes", "kind"):
+        del candidate["steps"][0][key]
+    for key in ("source_excerpts", "unknowns"):
+        del candidate[key]
+    assert (
+        run_candidate(tmp_path, candidate, time_budget_minutes=None)["status"]
+        == "COMPLETED"
+    )

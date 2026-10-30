@@ -1,0 +1,223 @@
+{
+  "date": "2026-10-30",
+  "method": "offline injected model responses; no live model or browser requests",
+  "pytest": {
+    "passed": 259,
+    "warnings": 1,
+    "seconds": 15.92
+  },
+  "ruff": "all seven changed Python files check and format-check passed",
+  "examples": [
+    {
+      "case": "general_purchase",
+      "time_budget_minutes": null,
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 165,
+              "output_chars": 117
+            },
+            "opinion": {
+              "view": "依据",
+              "recommendation": "先定位",
+              "concerns": [],
+              "unknowns": [],
+              "evidence_refs": []
+            },
+            "seconds": 0.0
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 165,
+              "output_chars": 117
+            },
+            "opinion": {
+              "view": "依据",
+              "recommendation": "先定位",
+              "concerns": [],
+              "unknowns": [],
+              "evidence_refs": []
+            },
+            "seconds": 0.0
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 165,
+              "output_chars": 117
+            },
+            "opinion": {
+              "view": "依据",
+              "recommendation": "先定位",
+              "concerns": [],
+              "unknowns": [],
+              "evidence_refs": []
+            },
+            "seconds": 0.0
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "调整安排",
+          "steps": [
+            {
+              "action": "比较报价与交付条件",
+              "done_when": "记录取舍及缺失报价",
+              "minutes": null,
+              "kind": "采购比较"
+            }
+          ],
+          "assumptions": [
+            "环境可正常启动"
+          ],
+          "revision_reason": "保留定位与休息，暂缓扩展任务",
+          "source_excerpts": [],
+          "unknowns": [
+            "具体报错位置"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 1038,
+          "output_chars": 280,
+          "minutes_by_kind": {},
+          "seconds": 0.0
+        },
+        "agreement": [
+          "减负"
+        ],
+        "disagreements": [],
+        "unknowns": [],
+        "calls": 4,
+        "seconds": 0.0
+      },
+      "body": "调整安排\n\n修订/决策理由：保留定位与休息，暂缓扩展任务\n1. [采购比较] 比较报价与交付条件\n   完成条件：记录取舍及缺失报价\n\n用户陈述依据（原文摘录，不代表外部核实）：\n\n模型假设（待用户确认）：\n- 环境可正常启动\n\n待确认事项：\n- 具体报错位置\n\n请核对行动、假设和最新反馈；通过程序校验不代表建议正确。"
+    },
+    {
+      "case": "time_budget_without_label",
+      "time_budget_minutes": 90,
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 163,
+              "output_chars": 117
+            },
+            "opinion": {
+              "view": "依据",
+              "recommendation": "先定位",
+              "concerns": [],
+              "unknowns": [],
+              "evidence_refs": []
+            },
+            "seconds": 0.0
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 163,
+              "output_chars": 117
+            },
+            "opinion": {
+              "view": "依据",
+              "recommendation": "先定位",
+              "concerns": [],
+              "unknowns": [],
+              "evidence_refs": []
+            },
+            "seconds": 0.0
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 163,
+              "output_chars": 117
+            },
+            "opinion": {
+              "view": "依据",
+              "recommendation": "先定位",
+              "concerns": [],
+              "unknowns": [],
+              "evidence_refs": []
+            },
+            "seconds": 0.0
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "调整安排",
+          "steps": [
+            {
+              "action": "定位接口问题",
+              "done_when": "记录复现步骤",
+              "minutes": 30,
+              "kind": null
+            }
+          ],
+          "assumptions": [
+            "环境可正常启动"
+          ],
+          "revision_reason": "保留定位与休息，暂缓扩展任务",
+          "source_excerpts": [
+            {
+              "evidence_ref": "user:current",
+              "quote": "工具调用没看懂"
+            }
+          ],
+          "unknowns": [
+            "具体报错位置"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 1036,
+          "output_chars": 325,
+          "minutes_by_kind": {
+            "未分类": 30
+          },
+          "total_minutes": 30,
+          "time_budget_minutes": 90,
+          "seconds": 0.0
+        },
+        "agreement": [
+          "减负"
+        ],
+        "disagreements": [],
+        "unknowns": [],
+        "calls": 4,
+        "seconds": 0.0
+      },
+      "body": "调整安排\n\n修订/决策理由：保留定位与休息，暂缓扩展任务\n1. 定位接口问题（预计 30 分钟）\n   完成条件：记录复现步骤\n\n时间分配（程序汇总，各步骤计入一次）：未分类 30 分钟\n合计 30 分钟\n\n用户陈述依据（原文摘录，不代表外部核实）：\n- [user:current] 工具调用没看懂\n\n模型假设（待用户确认）：\n- 环境可正常启动\n\n待确认事项：\n- 具体报错位置\n\n请核对行动、假设和最新反馈；通过程序校验不代表建议正确。"
+    }
+  ],
+  "limits": [
+    "no live Qianwen validation: current environment has no key",
+    "labels and estimates are optional without an explicit time budget",
+    "source matching and arithmetic do not establish semantic correctness",
+    "money and dependency validators are not implemented"
+  ]
+}

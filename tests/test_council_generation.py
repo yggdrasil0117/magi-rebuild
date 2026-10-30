@@ -78,7 +78,7 @@ def test_generation_schema_limits_known_refs_and_preserves_business_title():
     }
     assert "$ref" not in json.dumps(synthesis)
     assert candidate["properties"]["steps"]["maxItems"] == 6
-    assert "kind" in step["required"]
+    assert "kind" not in step["required"]
     assert "source_excerpts" in candidate["required"]
     assert "unknowns" in candidate["required"]
     # Read historical candidates under the original domain contract.

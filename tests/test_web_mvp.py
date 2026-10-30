@@ -153,6 +153,41 @@ def test_unmatched_user_excerpt_never_becomes_web_proposal(env):
     assert not service.plans.list_current()
 
 
+def test_general_plan_save_restart_and_revision_without_time_fields(env):
+    settings, service, _, _ = env
+    original = service.council.invoke
+
+    def invoke(system, payload, schema, *args):
+        raw = original(system, payload, schema, *args)
+        if schema is not Opinion:
+            value = json.loads(raw)
+            value["candidate"]["steps"] = [
+                {"action": "比较方案", "done_when": "记录取舍", "kind": "采购"}
+            ]
+            return json.dumps(value)
+        return raw
+
+    service.council.invoke = invoke
+    turn = service.turn(request(), "council")
+    saved = confirm(service, turn)
+    restarted = WebService(
+        settings,
+        "owner",
+        council=service.council,
+        session_factory=service.session_factory,
+    )
+    restarted.recover()
+    old = restarted.plans.get(saved["object_id"])
+    assert "[采购]" in old.body and "记录取舍" in old.body
+    assert "合计" not in old.body and "旧版候选" not in old.body
+    revised = restarted.turn(
+        request("2", target_plan_id=old.id, expected_version=1), "council"
+    )
+    receipt = confirm(restarted, revised)
+    assert receipt["result_version"] == 2
+    assert restarted.plans.get(old.id, 1).body == old.body
+
+
 @pytest.mark.parametrize(
     "change",
     [{"chat_id": "other"}, {"reply_message_id": "wrong"}, {"payload_hash": "0" * 64}],

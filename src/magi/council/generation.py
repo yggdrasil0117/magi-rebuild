@@ -43,12 +43,7 @@ def generation_schema(model, snapshot):
             )
             if not ids:
                 properties["evidence_refs"]["maxItems"] = 0
-        if "kind" in properties:
-            properties["kind"] = {
-                "type": "string",
-                "enum": ["work", "rest", "review", "buffer"],
-            }
-        if "minutes" in properties:
+        if "minutes" in properties and snapshot.get("time_budget_minutes") is not None:
             properties["minutes"] = {
                 "type": "integer",
                 "minimum": 1,
@@ -57,7 +52,7 @@ def generation_schema(model, snapshot):
             result["required"] = list(
                 dict.fromkeys([*result.get("required", []), "minutes"])
             )
-        if "source_excerpts" in properties or "kind" in properties:
+        if "source_excerpts" in properties:
             result["required"] = list(properties)
         return result
 
@@ -127,7 +122,6 @@ def failure_details(exc):
         "unknown evidence reference": "UNKNOWN_EVIDENCE",
         "candidate exceeds explicit time budget": "TIME_BUDGET_EXCEEDED",
         "candidate lacks step minutes": "MISSING_STEP_MINUTES",
-        "candidate lacks step kind": "MISSING_STEP_KIND",
         "unmatched source excerpt": "UNMATCHED_SOURCE_EXCERPT",
         "council tools are forbidden": "FORBIDDEN_TOOL",
     }.get(message, "MODEL_FAILURE"), []
@@ -145,7 +139,6 @@ FAILURE_MESSAGES = {
     "MODEL_UNAVAILABLE": "无法连接模型服务",
     "TIME_BUDGET_EXCEEDED": "候选计划的总时长超过本次预算",
     "MISSING_STEP_MINUTES": "候选步骤未填写预计用时，无法核对预算",
-    "MISSING_STEP_KIND": "候选步骤未区分任务、休息、复盘或缓冲",
     "UNMATCHED_SOURCE_EXCERPT": "候选的用户陈述摘录无法匹配本轮原文或有效记忆",
     "FORBIDDEN_TOOL": "模型请求了审议阶段不允许的工具",
     "MODEL_FAILURE": "模型调用未完成",

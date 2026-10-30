@@ -64,8 +64,9 @@ def assess_result(snapshot, result):
         ),
     }
     if candidate:
-        checks["explicit_step_categories"] = all(
-            s.get("kind") in {"work", "rest", "review", "buffer"}
+        checks["valid_optional_labels"] = all(
+            s.get("kind") is None
+            or (isinstance(s["kind"], str) and 0 < len(s["kind"].strip()) <= 60)
             for s in candidate.get("steps", [])
         )
         sources = {"user:current": snapshot.get("question", "")}
@@ -80,13 +81,15 @@ def assess_result(snapshot, result):
             for item in candidate.get("source_excerpts", [])
         )
         minutes = [s.get("minutes") for s in candidate.get("steps", [])]
+        budget = snapshot.get("time_budget_minutes")
         checks["positive_step_minutes"] = bool(minutes) and all(
-            type(m) is int and m > 0 for m in minutes
+            (m is None and budget is None) or (type(m) is int and 0 < m <= 10080)
+            for m in minutes
         )
-        checks["within_time_budget"] = (
-            checks["positive_step_minutes"]
-            and sum(minutes) <= snapshot["time_budget_minutes"]
-        )
+        if budget is not None:
+            checks["within_time_budget"] = (
+                checks["positive_step_minutes"] and sum(minutes) <= budget
+            )
     return {"passed": all(checks.values()), "checks": checks}
 
 

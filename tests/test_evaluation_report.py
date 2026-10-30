@@ -71,7 +71,7 @@ def test_report_rejects_saved_candidate_from_failed_or_missing_personas():
     assert not assessment["checks"]["call_limit"]
 
 
-def test_report_detects_missing_category_and_fabricated_excerpt():
+def test_report_accepts_missing_category_but_rejects_fabricated_excerpt():
     result = completed_result()
     del result["candidate"]["steps"][0]["kind"]
     result["candidate"]["source_excerpts"] = [
@@ -85,5 +85,15 @@ def test_report_detects_missing_category_and_fabricated_excerpt():
         },
         result,
     )
-    assert not assessment["checks"]["explicit_step_categories"]
+    assert assessment["checks"]["valid_optional_labels"]
     assert not assessment["checks"]["source_excerpts_match"]
+
+
+def test_report_allows_general_plan_without_budget_or_estimates():
+    result = completed_result()
+    result["candidate"]["steps"] = [{"action": "比较方案", "kind": "采购"}]
+    assessment = assess_result({"evidence_ids": []}, result)
+    assert assessment["passed"]
+    assert "within_time_budget" not in assessment["checks"]
+    result["candidate"]["steps"][0]["minutes"] = -1
+    assert not assess_result({"evidence_ids": []}, result)["passed"]
