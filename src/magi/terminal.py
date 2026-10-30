@@ -7,12 +7,15 @@ import json
 import os
 import random
 import re
+import shutil
 import sys
 import threading
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 from uuid import uuid4
+
+from magi.terminal_ui import welcome_rows
 
 # 16 个 EVA 意象 × 4 个等待动作，共 64 条；均为氛围文案，不报告运行阶段。
 LOADING = tuple(
@@ -42,16 +45,6 @@ HELP = """/chat 日常聊天   /council 三人格   /history 历史
 /retry 重试原请求   /discard 放弃本地重试
 /help 帮助   /quit 退出
 直接输入文字后回车发送。多行内容请先合并为一行。本轮记忆管理及计划历史仍在网页使用。"""
-EMBLEM = r"""
-                 _   _
-             ___/ \ / \_
-          __/   /\ | /\ \__
-         /___  /  \|/  \___\
-             \    /|\    /
-              \__/ | \__/
-                   |
-           N E R V  |  M A G I
-"""
 
 
 def safe_text(value):
@@ -159,25 +152,48 @@ class Terminal:
                 worker.join()
                 print("\r" + " " * 100 + "\r", end="", flush=True)
 
+    def welcome(self):
+        """输出可信静态徽章与系统信息；非彩色终端保留相同块字符布局。"""
+        print()
+        for logo, info in welcome_rows(shutil.get_terminal_size((100, 30)).columns):
+            if self.color:
+                print("\033[38;2;183;40;46m" + logo + "\033[0m" + info)
+            else:
+                print(logo + info)
+        print()
+
     def display(self, turn):
         """展示后端真实结果；候选编号与所属回复一起保留，供确认绑定检查。"""
         self.parent = turn["reply"]
-        self.say("\n你：" + turn["user_text"])
+        self.say("\n❯ " + turn["user_text"])
         answer = turn["text"]
         marker = "\n待确认候选（尚未保存）\n"
         if turn.get("proposal_id") and marker in answer:
             answer = answer.split(marker, 1)[1].split("\n\n候选 ID：", 1)[0]
-        self.say("\nMAGI：\n" + answer)
-        self.say("状态：" + turn["status"])
+        self.say("\n⬡ MAGI\n" + answer)
+        if turn["status"] != "COMPLETED":
+            self.say("本轮未完整完成：" + turn["status"])
         if turn.get("proposal_id"):
             self.candidate = turn
             self.say("⬡ 有候选建议；输入 /save 查看实际保存状态并确认。")
 
-    def history(self):
+    def history(self, *, recent=None):
         """从共享后端恢复会话，不将模型文字当作保存结果。"""
         turns = self.client.request(f"/v1/chats/{quote(self.chat, safe='')}/turns")
         self.parent, self.candidate = None, None
+        # 启动仅展示最近几轮，但回复链和最新候选仍从完整历史恢复。
         for turn in turns:
+            self.parent = turn["reply"]
+            if turn.get("proposal_id"):
+                self.candidate = turn
+        visible = turns if recent is None else turns[-recent:] if recent else []
+        if recent == 0 and turns:
+            self.say(f"已恢复 {len(turns)} 轮历史；/history 查看，不自动展开。")
+        elif recent is not None and len(turns) > recent:
+            self.say(
+                f"已恢复 {len(turns)} 轮历史，显示最近 {recent} 轮；/history 查看全部。"
+            )
+        for turn in visible:
             self.display(turn)
         if not turns:
             self.say("当前会话还没有历史。")
@@ -294,9 +310,17 @@ def main():
     parser.add_argument("--url", default="http://127.0.0.1:8765")
     parser.add_argument("--chat", default="study", help="与网页相同则共享该会话")
     parser.add_argument("--no-color", action="store_true")
+    parser.add_argument(
+        "--preview", action="store_true", help="仅预览启动界面，不连接服务"
+    )
     args = parser.parse_args()
     if not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", args.chat):
         parser.error("会话名仅支持 1–80 位字母、数字、下划线、连字符")
+    interactive = sys.stdout.isatty()
+    color = interactive and not args.no_color and "NO_COLOR" not in os.environ
+    if args.preview:
+        Terminal(None, args.chat, color=color).welcome()
+        return 0
     try:
         token = os.environ.get("MAGI_API_TOKEN") or getpass.getpass(
             "本机服务凭据（隐藏输入）："
@@ -304,19 +328,16 @@ def main():
         if not token.strip():
             raise ValueError("服务凭据不能为空")
         client = Client(args.url, token)
-        interactive = sys.stdout.isatty()
         terminal = Terminal(
             client,
             args.chat,
-            color=interactive and not args.no_color and "NO_COLOR" not in os.environ,
+            color=color,
             animate=interactive,
         )
-        terminal.say(EMBLEM, "red")
-        terminal.say("⬡ MAGI SYSTEM · 个人终端 · 叶片字符画示意", "red")
-        terminal.say("MELCHIOR · BALTHASAR · CASPER", "red")
+        terminal.welcome()
         terminal.say(f"会话：{args.chat}；与同一服务的网页共享数据。")
-        terminal.history()
-        terminal.say(HELP)
+        terminal.history(recent=0)
+        terminal.say("⬡ /council 三人格   /chat 日常   /save 保存   /help 全部命令")
         while True:
             text = input("\n⬡ 你 > ").strip()
             if not text:

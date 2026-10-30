@@ -3,6 +3,7 @@
 import shutil
 import socket
 import subprocess
+import sys
 import threading
 import time
 from pathlib import Path
@@ -12,6 +13,7 @@ import uvicorn
 from fastapi.testclient import TestClient
 
 from magi.terminal import LOADING, Client, Terminal, safe_text
+from magi.terminal_ui import NERV_BLOCKS, welcome_rows
 from magi.web.app import create_app
 from tests import test_web_mvp as web_tests
 
@@ -183,3 +185,29 @@ def test_windows_powershell_launcher_enters_magi_module():
     # 两个含中文的入口都须在 PowerShell 5.1 中按 UTF-8 读取。
     for name in ("start_terminal.ps1", "start_magi.ps1"):
         assert (root / "scripts" / name).read_bytes().startswith(b"\xef\xbb\xbf")
+
+
+def test_welcome_does_not_wrap_or_require_service():
+    """宽屏并排，窄屏降级；预览无需服务凭据或模型连接。"""
+    for width in (24, 40, 60, 80, 120):
+        rows = welcome_rows(width)
+        assert all(len(left + right) <= width for left, right in rows)
+    assert len(NERV_BLOCKS) == 19
+    root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            "-m",
+            "magi.terminal",
+            "--preview",
+            "--no-color",
+        ],
+        cwd=root,
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        timeout=10,
+    )
+    assert result.returncode == 0
+    assert b"MAGI SYSTEM" in result.stdout and b"\x1b" not in result.stdout
