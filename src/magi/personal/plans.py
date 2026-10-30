@@ -362,3 +362,29 @@ class PlanService:
             )
             for row in rows
         ]
+
+    def list_versions(self, plan_id: str) -> list[dict]:
+        """返回已保存版本的目录，不加载全部正文；无此计划时保持404语义。"""
+        with self.store.connect() as connection:
+            if (
+                connection.execute(
+                    "SELECT 1 FROM plans WHERE id=?", (plan_id,)
+                ).fetchone()
+                is None
+            ):
+                raise PersonalError(ErrorCode.NOT_FOUND, "plan not found")
+            epoch = self._current_epoch(connection)
+            rows = connection.execute(
+                "SELECT version,title,created_at,source_epoch FROM plan_revisions "
+                "WHERE plan_id=? ORDER BY version DESC",
+                (plan_id,),
+            ).fetchall()
+        return [
+            dict(
+                version=r["version"],
+                title=r["title"],
+                created_at=r["created_at"],
+                needs_review=r["source_epoch"] != epoch,
+            )
+            for r in rows
+        ]

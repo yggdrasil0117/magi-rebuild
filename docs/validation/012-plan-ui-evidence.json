@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-30",
+  "method": "Playwright CLI controlling real Edge, real FastAPI and SQLite, simulated Council responses and checkpoint",
+  "cloud_model_calls": 0,
+  "pytest": {
+    "passed": 277,
+    "warnings": 1,
+    "seconds": 18.05
+  },
+  "checks": {
+    "authenticated_plan_list": true,
+    "unauthorized_prompt": true,
+    "v1_v2_comparison": true,
+    "old_detail_feedback_uses_latest_v2": true,
+    "candidate_does_not_save_automatically": true,
+    "confirmation_creates_v3": true,
+    "duplicate_confirmation_creates_no_extra_version": true,
+    "real_api_process_restart": true,
+    "v1_v3_readable_after_restart": true,
+    "single_version_compare_disabled": true,
+    "daily_mode_clears_target_version_and_budget": true,
+    "mobile_390_no_horizontal_overflow": true,
+    "wheel_includes_html_and_js": true
+  },
+  "observed_operation_counts": {
+    "before_feedback": 3,
+    "after_candidate_generation": 3,
+    "after_confirmation": 4,
+    "after_duplicate_confirmation": 4
+  },
+  "final_operation_count": 4,
+  "plan_id": "b6da592f7f884c64ac703bfccbca46ea",
+  "saved_versions": [
+    {
+      "version": 1,
+      "title": "学习与项目练习",
+      "body": "阅读调用链\n完成接口练习\n保留休息"
+    },
+    {
+      "version": 2,
+      "title": "学习与项目练习",
+      "body": "阅读调用链\n定位工具调用卡点\n保留休息"
+    },
+    {
+      "version": 3,
+      "title": "学习安排·反馈修订",
+      "body": "学习安排·反馈修订\n\n修订/决策理由：保留定位，暂缓扩展练习\n1. 定位接口问题\n   完成条件：记录复现或待验证缺口\n\n用户陈述依据（原文摘录，不代表外部核实）：\n- [user:current] 接口已完成，请只保留定位问题和记录缺口。\n\n模型假设（待用户确认）：\n\n待确认事项：\n\n请核对行动、假设和最新反馈；通过程序校验不代表建议正确。"
+    }
+  ],
+  "processes": {
+    "before_restart": 98312,
+    "after_restart": 92280,
+    "cleanup": "both API processes stopped; dedicated browser session closed"
+  },
+  "artifacts": [
+    "012-compare.png",
+    "012-feedback.png",
+    "012-mobile.png"
+  ],
+  "limits": [
+    "no live cloud generation in this round",
+    "no new Open WebUI integration",
+    "original chat reply preserves its generation-time unsaved wording; current facts come from saved plan details",
+    "no pagination or deletion UI",
+    "last wording-only change labels latest version as latest at read time"
+  ]
+}

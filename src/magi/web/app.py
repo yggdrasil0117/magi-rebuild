@@ -2,9 +2,10 @@ import hmac
 import os
 from contextlib import asynccontextmanager
 from dataclasses import asdict
+from difflib import unified_diff
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, Header, Request
+from fastapi import Depends, FastAPI, Header, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 
@@ -88,6 +89,12 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
     def page():
         return FileResponse(Path(__file__).with_name("index.html"))
 
+    @app.get("/app.js")
+    def javascript():
+        return FileResponse(
+            Path(__file__).with_name("app.js"), media_type="text/javascript"
+        )
+
     @app.get("/health")
     def health():
         with service.store.connect() as db:
@@ -127,5 +134,33 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
     @app.get("/v1/plans/{plan_id}", dependencies=guarded)
     def plan(plan_id: str, version: int | None = None):
         return asdict(service.plans.get(plan_id, version))
+
+    @app.get("/v1/plans/{plan_id}/versions", dependencies=guarded)
+    def versions(plan_id: str):
+        """读取真实版本目录，供网页选择；此接口不请求模型或写入计划。"""
+        return service.plans.list_versions(plan_id)
+
+    @app.get("/v1/plans/{plan_id}/compare", dependencies=guarded)
+    def compare(
+        plan_id: str, from_version: int = Query(ge=1), to_version: int = Query(ge=1)
+    ):
+        """比较两个不可变版本的标题及正文；显式版本避免把旧内容当成最新版。"""
+        before = service.plans.get(plan_id, from_version)
+        after = service.plans.get(plan_id, to_version)
+        changes = "".join(
+            unified_diff(
+                (before.title + "\n" + before.body + "\n").splitlines(keepends=True),
+                (after.title + "\n" + after.body + "\n").splitlines(keepends=True),
+                fromfile=f"v{from_version}",
+                tofile=f"v{to_version}",
+            )
+        )
+        return {
+            "plan_id": plan_id,
+            "before": asdict(before),
+            "after": asdict(after),
+            "diff": changes,
+            "identical": not changes,
+        }
 
     return app

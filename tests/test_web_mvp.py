@@ -316,6 +316,7 @@ def test_http_identity_and_history(env):
     with TestClient(create_app(settings, token=token, service=service)) as client:
         assert client.get("/health").status_code == 200
         assert client.get("/").status_code == 200
+        assert client.get("/app.js").status_code == 200
         assert client.get("/v1/plans").status_code == 401
         headers = {"Authorization": "Bearer " + token}
         response = client.post("/v1/chat", json=request().model_dump(), headers=headers)
@@ -326,6 +327,68 @@ def test_http_identity_and_history(env):
         )
         bad = request().model_dump() | {"owner": "attacker"}
         assert client.post("/v1/chat", json=bad, headers=headers).status_code == 422
+
+
+def test_plan_version_directory_and_compare_are_authenticated_read_only(env):
+    settings, service, _, calls = env
+    first = service.plans.create(
+        title="原安排", body="学习\n休息", request_id="p1", source_epoch=0
+    )
+    plan_id = first.object_id
+    service.plans.update(
+        plan_id,
+        title="新安排",
+        body="定位问题\n休息",
+        request_id="p2",
+        expected_version=1,
+        source_epoch=0,
+    )
+    headers = {"Authorization": "Bearer test-token-which-is-long-enough"}
+    with TestClient(
+        create_app(settings, token="test-token-which-is-long-enough", service=service)
+    ) as client:
+        base = f"/v1/plans/{plan_id}"
+        assert client.get(base + "/versions").status_code == 401
+        assert (
+            client.get(base + "/compare?from_version=1&to_version=2").status_code == 401
+        )
+        versions = client.get(base + "/versions", headers=headers).json()
+        assert [r["version"] for r in versions] == [2, 1]
+        assert "body" not in versions[0]
+        response = client.get(
+            base + "/compare?from_version=1&to_version=2", headers=headers
+        )
+        assert response.status_code == 200
+        result = response.json()
+        assert result["before"]["body"] == "学习\n休息"
+        assert result["after"]["body"] == "定位问题\n休息"
+        assert "-学习" in result["diff"] and "+定位问题" in result["diff"]
+        assert not result["identical"]
+        same = client.get(
+            base + "/compare?from_version=2&to_version=2", headers=headers
+        ).json()
+        assert same["identical"] and not same["diff"]
+        assert (
+            client.get(
+                base + "/compare?from_version=0&to_version=2", headers=headers
+            ).status_code
+            == 422
+        )
+        assert (
+            client.get(
+                base + "/compare?from_version=1&to_version=99", headers=headers
+            ).status_code
+            == 404
+        )
+        assert (
+            client.get("/v1/plans/missing/versions", headers=headers).status_code == 404
+        )
+        bump_epoch(service)
+        assert all(
+            v["needs_review"]
+            for v in client.get(base + "/versions", headers=headers).json()
+        )
+    assert not calls and service.plans.get(plan_id).version == 2
 
 
 def test_other_owner_cannot_access_proposal_or_turn(env):

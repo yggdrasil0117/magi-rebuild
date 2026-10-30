@@ -28,7 +28,7 @@ dev = [
 where = ["src"]
 
 [tool.setuptools.package-data]
-"magi.web" = ["*.html"]
+"magi.web" = ["*.html", "*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
