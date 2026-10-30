@@ -7,7 +7,13 @@ from httpx import ReadTimeout
 from langchain_core.messages import AIMessage
 
 from magi.council.generation import generation_schema, model_snapshot
-from magi.council.service import Candidate, Council, Opinion, Synthesis, render
+from magi.council.service import (
+    Candidate,
+    Council,
+    Opinion,
+    Synthesis,
+    render,
+)
 from magi.harness.config import HarnessConfig
 
 OPINION = {
@@ -23,7 +29,9 @@ SYNTHESIS = {
     "unknowns": [],
     "candidate": {
         "title": "调整计划",
-        "steps": [{"action": "诊断", "done_when": "记录卡点", "minutes": 30}],
+        "steps": [
+            {"action": "诊断", "done_when": "记录卡点", "minutes": 30, "kind": "work"}
+        ],
         "assumptions": [],
         "revision_reason": "缩减实验，保留必要诊断",
     },
@@ -69,6 +77,10 @@ def test_generation_schema_limits_known_refs_and_preserves_business_title():
         "maximum": 30,
     }
     assert "$ref" not in json.dumps(synthesis)
+    assert candidate["properties"]["steps"]["maxItems"] == 6
+    assert "kind" in step["required"]
+    assert "source_excerpts" in candidate["required"]
+    assert "unknowns" in candidate["required"]
     # Read historical candidates under the original domain contract.
     old = SYNTHESIS["candidate"] | {
         "title": "旧计划" * 40,

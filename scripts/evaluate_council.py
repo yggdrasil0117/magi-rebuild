@@ -64,6 +64,21 @@ def assess_result(snapshot, result):
         ),
     }
     if candidate:
+        checks["explicit_step_categories"] = all(
+            s.get("kind") in {"work", "rest", "review", "buffer"}
+            for s in candidate.get("steps", [])
+        )
+        sources = {"user:current": snapshot.get("question", "")}
+        sources.update(
+            {"memory:" + m["key"]: m["value"] for m in snapshot.get("memories", [])}
+        )
+        checks["source_excerpts_match"] = all(
+            item.get("evidence_ref") in snapshot["evidence_ids"]
+            and item.get("evidence_ref") in sources
+            and bool(item.get("quote"))
+            and item["quote"] in sources[item["evidence_ref"]]
+            for item in candidate.get("source_excerpts", [])
+        )
         minutes = [s.get("minutes") for s in candidate.get("steps", [])]
         checks["positive_step_minutes"] = bool(minutes) and all(
             type(m) is int and m > 0 for m in minutes

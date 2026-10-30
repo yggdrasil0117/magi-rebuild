@@ -18,7 +18,7 @@ def completed_result():
             }
             for role in ("MELCHIOR", "BALTHASAR", "CASPER")
         ],
-        "candidate": {"steps": [{"minutes": 30}]},
+        "candidate": {"steps": [{"minutes": 30, "kind": "work"}]},
         "synthesis_diagnostics": diagnostics,
     }
 
@@ -69,3 +69,21 @@ def test_report_rejects_saved_candidate_from_failed_or_missing_personas():
     assert not assessment["checks"]["candidate_requires_completion"]
     assert not assessment["checks"]["all_roles_complete_before_candidate"]
     assert not assessment["checks"]["call_limit"]
+
+
+def test_report_detects_missing_category_and_fabricated_excerpt():
+    result = completed_result()
+    del result["candidate"]["steps"][0]["kind"]
+    result["candidate"]["source_excerpts"] = [
+        {"evidence_ref": "user:current", "quote": "环境已准备好"}
+    ]
+    assessment = assess_result(
+        {
+            "question": "想学习",
+            "time_budget_minutes": 30,
+            "evidence_ids": ["user:current"],
+        },
+        result,
+    )
+    assert not assessment["checks"]["explicit_step_categories"]
+    assert not assessment["checks"]["source_excerpts_match"]

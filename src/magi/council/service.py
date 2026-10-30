@@ -1,7 +1,7 @@
 import json
 import time
 from dataclasses import replace
-from typing import Annotated
+from typing import Annotated, Literal
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langsmith import tracing_context
@@ -36,7 +36,13 @@ class Opinion(Content):
 class Step(Content):
     action: str = Field(min_length=1, max_length=500)
     done_when: str = Field(min_length=1, max_length=500)
-    minutes: int | None = Field(default=None, ge=1, le=10080)
+    minutes: int | None = Field(default=None, ge=1, le=10080, strict=True)
+    kind: Literal["work", "rest", "review", "buffer"] | None = None
+
+
+class SourceExcerpt(Content):
+    evidence_ref: ShortText
+    quote: ShortText
 
 
 class Candidate(Content):
@@ -44,6 +50,33 @@ class Candidate(Content):
     steps: list[Step] = Field(min_length=1, max_length=8)
     assumptions: list[ShortText] = Field(max_length=5)
     revision_reason: str = Field(min_length=1, max_length=1200)
+    source_excerpts: list[SourceExcerpt] = Field(default_factory=list, max_length=5)
+    unknowns: list[ShortText] = Field(default_factory=list, max_length=5)
+
+
+KINDS = {"work": "任务", "rest": "休息", "review": "复盘", "buffer": "缓冲"}
+
+
+def check_content(candidate, snapshot):
+    """Check allocation/source boundaries, not the truth of model prose."""
+    if any(s.kind is None for s in candidate.steps):
+        raise ValueError("candidate lacks step kind")
+    if any(s.minutes is None for s in candidate.steps):
+        raise ValueError("candidate lacks step minutes")
+    sources = {"user:current": snapshot["question"]}
+    for memory in snapshot.get("memories", []):
+        sources["memory:" + memory["key"]] = memory["value"]
+    for item in candidate.source_excerpts:
+        if (
+            item.evidence_ref not in snapshot["evidence_ids"]
+            or item.evidence_ref not in sources
+            or item.quote not in sources[item.evidence_ref]
+        ):
+            raise ValueError("unmatched source excerpt")
+    return {
+        kind: sum(s.minutes for s in candidate.steps if s.kind == kind)
+        for kind in KINDS
+    }
 
 
 class Synthesis(Content):
@@ -64,8 +97,34 @@ def candidate_body(candidate):
     lines = [candidate.title, "", "修订/决策理由：" + candidate.revision_reason]
     for i, step in enumerate(candidate.steps, 1):
         duration = f"（预计 {step.minutes} 分钟）" if step.minutes else ""
-        lines.append(f"{i}. {step.action}{duration}\n   完成条件：{step.done_when}")
-    lines += ["", "假设：", *["- " + s for s in candidate.assumptions]]
+        category = f"[{KINDS[step.kind]}] " if step.kind else ""
+        lines.append(
+            f"{i}. {category}{step.action}{duration}\n   完成条件：{step.done_when}"
+        )
+    if all(s.kind and s.minutes is not None for s in candidate.steps):
+        lines += [
+            "",
+            "时间分配（程序汇总，各步骤计入一次）："
+            + "；".join(
+                f"{label} {sum(s.minutes for s in candidate.steps if s.kind == kind)} 分钟"
+                for kind, label in KINDS.items()
+            ),
+            f"合计 {sum(s.minutes for s in candidate.steps)} 分钟",
+        ]
+    else:
+        lines += ["", "旧版候选：未记录完整时间分类，请人工复核。"]
+    lines += [
+        "",
+        "用户陈述依据（原文摘录，不代表外部核实）：",
+        *[f"- [{s.evidence_ref}] {s.quote}" for s in candidate.source_excerpts],
+    ]
+    lines += [
+        "",
+        "模型假设（待用户确认）：",
+        *["- " + s for s in candidate.assumptions],
+    ]
+    lines += ["", "待确认事项：", *["- " + s for s in candidate.unknowns]]
+    lines += ["", "请核对时间归属、假设和最新反馈；通过程序校验不代表建议正确。"]
     return "\n".join(lines)
 
 
@@ -211,7 +270,12 @@ class Council:
                     "同一模型的意见不构成独立事实证据。对照旧计划解释保留、缩减与放弃。"
                     "严格遵守快照 time_budget_minutes：每一步填写 minutes，包含休息，合计不得超过该预算。"
                     "当前question与时间预算是最新约束，旧计划只用于解释改变，不能复制旧时长覆盖新预算。"
-                    "每个说明字段最多80字，各列表最多3条，步骤最多3个；先检查分钟合计，不复制旧计划的过时时长。"
+                    "每步只属于一种kind：work任务、rest纯休息、review复盘、buffer预留缓冲。"
+                    "混合活动必须拆步；休息不含下单、复盘或缓冲，不重复计时。每步填写正整数minutes，即使没有预算。"
+                    "source_excerpts只摘录question或memories.value的连续原文并绑定evidence_ref；无可引用项填[]。"
+                    "模型意见、历史和旧计划不当成当前用户事实。推测放assumptions，缺失信息放candidate.unknowns。"
+                    "revision_reason解释保留和放弃，不再重复分钟数字；具体时长以步骤和程序汇总为准。"
+                    "每个说明字段最多80字，各列表最多3条，步骤最多6个；先检查分钟合计，不复制旧计划的过时时长。"
                     "只返回符合 schema 的简短中文 JSON，不宣称已保存。",
                     json.dumps(
                         {"snapshot": snapshot, "opinions": results}, ensure_ascii=False
@@ -220,6 +284,9 @@ class Council:
                     SYNTHESIS_OUTPUT_TOKENS,
                     min(self.settings.timeout_seconds, remaining),
                     output["synthesis_diagnostics"],
+                )
+                output["synthesis_diagnostics"]["minutes_by_kind"] = check_content(
+                    synthesis.candidate, snapshot
                 )
                 if budget := snapshot.get("time_budget_minutes"):
                     minutes = [s.minutes for s in synthesis.candidate.steps]

@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-30",
+  "method": "offline injected model responses through Council.run; no live model requests",
+  "pytest": {
+    "passed": 252,
+    "warnings": 1,
+    "seconds": 14.41
+  },
+  "new_tests": 20,
+  "live_qianwen_validation": "not run: DASHSCOPE_API_KEY unavailable in current environment",
+  "prior_ambiguity_regressions": "five manually authored explicit allocations, not automatic repairs of prior outputs",
+  "sample": {
+    "result": {
+      "personas": [
+        {
+          "role": "MELCHIOR",
+          "status": "COMPLETED",
+          "diagnostics": {
+            "output_budget": 768,
+            "timeout_seconds": 60.0,
+            "snapshot_payload_chars": 163,
+            "output_chars": 117
+          },
+          "opinion": {
+            "view": "依据",
+            "recommendation": "先定位",
+            "concerns": [],
+            "unknowns": [],
+            "evidence_refs": []
+          },
+          "seconds": 0.0
+        },
+        {
+          "role": "BALTHASAR",
+          "status": "COMPLETED",
+          "diagnostics": {
+            "output_budget": 768,
+            "timeout_seconds": 60.0,
+            "snapshot_payload_chars": 163,
+            "output_chars": 117
+          },
+          "opinion": {
+            "view": "依据",
+            "recommendation": "先定位",
+            "concerns": [],
+            "unknowns": [],
+            "evidence_refs": []
+          },
+          "seconds": 0.0
+        },
+        {
+          "role": "CASPER",
+          "status": "COMPLETED",
+          "diagnostics": {
+            "output_budget": 768,
+            "timeout_seconds": 60.0,
+            "snapshot_payload_chars": 163,
+            "output_chars": 117
+          },
+          "opinion": {
+            "view": "依据",
+            "recommendation": "先定位",
+            "concerns": [],
+            "unknowns": [],
+            "evidence_refs": []
+          },
+          "seconds": 0.0
+        }
+      ],
+      "status": "COMPLETED",
+      "candidate": {
+        "title": "调整安排",
+        "steps": [
+          {
+            "action": "配送下单",
+            "done_when": "订单提交",
+            "minutes": 10,
+            "kind": "work"
+          },
+          {
+            "action": "休息",
+            "done_when": "停止任务",
+            "minutes": 45,
+            "kind": "rest"
+          },
+          {
+            "action": "预留",
+            "done_when": "不承诺任务产出",
+            "minutes": 5,
+            "kind": "buffer"
+          }
+        ],
+        "assumptions": [
+          "环境可正常启动"
+        ],
+        "revision_reason": "保留定位与休息，暂缓扩展任务",
+        "source_excerpts": [
+          {
+            "evidence_ref": "user:current",
+            "quote": "工具调用没看懂"
+          }
+        ],
+        "unknowns": [
+          "具体报错位置"
+        ]
+      },
+      "synthesis_diagnostics": {
+        "output_budget": 1536,
+        "timeout_seconds": 60.0,
+        "snapshot_payload_chars": 1036,
+        "output_chars": 481,
+        "minutes_by_kind": {
+          "work": 10,
+          "rest": 45,
+          "review": 0,
+          "buffer": 5
+        },
+        "total_minutes": 60,
+        "time_budget_minutes": 60,
+        "seconds": 0.0
+      },
+      "agreement": [
+        "减负"
+      ],
+      "disagreements": [],
+      "unknowns": [],
+      "calls": 4,
+      "seconds": 0.0
+    },
+    "rendered_candidate": "调整安排\n\n修订/决策理由：保留定位与休息，暂缓扩展任务\n1. [任务] 配送下单（预计 10 分钟）\n   完成条件：订单提交\n2. [休息] 休息（预计 45 分钟）\n   完成条件：停止任务\n3. [缓冲] 预留（预计 5 分钟）\n   完成条件：不承诺任务产出\n\n时间分配（程序汇总，各步骤计入一次）：任务 10 分钟；休息 45 分钟；复盘 0 分钟；缓冲 5 分钟\n合计 60 分钟\n\n用户陈述依据（原文摘录，不代表外部核实）：\n- [user:current] 工具调用没看懂\n\n模型假设（待用户确认）：\n- 环境可正常启动\n\n待确认事项：\n- 具体报错位置\n\n请核对时间归属、假设和最新反馈；通过程序校验不代表建议正确。"
+  },
+  "limits": [
+    "category labels do not prove prose matches categories",
+    "excerpt substring matching does not prove truth or relevance",
+    "assumptions and unknowns remain model-authored and can be incomplete",
+    "no independent model reviewer or automatic retry added"
+  ]
+}

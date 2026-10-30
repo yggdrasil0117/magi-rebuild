@@ -27,8 +27,15 @@ def generation_schema(model, snapshot):
         if result.get("type") == "string":
             result["maxLength"] = min(result.get("maxLength", 160), 160)
         if result.get("type") == "array":
-            result["maxItems"] = min(result.get("maxItems", 3), 3)
+            limit = (
+                6 if result.get("items", {}).get("properties", {}).get("kind") else 3
+            )
+            result["maxItems"] = min(result.get("maxItems", limit), limit)
         properties = result.get("properties", {})
+        if "evidence_ref" in properties:
+            ids = snapshot.get("evidence_ids", [])
+            if ids:
+                properties["evidence_ref"]["enum"] = ids
         if "evidence_refs" in properties:
             ids = snapshot.get("evidence_ids", [])
             properties["evidence_refs"]["items"] = (
@@ -36,15 +43,22 @@ def generation_schema(model, snapshot):
             )
             if not ids:
                 properties["evidence_refs"]["maxItems"] = 0
-        if "minutes" in properties and snapshot.get("time_budget_minutes"):
+        if "kind" in properties:
+            properties["kind"] = {
+                "type": "string",
+                "enum": ["work", "rest", "review", "buffer"],
+            }
+        if "minutes" in properties:
             properties["minutes"] = {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": snapshot["time_budget_minutes"],
+                "maximum": snapshot.get("time_budget_minutes") or 10080,
             }
             result["required"] = list(
                 dict.fromkeys([*result.get("required", []), "minutes"])
             )
+        if "source_excerpts" in properties or "kind" in properties:
+            result["required"] = list(properties)
         return result
 
     return inline(original)
@@ -113,6 +127,8 @@ def failure_details(exc):
         "unknown evidence reference": "UNKNOWN_EVIDENCE",
         "candidate exceeds explicit time budget": "TIME_BUDGET_EXCEEDED",
         "candidate lacks step minutes": "MISSING_STEP_MINUTES",
+        "candidate lacks step kind": "MISSING_STEP_KIND",
+        "unmatched source excerpt": "UNMATCHED_SOURCE_EXCERPT",
         "council tools are forbidden": "FORBIDDEN_TOOL",
     }.get(message, "MODEL_FAILURE"), []
 
@@ -129,6 +145,8 @@ FAILURE_MESSAGES = {
     "MODEL_UNAVAILABLE": "无法连接模型服务",
     "TIME_BUDGET_EXCEEDED": "候选计划的总时长超过本次预算",
     "MISSING_STEP_MINUTES": "候选步骤未填写预计用时，无法核对预算",
+    "MISSING_STEP_KIND": "候选步骤未区分任务、休息、复盘或缓冲",
+    "UNMATCHED_SOURCE_EXCERPT": "候选的用户陈述摘录无法匹配本轮原文或有效记忆",
     "FORBIDDEN_TOOL": "模型请求了审议阶段不允许的工具",
     "MODEL_FAILURE": "模型调用未完成",
 }

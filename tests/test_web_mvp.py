@@ -28,8 +28,12 @@ SYNTHESIS = {
     "unknowns": [],
     "candidate": {
         "title": "本周安排",
-        "steps": [{"action": "实验", "done_when": "记录结果", "minutes": 60}],
+        "steps": [
+            {"action": "实验", "done_when": "记录结果", "minutes": 60, "kind": "work"}
+        ],
         "assumptions": ["尚有两小时"],
+        "source_excerpts": [{"evidence_ref": "user:current", "quote": "本周六小时"}],
+        "unknowns": ["实验环境是否就绪"],
         "revision_reason": "保留实验，缩减求职以适应剩余时间",
     },
 }
@@ -110,6 +114,9 @@ def test_full_create_restart_feedback_versions(env):
     restarted.recover()
     old = restarted.plans.get(receipt["object_id"])
     assert old.source == "confirmed_web_proposal"
+    assert "[任务]" in old.body and "任务 60 分钟" in old.body
+    assert "本周六小时" in old.body and "实验环境是否就绪" in old.body
+    assert "模型假设（待用户确认）" in old.body
     revision = restarted.turn(
         request("3", target_plan_id=old.id, expected_version=1), "council"
     )
@@ -126,6 +133,24 @@ def test_same_id_changed_input_rejected(env):
     with pytest.raises(WebError, match="输入已改变"):
         service.turn(request().model_copy(update={"user_text": "changed"}), "council")
     assert len(calls) == 4
+
+
+def test_unmatched_user_excerpt_never_becomes_web_proposal(env):
+    _, service, _, _ = env
+    original = service.council.invoke
+
+    def invoke(system, payload, schema, *args):
+        raw = original(system, payload, schema, *args)
+        if schema is not Opinion:
+            value = json.loads(raw)
+            value["candidate"]["source_excerpts"][0]["quote"] = "用户已确认实验成功"
+            return json.dumps(value)
+        return raw
+
+    service.council.invoke = invoke
+    turn = service.turn(request(), "council")
+    assert turn["status"] == "PARTIAL" and not turn.get("proposal_id")
+    assert not service.plans.list_current()
 
 
 @pytest.mark.parametrize(
