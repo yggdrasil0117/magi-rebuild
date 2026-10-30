@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 import statistics
 import subprocess
 import time
@@ -44,9 +45,59 @@ CASES = [
     },
 ]
 
+# 固定虚构输入，不查询实时价格。金额场景由人工核对，不能当作已有金额校验器。
+COMPATIBILITY_CASES = [
+    {
+        "id": "travel_cost",
+        "background": "以下均为测试中已给定的报价，不需要查询实时价格；不要求按分钟安排。",
+        "create": "出差费用上限1800元：往返车票600元，住宿800元，餐饮200元。比较费用与必要性，给出行动及完成条件，不编造报价，不需要估计分钟。",
+        "budget": None,
+        "old_body": "往返车票600元，住宿800元，餐饮200元，合计1600元；预留200元。",
+        "feedback": "出差费用上限降到1500元；车票600元不变，住宿新报价900元，餐饮200元。现有报价超预算，请说明缺口和待确认选项，不虚构已拿到折扣，不需要分钟安排。",
+        "new_budget": None,
+    },
+    {
+        "id": "purchase_choice",
+        "background": "测试给定产品属性，不做实时商品推荐；没有时间预算。",
+        "create": "团队选采购方案：A价格1200元且已确认兼容，B价格900元但兼容性未知。上限1300元，稳定性优先。给出比较、行动及完成条件，不需要估时。",
+        "budget": None,
+        "old_body": "优先A，1200元，在1300元以内；下单前确认售后。B兼容性未知，不当作已验证。",
+        "feedback": "采购上限改为1000元，A价格仍为1200元，B仍为900元且尚未确认兼容。修订原建议，不能把兼容性推测当事实，不需要估时。",
+        "new_budget": None,
+    },
+    {
+        "id": "software_debug",
+        "background": "这是模拟开发任务，不访问仓库、不实际执行代码。没有时间预算。",
+        "create": "接口返回500，只有错误状态码，尚无日志和复现步骤。提出排查行动及完成条件，区分假设与事实，不猜测已确定根因，不需要估计分钟。",
+        "budget": None,
+        "old_body": "先取得最小复现与脱敏日志；核对请求参数和异常位置，再按证据提出修改。根因未确认。",
+        "feedback": "已有稳定复现，脱敏日志显示数据库连接超时；但数据库宕机还是网络问题尚未确定。修订排查顺序，不重复要求从零收集复现，也不宣称已修复。不需要估时。",
+        "new_budget": None,
+    },
+    CASES[1],  # 保留显式时间预算及预算缩减的对照场景。
+]
+
+
+def build_snapshot(case, phase, repeat):
+    """把一个固定案例转换成 Council 输入；修订使用预设旧计划，独立于创建结果。"""
+    creating = phase == "create"
+    return {
+        "run_id": f"eval-{case['id']}-{phase}-{repeat}",
+        "logical_session_id": "eval-" + case["id"],
+        "epoch": 0,
+        "question": case["create"] if creating else case["feedback"],
+        "time_budget_minutes": case["budget"] if creating else case["new_budget"],
+        "memories": [],
+        "history": [{"role": "human", "text": case["background"]}],
+        "evidence_ids": ["user:current"],
+        "old_plan": None
+        if creating
+        else {"title": "原计划", "version": 1, "body": case["old_body"]},
+    }
+
 
 def assess_result(snapshot, result):
-    """Check boundaries independently; semantic quality still needs review."""
+    """独立核对工作流、输出结构、引用和预算；返回检查明细，不评判建议是否合理。"""
     personas = result.get("personas", [])
     candidate = result.get("candidate")
     completed = result.get("status") == "COMPLETED"
@@ -64,6 +115,14 @@ def assess_result(snapshot, result):
         ),
     }
     if candidate:
+        steps = candidate.get("steps", [])
+        checks["executable_steps"] = bool(steps) and all(
+            isinstance(s.get("action"), str)
+            and bool(s["action"].strip())
+            and isinstance(s.get("done_when"), str)
+            and bool(s["done_when"].strip())
+            for s in steps
+        )
         checks["valid_optional_labels"] = all(
             s.get("kind") is None
             or (isinstance(s["kind"], str) and 0 < len(s["kind"].strip()) <= 60)
@@ -94,6 +153,7 @@ def assess_result(snapshot, result):
 
 
 def summarize_report(report, seconds):
+    """汇总全部尝试；部分失败与完成分开计数，缺失用量不当成零消耗。"""
     runs = report["runs"]
     statuses = Counter(r["result"]["status"] for r in runs)
     times = [r["result"]["seconds"] for r in runs if "seconds" in r["result"]]
@@ -119,7 +179,7 @@ def summarize_report(report, seconds):
     ]
     return {
         "attempted": len(runs),
-        "planned": report["repeats"] * len(CASES) * 2,
+        "planned": report.get("planned_runs", report["repeats"] * len(CASES) * 2),
         "statuses": dict(statuses),
         "failure_codes": dict(failures),
         "boundary_checks_passed": sum(
@@ -148,10 +208,14 @@ def summarize_report(report, seconds):
 
 
 def main():
+    """选择固定案例集，逐轮留证；dry-run 不读取密钥或调用模型。"""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repeats", type=int, choices=range(1, 6), default=1)
     parser.add_argument("--label", choices=["baseline", "updated"], default="updated")
     parser.add_argument("--model", default=None)
+    parser.add_argument(
+        "--suite", choices=["original", "compatibility"], default="original"
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -163,6 +227,8 @@ def main():
         default=Path(__file__).resolve().parents[1] / "magi.qianwen.toml",
     )
     args = parser.parse_args()
+    cases = CASES if args.suite == "original" else COMPATIBILITY_CASES
+    planned_runs = args.repeats * len(cases) * 2
     root = Path(__file__).resolve().parents[1]
     settings = load_config(args.config)
     if args.model:
@@ -173,13 +239,20 @@ def main():
                 {
                     "provider": settings.provider,
                     "model": settings.model,
-                    "planned_runs": args.repeats * len(CASES) * 2,
-                    "max_model_invocations": args.repeats * len(CASES) * 8,
+                    "suite": args.suite,
+                    "planned_runs": planned_runs,
+                    "max_model_invocations": planned_runs * 4,
                 },
                 ensure_ascii=False,
             )
         )
         return 0
+    # 缺少密钥时提前停止，避免把配置问题记录成整批模型质量失败。
+    if (
+        settings.provider == "qianwen"
+        and not os.environ.get(settings.api_key_env, "").strip()
+    ):
+        parser.error(f"缺少环境变量 {settings.api_key_env}；尚未调用模型")
     output_dir = root / ".magi" / "evaluations"
     output_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
@@ -194,7 +267,7 @@ def main():
         ).strip(),
         "scope": "council only, fixed independent create/revision cases, real model",
         "case_set_sha256": hashlib.sha256(
-            json.dumps(CASES, ensure_ascii=False, sort_keys=True).encode()
+            json.dumps(cases, ensure_ascii=False, sort_keys=True).encode()
         ).hexdigest(),
         "source_files_sha256": {
             str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
@@ -202,34 +275,16 @@ def main():
         },
         "num_ctx": settings.num_ctx,
         "repeats": args.repeats,
+        "suite": args.suite,
+        "planned_runs": planned_runs,
         "runs": [],
     }
     started = time.monotonic()
     try:
         for repeat in range(args.repeats):
-            for case in CASES:
+            for case in cases:
                 for phase in ("create", "revision"):
-                    snapshot = {
-                        "run_id": f"eval-{case['id']}-{phase}-{repeat}",
-                        "logical_session_id": "eval-" + case["id"],
-                        "epoch": 0,
-                        "question": case["create"]
-                        if phase == "create"
-                        else case["feedback"],
-                        "time_budget_minutes": case["budget"]
-                        if phase == "create"
-                        else case["new_budget"],
-                        "memories": [],
-                        "history": [{"role": "human", "text": case["background"]}],
-                        "evidence_ids": ["user:current"],
-                        "old_plan": None
-                        if phase == "create"
-                        else {
-                            "title": "原计划",
-                            "version": 1,
-                            "body": case["old_body"],
-                        },
-                    }
+                    snapshot = build_snapshot(case, phase, repeat)
                     try:
                         result = Council(settings).run(snapshot)
                     except Exception as exc:

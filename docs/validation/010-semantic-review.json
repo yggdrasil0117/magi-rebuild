@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-30",
+  "method": "manual review of every accepted candidate against its frozen snapshot; no extra model evaluator",
+  "scope": "4 accepted candidates; 4 partial results have no candidate and are not assigned a semantic grade",
+  "rubric": ["latest feedback addressed", "assumptions distinguished from user statements", "no invented quotations or known prices", "actions and completion conditions consistent", "uncertainty can remain after execution", "time allocation if budget exists"],
+  "summary": {"clear_with_assumptions": 2, "needs_clarification": 2, "no_candidate": 4},
+  "reviews": [
+    {
+      "case": "travel_cost", "phase": "create", "verdict": "no_candidate",
+      "reason": "Source excerpt check failed. Invalid synthesis content is not retained, so its exact quotation error cannot be diagnosed from this report."
+    },
+    {
+      "case": "travel_cost", "phase": "revision", "verdict": "no_candidate",
+      "reason": "Synthesis timed out; cannot assess a completed budget revision."
+    },
+    {
+      "case": "purchase_choice", "phase": "create", "verdict": "no_candidate",
+      "reason": "BALTHASAR timed out; synthesis was not invoked."
+    },
+    {
+      "case": "purchase_choice", "phase": "revision", "verdict": "clear_with_assumptions",
+      "reason": "A at 1200 exceeds the new 1000 limit; B at 900 remains conditional on compatibility verification. No discount or confirmed compatibility is invented. No time estimate is forced. Alternative availability remains an assumption."
+    },
+    {
+      "case": "software_debug", "phase": "create", "verdict": "clear_with_assumptions",
+      "reason": "Requests logs and reproduction instead of declaring a root cause. Permissions and reproducibility are explicitly assumptions. Custom label is accepted with null minutes. Before real execution, detailed-log collection would need environment and redaction decisions; this run is a simulated task."
+    },
+    {
+      "case": "software_debug", "phase": "revision", "verdict": "needs_clarification",
+      "reason": "Uses new database-timeout evidence and avoids collecting reproduction from scratch, but the final completion condition demands a definite root-cause conclusion. Checks may remain inconclusive; it should allow a documented evidence gap and next diagnostic action."
+    },
+    {
+      "case": "backend_agent", "phase": "create", "verdict": "no_candidate",
+      "reason": "Source excerpt check failed; no saveable candidate was produced."
+    },
+    {
+      "case": "backend_agent", "phase": "revision", "verdict": "needs_clarification",
+      "reason": "30+45+15=90, custom labels work, and completed interface work is removed. However, the old rest period is cancelled on an unconfirmed assumption that the user can focus for 90 minutes without rest. The user should choose or confirm that tradeoff; arithmetic cannot validate it."
+    }
+  ],
+  "limitations": ["single fixed batch, not a general success rate", "no comparison against a single-assistant baseline", "no automatic financial validator", "successful structure is not proof of content correctness"]
+}

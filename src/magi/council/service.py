@@ -34,6 +34,8 @@ class Opinion(Content):
 
 
 class Step(Content):
+    """一个行动及完成条件；估时和标签是可选信息，不限定使用场景。"""
+
     action: str = Field(min_length=1, max_length=500)
     done_when: str = Field(min_length=1, max_length=500)
     minutes: int | None = Field(default=None, ge=1, le=10080, strict=True)
@@ -58,7 +60,12 @@ KINDS = {"work": "任务", "rest": "休息", "review": "复盘", "buffer": "缓�
 
 
 def check_content(candidate, snapshot):
-    """Check allocation/source boundaries, not the truth of model prose."""
+    """核对候选与本轮快照：有预算才要求估时，摘录必须匹配来源。
+
+    返回完整估时的分类汇总；部分未估时时返回空字典，避免伪装成完整合计。
+    不合格时抛出 ValueError，由 Council.run 转为失败原因并阻止生成保存候选。
+    这些检查不证明模型文字的语义或事实正确。
+    """
     if snapshot.get("time_budget_minutes") is not None and any(
         s.minutes is None for s in candidate.steps
     ):
@@ -97,6 +104,10 @@ ROLES = {
 
 
 def candidate_body(candidate):
+    """将候选转成展示和确认保存共用的正文；不修改数据库。
+
+    旧标签保留中文显示，自定义标签直接展示；缺少估时不猜测补全。
+    """
     lines = [candidate.title, "", "修订/决策理由：" + candidate.revision_reason]
     for i, step in enumerate(candidate.steps, 1):
         duration = f"（预计 {step.minutes} 分钟）" if step.minutes else ""
@@ -138,6 +149,7 @@ class Council:
         self.invoke = invoke or self._invoke
 
     def _invoke(self, system, payload, schema, budget, timeout):
+        """适配真实模型调用；budget 是输出 token 上限，区别于用户的分钟预算。"""
         data = json.loads(payload)
         snapshot = data if schema is Opinion else data["snapshot"]
         wire_schema = generation_schema(schema, snapshot)
@@ -181,6 +193,7 @@ class Council:
         return message
 
     def _generate(self, system, payload, schema, budget, timeout, diagnostics):
+        """记录用量并解析结构化响应；校验失败向上抛出，不自动修复或重试。"""
         diagnostics.update(
             output_budget=budget,
             timeout_seconds=round(timeout, 3),
@@ -220,6 +233,10 @@ class Council:
         return schema.model_validate_json(raw)
 
     def run(self, snapshot, progress=None):
+        """冻结同一输入，依次生成三份独立意见再综合，最多调用四次。
+
+        progress 用于向上层持久化进度；返回候选或明确的失败状态，不保存计划。
+        """
         started = time.monotonic()
         deadline = started + min(240, self.settings.timeout_seconds * 4)
         frozen = json.dumps(snapshot, ensure_ascii=False, sort_keys=True)
@@ -330,6 +347,7 @@ class Council:
 
 
 def render(result):
+    """把审议结果和失败原因转成聊天回复；COMPLETED 只表示流程校验完成。"""
     lines = ["MAGI 三人格审议 · " + result["status"]]
     for item in result["personas"]:
         lines += [f"\n{item['role']} · {item['status']} · {item['seconds']}s"]

@@ -1,0 +1,1439 @@
+{
+  "created_at": "2026-10-30T02:22:42.049038+00:00",
+  "label": "updated",
+  "model": "qwen3.8-max",
+  "provider": "qianwen",
+  "source_commit": "e455bfc11bf06b0457882b80563256568df94a30",
+  "scope": "council only, fixed independent create/revision cases, real model",
+  "case_set_sha256": "52a306b6132350db1db4a5403bddc6a71454407d9abaa15cd2645a1333c742ed",
+  "source_files_sha256": {
+    "src\\magi\\council\\generation.py": "fa3f0812e4779c9b4172d30e72f55b0a17a177ee30fd3ccfb267a24c3c2f5677",
+    "src\\magi\\council\\service.py": "e36a0e49035b33c97aa40a9e970a66f4c6ec3a148db2bff54b37370f8e068b9b",
+    "src\\magi\\council\\__init__.py": "4d53fd84f7621efee08590eda97459204d8dffa5d3abc72d27142b4f6ac933a9"
+  },
+  "num_ctx": 32768,
+  "repeats": 1,
+  "suite": "compatibility",
+  "planned_runs": 8,
+  "runs": [
+    {
+      "case": "travel_cost",
+      "phase": "create",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-travel_cost-create-0",
+        "logical_session_id": "eval-travel_cost",
+        "epoch": 0,
+        "question": "出差费用上限1800元：往返车票600元，住宿800元，餐饮200元。比较费用与必要性，给出行动及完成条件，不编造报价，不需要估计分钟。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "以下均为测试中已给定的报价，不需要查询实时价格；不要求按分钟安排。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": null
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 351,
+              "input_tokens": 417,
+              "output_tokens": 125,
+              "total_tokens": 542,
+              "finish_reason": "stop",
+              "output_chars": 249
+            },
+            "opinion": {
+              "view": "给定上限1800元（车票600、住宿800、餐饮200），需逐项比较实际费用与出差必要性。",
+              "recommendation": "确认出差必要后，按三项上限分别预订并保留凭证，总花费不超1800元即完成。",
+              "concerns": [
+                "若单项超支将导致总额突破1800元上限。",
+                "未明确各分项是否允许互相调剂额度。"
+              ],
+              "unknowns": [
+                "出差目的地及天数尚未确定。",
+                "各项费用的实际报价是否已锁定。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 5.734
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 351,
+              "input_tokens": 418,
+              "output_tokens": 129,
+              "total_tokens": 547,
+              "finish_reason": "stop",
+              "output_chars": 269
+            },
+            "opinion": {
+              "view": "出差总预算1800元，交通住宿餐饮分配明确，需评估此行是否值得该成本。",
+              "recommendation": "确认出差必要性后按上限执行，完成条件为取得合规票据且总额不超1800元。",
+              "concerns": [
+                "若行程取消，已购车票和预订住宿的退改费用可能增加负担。",
+                "餐饮200元额度较低，可能导致个人额外垫付或影响工作状态。"
+              ],
+              "unknowns": [
+                "出差的具体业务目标和预期收益尚不明确。",
+                "若遇突发情况是否有备用资金或审批通道未知。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 5.016
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 351,
+              "input_tokens": 414,
+              "output_tokens": 118,
+              "total_tokens": 532,
+              "finish_reason": "stop",
+              "output_chars": 253
+            },
+            "opinion": {
+              "view": "出差总预算1800元已明确分配，需权衡此行长期目标收益是否大于该机会成本。",
+              "recommendation": "确认出差必要性后按既定上限执行预订，完成条件为行程结束且报销不超1800元。",
+              "concerns": [
+                "若出差产出低于1800元的机会成本则不应成行",
+                "实际支出可能因突发情况逼近或超出各项上限"
+              ],
+              "unknowns": [
+                "本次出差的具体业务目标与预期收益",
+                "是否存在更低成本的替代方案如线上会议"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.656
+          }
+        ],
+        "status": "PARTIAL",
+        "candidate": null,
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2025,
+          "input_tokens": 1339,
+          "output_tokens": 453,
+          "total_tokens": 1792,
+          "finish_reason": "stop",
+          "output_chars": 971,
+          "seconds": 13.953
+        },
+        "synthesis_error": "ValueError",
+        "synthesis_error_code": "UNMATCHED_SOURCE_EXCERPT",
+        "synthesis_validation_errors": [],
+        "calls": 4,
+        "seconds": 29.359
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true
+        }
+      }
+    },
+    {
+      "case": "travel_cost",
+      "phase": "revision",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-travel_cost-revision-0",
+        "logical_session_id": "eval-travel_cost",
+        "epoch": 0,
+        "question": "出差费用上限降到1500元；车票600元不变，住宿新报价900元，餐饮200元。现有报价超预算，请说明缺口和待确认选项，不虚构已拿到折扣，不需要分钟安排。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "以下均为测试中已给定的报价，不需要查询实时价格；不要求按分钟安排。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": {
+          "title": "原计划",
+          "version": 1,
+          "body": "往返车票600元，住宿800元，餐饮200元，合计1600元；预留200元。"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 438,
+              "input_tokens": 471,
+              "output_tokens": 140,
+              "total_tokens": 611,
+              "finish_reason": "stop",
+              "output_chars": 256
+            },
+            "opinion": {
+              "view": "新报价合计1700元（车票600+住宿900+餐饮200），超预算上限1500元，缺口200元。",
+              "recommendation": "需确认能否将住宿压至700元以下，或申请将总预算上调至1700元。",
+              "concerns": [
+                "住宿新报价900元较原计划涨100元，是超支主因。",
+                "不可虚构折扣，必须基于实际可执行方案。"
+              ],
+              "unknowns": [
+                "公司是否允许单项超标但总额不超？",
+                "是否有更低价格的备选住宿？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 5.266
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 438,
+              "input_tokens": 472,
+              "output_tokens": 123,
+              "total_tokens": 595,
+              "finish_reason": "stop",
+              "output_chars": 233
+            },
+            "opinion": {
+              "view": "车票600加住宿900加餐饮200共1700元，超新上限1500元，缺口200元。",
+              "recommendation": "确认能否将住宿压至700元内，或申请额外200元预算批准。",
+              "concerns": [
+                "住宿报价已升至900元，压缩空间有限。",
+                "若无法追加预算，出差可能被迫取消或降级。"
+              ],
+              "unknowns": [
+                "公司是否允许超标特批？",
+                "是否有更低价住宿可选？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.891
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 438,
+              "input_tokens": 468,
+              "output_tokens": 133,
+              "total_tokens": 601,
+              "finish_reason": "stop",
+              "output_chars": 259
+            },
+            "opinion": {
+              "view": "新报价合计1700元，超预算200元；车票600元固定，缺口只能从住宿或餐饮压缩。",
+              "recommendation": "优先确认住宿能否降至700元以内，或接受餐饮降级以控制总费用不超1500元。",
+              "concerns": [
+                "住宿900元若无法降价，必须削减餐饮或其他开支。",
+                "压缩餐饮可能影响出差期间基本需求。"
+              ],
+              "unknowns": [
+                "住宿方是否接受议价或更换更低价酒店。",
+                "餐饮200元是否为不可再降的最低标准。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.859
+          }
+        ],
+        "status": "PARTIAL",
+        "candidate": null,
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2089,
+          "seconds": 61.172
+        },
+        "synthesis_error": "OpenAITimeoutError",
+        "synthesis_error_code": "TIMEOUT",
+        "synthesis_validation_errors": [],
+        "calls": 4,
+        "seconds": 76.188
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true
+        }
+      }
+    },
+    {
+      "case": "purchase_choice",
+      "phase": "create",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-purchase_choice-create-0",
+        "logical_session_id": "eval-purchase_choice",
+        "epoch": 0,
+        "question": "团队选采购方案：A价格1200元且已确认兼容，B价格900元但兼容性未知。上限1300元，稳定性优先。给出比较、行动及完成条件，不需要估时。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "测试给定产品属性，不做实时商品推荐；没有时间预算。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": null
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 353,
+              "input_tokens": 411,
+              "output_tokens": 115,
+              "total_tokens": 526,
+              "finish_reason": "stop",
+              "output_chars": 252
+            },
+            "opinion": {
+              "view": "A方案1200元在预算内且已确认兼容，符合稳定性优先原则；B虽便宜但兼容性未知存在风险。",
+              "recommendation": "直接选择A方案采购，若必须评估B则先完成兼容性验证再决策。",
+              "concerns": [
+                "B方案兼容性未经验证，贸然采用可能影响系统稳定",
+                "需确认A方案供应商交付周期是否满足项目要求"
+              ],
+              "unknowns": [
+                "B方案具体兼容性问题及验证所需条件",
+                "团队对成本节约是否有硬性考核指标"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.656
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "FAILED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 353
+            },
+            "error": "OpenAITimeoutError",
+            "error_code": "TIMEOUT",
+            "validation_errors": [],
+            "seconds": 22.219
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 353,
+              "input_tokens": 408,
+              "output_tokens": 128,
+              "total_tokens": 536,
+              "finish_reason": "stop",
+              "output_chars": 266
+            },
+            "opinion": {
+              "view": "稳定性优先且预算充足，A已确认兼容风险最低；B虽便宜但兼容性未知，失败的机会成本高。",
+              "recommendation": "选择方案A，立即采购并完成兼容性复测，以系统稳定运行为完成条件。",
+              "concerns": [
+                "选B若兼容性失败将导致返工和延期，机会成本高于300元差价。",
+                "需确认A的1200元报价含所有必要组件无隐性费用。"
+              ],
+              "unknowns": [
+                "B的兼容性验证具体需要哪些测试步骤？",
+                "团队是否有备用方案应对A临时缺货？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.766
+          }
+        ],
+        "status": "PARTIAL",
+        "candidate": null,
+        "calls": 3,
+        "seconds": 31.641
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true
+        }
+      }
+    },
+    {
+      "case": "purchase_choice",
+      "phase": "revision",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-purchase_choice-revision-0",
+        "logical_session_id": "eval-purchase_choice",
+        "epoch": 0,
+        "question": "采购上限改为1000元，A价格仍为1200元，B仍为900元且尚未确认兼容。修订原建议，不能把兼容性推测当事实，不需要估时。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "测试给定产品属性，不做实时商品推荐；没有时间预算。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": {
+          "title": "原计划",
+          "version": 1,
+          "body": "优先A，1200元，在1300元以内；下单前确认售后。B兼容性未知，不当作已验证。"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 426,
+              "input_tokens": 455,
+              "output_tokens": 113,
+              "total_tokens": 568,
+              "finish_reason": "stop",
+              "output_chars": 234
+            },
+            "opinion": {
+              "view": "采购上限降至1000元，A价1200元超预算不可选，B价900元符合但兼容性未确认。",
+              "recommendation": "先验证B的兼容性，确认后再采购；若B不兼容则需寻找其他千元内方案。",
+              "concerns": [
+                "B兼容性尚未确认，不能推测为可用",
+                "A价格超出新上限，无法采购"
+              ],
+              "unknowns": [
+                "B的实际兼容性结果未知",
+                "是否存在其他千元内且兼容的替代产品"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.546
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 426,
+              "input_tokens": 456,
+              "output_tokens": 115,
+              "total_tokens": 571,
+              "finish_reason": "stop",
+              "output_chars": 239
+            },
+            "opinion": {
+              "view": "预算降至1000元后A超支不可选，B价格符合但兼容性未确认，不能推测其可用。",
+              "recommendation": "暂停采购，先实测或向厂商确认B的兼容性，再决定是否购买。",
+              "concerns": [
+                "若B不兼容将造成900元浪费且退货可能产生成本。",
+                "当前无其他已知选项满足预算与需求。"
+              ],
+              "unknowns": [
+                "B的实际兼容性尚无验证数据。",
+                "B若需退换的具体政策与费用未知。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.329
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 426,
+              "input_tokens": 452,
+              "output_tokens": 129,
+              "total_tokens": 581,
+              "finish_reason": "stop",
+              "output_chars": 264
+            },
+            "opinion": {
+              "view": "预算降至1000元后A已超支，B虽在预算内但兼容性未确认，不能视为可行选项。",
+              "recommendation": "放弃A；在未实测验证B兼容性前暂不下单，或寻找其他千元内且已确认兼容的替代方案。",
+              "concerns": [
+                "若将B兼容性推测当事实直接采购，可能因不兼容导致浪费。",
+                "仅凭价格筛选而忽略兼容性验证，会偏离长期目标。"
+              ],
+              "unknowns": [
+                "B的实际兼容性测试结果未知。",
+                "是否存在其他千元内且兼容的替代产品未知。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 5.343
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "修订采购建议：暂停下单，先验B兼容性",
+          "steps": [
+            {
+              "action": "放弃A，因1200元超出1000元采购上限",
+              "done_when": "明确A不在候选清单中",
+              "minutes": null,
+              "kind": null
+            },
+            {
+              "action": "通过实测或厂商确认B的兼容性",
+              "done_when": "获得B兼容性的客观验证结果，非推测",
+              "minutes": null,
+              "kind": null
+            },
+            {
+              "action": "若B兼容则采购B；若不兼容则寻找其他千元内已确认兼容的方案",
+              "done_when": "确定最终可采购项且满足预算与兼容性要求",
+              "minutes": null,
+              "kind": null
+            }
+          ],
+          "assumptions": [
+            "存在可行的兼容性验证途径（实测或厂商确认）",
+            "市场上可能存在其他千元内且兼容的替代产品"
+          ],
+          "revision_reason": "旧计划优先A基于1300元上限，现上限降至1000元故放弃A；保留B不推测兼容的原则，缩减为仅验证后再决策。",
+          "source_excerpts": [
+            {
+              "evidence_ref": "user:current",
+              "quote": "采购上限改为1000元，A价格仍为1200元，B仍为900元且尚未确认兼容"
+            },
+            {
+              "evidence_ref": "user:current",
+              "quote": "不能把兼容性推测当事实，不需要估时"
+            }
+          ],
+          "unknowns": [
+            "B的实际兼容性测试结果未知",
+            "是否存在其他千元内且兼容的替代产品"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2066,
+          "input_tokens": 1362,
+          "output_tokens": 381,
+          "total_tokens": 1743,
+          "finish_reason": "stop",
+          "output_chars": 854,
+          "minutes_by_kind": {},
+          "seconds": 28.094
+        },
+        "agreement": [
+          "采购上限1000元，A价1200元超预算不可选",
+          "B价900元在预算内但兼容性未确认，不能推测为可用",
+          "需先验证B兼容性或寻找其他千元内兼容方案"
+        ],
+        "disagreements": [],
+        "unknowns": [
+          "B的实际兼容性结果未知",
+          "是否存在其他千元内且兼容的替代产品",
+          "B若需退换的具体政策与费用未知"
+        ],
+        "calls": 4,
+        "seconds": 42.312
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "executable_steps": true,
+          "valid_optional_labels": true,
+          "source_excerpts_match": true,
+          "positive_step_minutes": true
+        }
+      }
+    },
+    {
+      "case": "software_debug",
+      "phase": "create",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-software_debug-create-0",
+        "logical_session_id": "eval-software_debug",
+        "epoch": 0,
+        "question": "接口返回500，只有错误状态码，尚无日志和复现步骤。提出排查行动及完成条件，区分假设与事实，不猜测已确定根因，不需要估计分钟。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "这是模拟开发任务，不访问仓库、不实际执行代码。没有时间预算。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": null
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 349,
+              "input_tokens": 407,
+              "output_tokens": 130,
+              "total_tokens": 537,
+              "finish_reason": "stop",
+              "output_chars": 263
+            },
+            "opinion": {
+              "view": "事实是接口返回500且无日志与复现步骤；假设可能涉及代码异常、依赖故障或配置错误，根因未确定。",
+              "recommendation": "先开启详细日志并构造请求复现，再按网络、网关、应用层逐段排查，以定位错误源。",
+              "concerns": [
+                "无日志无法区分是应用层崩溃还是网关拦截导致的500",
+                "缺少复现步骤则无法验证修复是否有效"
+              ],
+              "unknowns": [
+                "触发500的具体请求参数和路径未知",
+                "后端是否已配置全局异常捕获机制未知"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.594
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 349,
+              "input_tokens": 408,
+              "output_tokens": 117,
+              "total_tokens": 525,
+              "finish_reason": "stop",
+              "output_chars": 250
+            },
+            "opinion": {
+              "view": "当前事实仅有接口返回500状态码，日志与复现步骤缺失，排查需先补齐信息再定位。",
+              "recommendation": "立即开启详细错误日志并构造请求复现，完成条件为获取到异常堆栈或明确错误信息。",
+              "concerns": [
+                "无日志时盲目修改代码会增加不可逆风险",
+                "持续500可能影响依赖该接口的其他服务"
+              ],
+              "unknowns": [
+                "触发500的具体请求参数和路径未知",
+                "是代码异常还是基础设施问题尚不明确"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.515
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 349,
+              "input_tokens": 404,
+              "output_tokens": 132,
+              "total_tokens": 536,
+              "finish_reason": "stop",
+              "output_chars": 266
+            },
+            "opinion": {
+              "view": "当前事实仅有接口返回500状态码，日志与复现步骤缺失，根因未知，需先补齐信息再定位。",
+              "recommendation": "优先获取服务端日志并构造稳定复现请求，完成条件为拿到错误堆栈或明确触发路径。",
+              "concerns": [
+                "无日志时盲目修改代码可能引入新问题且机会成本高",
+                "若500由外部依赖引起，仅查本服务将偏离方向"
+              ],
+              "unknowns": [
+                "500是必现还是偶发，触发条件是什么",
+                "服务端是否记录了异常堆栈或中间件拦截了错误"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 5.282
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "接口500排查行动",
+          "steps": [
+            {
+              "action": "开启服务端详细错误日志（含异常堆栈）",
+              "done_when": "日志级别已调整且能记录到请求的完整错误信息",
+              "minutes": null,
+              "kind": "排查"
+            },
+            {
+              "action": "构造请求尝试稳定复现500错误",
+              "done_when": "获得可重复触发500的请求参数与路径",
+              "minutes": null,
+              "kind": "排查"
+            },
+            {
+              "action": "检查网关与中间件日志，区分500来源层",
+              "done_when": "确认500由应用层抛出还是被网关/中间件拦截",
+              "minutes": null,
+              "kind": "排查"
+            },
+            {
+              "action": "核查外部依赖服务状态与连通性",
+              "done_when": "排除或确认下游依赖故障导致500",
+              "minutes": null,
+              "kind": "排查"
+            }
+          ],
+          "assumptions": [
+            "假设服务端具备开启详细日志的权限与能力",
+            "假设500可由特定请求稳定复现",
+            "假设排查环境为模拟开发任务，不访问实际仓库"
+          ],
+          "revision_reason": "无旧计划；依据最新约束不估时，综合三视角形成分步排查方案，区分事实与假设。",
+          "source_excerpts": [
+            {
+              "evidence_ref": "user:current",
+              "quote": "接口返回500，只有错误状态码，尚无日志和复现步骤。提出排查行动及完成条件，区分假设与事实，不猜测已确定根因，不需要估计分钟。"
+            }
+          ],
+          "unknowns": [
+            "触发500的具体请求参数、路径及是否偶发未知",
+            "后端是否配置全局异常捕获或中间件拦截了错误未知",
+            "是代码异常、配置错误还是基础设施/外部依赖问题尚不明确"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2031,
+          "input_tokens": 1336,
+          "output_tokens": 479,
+          "total_tokens": 1815,
+          "finish_reason": "stop",
+          "output_chars": 1038,
+          "minutes_by_kind": {},
+          "seconds": 16.484
+        },
+        "agreement": [
+          "事实仅有接口返回500，无日志与复现步骤，根因未确定",
+          "需先开启详细日志并构造请求复现以补齐信息",
+          "无日志时盲目修改代码风险高且可能偏离方向"
+        ],
+        "disagreements": [
+          "排查顺序侧重不同：逐段网络排查、直接查应用日志或优先确认外部依赖",
+          "完成条件表述差异：获取异常堆栈、明确错误信息或明确触发路径"
+        ],
+        "unknowns": [
+          "触发500的具体请求参数、路径及是否偶发未知",
+          "后端是否配置全局异常捕获或中间件拦截了错误未知",
+          "是代码异常、配置错误还是基础设施/外部依赖问题尚不明确"
+        ],
+        "calls": 4,
+        "seconds": 30.875
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "executable_steps": true,
+          "valid_optional_labels": true,
+          "source_excerpts_match": true,
+          "positive_step_minutes": true
+        }
+      }
+    },
+    {
+      "case": "software_debug",
+      "phase": "revision",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-software_debug-revision-0",
+        "logical_session_id": "eval-software_debug",
+        "epoch": 0,
+        "question": "已有稳定复现，脱敏日志显示数据库连接超时；但数据库宕机还是网络问题尚未确定。修订排查顺序，不重复要求从零收集复现，也不宣称已修复。不需要估时。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "这是模拟开发任务，不访问仓库、不实际执行代码。没有时间预算。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": {
+          "title": "原计划",
+          "version": 1,
+          "body": "先取得最小复现与脱敏日志；核对请求参数和异常位置，再按证据提出修改。根因未确认。"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 437,
+              "input_tokens": 454,
+              "output_tokens": 122,
+              "total_tokens": 576,
+              "finish_reason": "stop",
+              "output_chars": 258
+            },
+            "opinion": {
+              "view": "已有稳定复现和超时日志，排查应聚焦区分数据库宕机与网络问题，无需重新收集复现。",
+              "recommendation": "先检查数据库进程与端口状态，再验证网络连通性与DNS解析，最后核对连接池配置。",
+              "concerns": [
+                "若为间歇性网络抖动，单次连通性测试可能漏检。",
+                "连接池耗尽也会表现为超时，易与宕机混淆。"
+              ],
+              "unknowns": [
+                "数据库服务端当前进程与资源状态未知。",
+                "应用与数据库间网络拓扑及中间件未知。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.734
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 437,
+              "input_tokens": 455,
+              "output_tokens": 112,
+              "total_tokens": 567,
+              "finish_reason": "stop",
+              "output_chars": 246
+            },
+            "opinion": {
+              "view": "已有稳定复现和超时日志，排查应直接聚焦区分数据库宕机与网络问题，避免重复收集。",
+              "recommendation": "先查数据库进程与端口状态，再测网络连通性，按结果分支处理。",
+              "concerns": [
+                "若误判根因可能导致无效修复并浪费人力成本。",
+                "反复重启服务排查会增加系统负担且影响可逆性。"
+              ],
+              "unknowns": [
+                "数据库实例当前是否存活尚无确认。",
+                "中间网络设备或防火墙是否拦截未知。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.36
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 437,
+              "input_tokens": 451,
+              "output_tokens": 107,
+              "total_tokens": 558,
+              "finish_reason": "stop",
+              "output_chars": 234
+            },
+            "opinion": {
+              "view": "已有稳定复现和超时日志，应跳过重复收集，直接按网络与数据库两条路径并行排查。",
+              "recommendation": "先查网络连通性与丢包，再查数据库连接池与存活状态，依据结果定位根因。",
+              "concerns": [
+                "若仅查一端可能遗漏另一端偶发故障",
+                "超时阈值配置不当会掩盖真实瓶颈"
+              ],
+              "unknowns": [
+                "数据库实例当前是否存活或重启过",
+                "中间网络设备是否有丢包或限流"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.187
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "数据库超时根因排查（区分宕机与网络）",
+          "steps": [
+            {
+              "action": "检查数据库进程状态、监听端口及系统资源占用",
+              "done_when": "确认数据库实例存活且端口可达，或记录异常状态",
+              "minutes": null,
+              "kind": "排查"
+            },
+            {
+              "action": "验证应用至数据库的网络连通性、DNS解析及丢包率",
+              "done_when": "完成ping/telnet等测试并记录结果，排除或确认网络故障",
+              "minutes": null,
+              "kind": "排查"
+            },
+            {
+              "action": "核对应用端连接池配置、活跃连接数及超时阈值",
+              "done_when": "确认连接池未耗尽且超时设置合理，或发现配置异常",
+              "minutes": null,
+              "kind": "排查"
+            },
+            {
+              "action": "汇总上述检查结果，判定根因为宕机、网络或配置问题",
+              "done_when": "输出明确结论，不宣称已修复，仅定位根因",
+              "minutes": null,
+              "kind": "分析"
+            }
+          ],
+          "assumptions": [
+            "具备访问数据库服务器及应用服务器的权限",
+            "脱敏日志中的超时信息准确反映故障现象",
+            "模拟任务环境，不实际执行代码变更"
+          ],
+          "revision_reason": "旧计划要求从零收集复现已不适用；新约束下跳过重复收集，直接按证据分支排查宕机与网络。无时间预算故不估时。",
+          "source_excerpts": [
+            {
+              "evidence_ref": "user:current",
+              "quote": "已有稳定复现，脱敏日志显示数据库连接超时；但数据库宕机还是网络问题尚未确定。修订排查顺序，不重复要求从零收集复现，也不宣称已修复。不需要估时。"
+            }
+          ],
+          "unknowns": [
+            "数据库服务端当前进程与资源状态未知",
+            "应用与数据库间网络拓扑及中间设备未知",
+            "连接池耗尽或超时阈值不当可能掩盖真实瓶颈"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2077,
+          "input_tokens": 1345,
+          "output_tokens": 492,
+          "total_tokens": 1837,
+          "finish_reason": "stop",
+          "output_chars": 1107,
+          "minutes_by_kind": {},
+          "seconds": 12.75
+        },
+        "agreement": [
+          "已有稳定复现和脱敏超时日志，无需重新收集复现步骤",
+          "排查应聚焦区分数据库宕机与网络问题",
+          "先检查数据库进程/端口状态，再验证网络连通性"
+        ],
+        "disagreements": [
+          "CASPER建议网络与数据库并行排查，其余建议串行先查数据库",
+          "MELCHIOR强调连接池耗尽易混淆，CASPER关注超时阈值配置",
+          "各模型对中间网络设备或防火墙的关注程度不同"
+        ],
+        "unknowns": [
+          "数据库实例当前是否存活、资源占用及是否重启过",
+          "应用与数据库间网络拓扑、中间件及防火墙策略未知",
+          "连接池配置与超时阈值是否合理尚待确认"
+        ],
+        "calls": 4,
+        "seconds": 26.031
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "executable_steps": true,
+          "valid_optional_labels": true,
+          "source_excerpts_match": true,
+          "positive_step_minutes": true
+        }
+      }
+    },
+    {
+      "case": "backend_agent",
+      "phase": "create",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-backend_agent-create-0",
+        "logical_session_id": "eval-backend_agent",
+        "epoch": 0,
+        "question": "比较两种学习投入，给出含休息的本周练习计划及完成条件。",
+        "time_budget_minutes": 240,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "本周有四小时学习时间，想同时学习后端开发和Agent，目标是能解释并修改自己的项目。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": null
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 322,
+              "input_tokens": 388,
+              "output_tokens": 111,
+              "total_tokens": 499,
+              "finish_reason": "stop",
+              "output_chars": 240
+            },
+            "opinion": {
+              "view": "后端重工程实践，Agent重提示与编排；240分钟宜按6:4分配并穿插休息。",
+              "recommendation": "每日两节各50分钟加10分钟休息，前三天练后端后两天练Agent，完成条件为能解释并修改项目代码。",
+              "concerns": [
+                "双目标并行易致上下文切换损耗",
+                "未明确具体项目难以细化任务"
+              ],
+              "unknowns": [
+                "两种学习投入的具体定义未给出",
+                "每日可用时段分布未知"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.594
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 322,
+              "input_tokens": 389,
+              "output_tokens": 112,
+              "total_tokens": 501,
+              "finish_reason": "stop",
+              "output_chars": 244
+            },
+            "opinion": {
+              "view": "240分钟需兼顾后端与Agent，负担较重；建议交替学习降低疲劳，成本可控且计划可逆。",
+              "recommendation": "每日60分钟：30分后端+30分Agent，每25分钟休息5分钟；完成条件为能解释并修改项目一处代码。",
+              "concerns": [
+                "双目标并行易致认知超载和疲劳",
+                "时间紧张可能影响休息质量"
+              ],
+              "unknowns": [
+                "两种学习方式的具体偏好未明",
+                "当前项目复杂度未知"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 5.547
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 322,
+              "input_tokens": 385,
+              "output_tokens": 102,
+              "total_tokens": 487,
+              "finish_reason": "stop",
+              "output_chars": 233
+            },
+            "opinion": {
+              "view": "240分钟需在后端与Agent间分配，机会成本是偏重一方会延缓另一方理解自己项目的能力。",
+              "recommendation": "各占100分钟学习加20分钟休息，完成条件是能独立解释并修改各自模块的一处代码。",
+              "concerns": [
+                "时间有限，两方向均难深入",
+                "切换上下文可能降低效率"
+              ],
+              "unknowns": [
+                "当前后端与Agent基础水平",
+                "具体项目技术栈是什么"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.297
+          }
+        ],
+        "status": "PARTIAL",
+        "candidate": null,
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 1942,
+          "input_tokens": 1254,
+          "output_tokens": 499,
+          "total_tokens": 1753,
+          "finish_reason": "stop",
+          "output_chars": 1134,
+          "seconds": 12.812
+        },
+        "synthesis_error": "ValueError",
+        "synthesis_error_code": "UNMATCHED_SOURCE_EXCERPT",
+        "synthesis_validation_errors": [],
+        "calls": 4,
+        "seconds": 27.25
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true
+        }
+      }
+    },
+    {
+      "case": "backend_agent",
+      "phase": "revision",
+      "repeat": 0,
+      "snapshot": {
+        "run_id": "eval-backend_agent-revision-0",
+        "logical_session_id": "eval-backend_agent",
+        "epoch": 0,
+        "question": "接口练习已完成，但Agent工具调用没看懂，只剩90分钟，请修订原计划并解释理由。",
+        "time_budget_minutes": 90,
+        "memories": [],
+        "history": [
+          {
+            "role": "human",
+            "text": "本周有四小时学习时间，想同时学习后端开发和Agent，目标是能解释并修改自己的项目。"
+          }
+        ],
+        "evidence_ids": [
+          "user:current"
+        ],
+        "old_plan": {
+          "title": "原计划",
+          "version": 1,
+          "body": "后端接口练习120分钟，Agent调用链练习90分钟，休息30分钟。"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 409,
+              "input_tokens": 432,
+              "output_tokens": 104,
+              "total_tokens": 536,
+              "finish_reason": "stop",
+              "output_chars": 238
+            },
+            "opinion": {
+              "view": "接口练习已完成，剩余90分钟应全用于Agent工具调用，先理解原理再动手。",
+              "recommendation": "30分钟读文档理清调用链，45分钟跑通示例并修改参数，15分钟总结。",
+              "concerns": [
+                "原计划含休息，连续学习可能影响效率",
+                "未明确Agent框架版本，文档可能不匹配"
+              ],
+              "unknowns": [
+                "使用的具体Agent框架是什么",
+                "是否有现成可运行的示例代码"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.657
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 409,
+              "input_tokens": 433,
+              "output_tokens": 105,
+              "total_tokens": 538,
+              "finish_reason": "stop",
+              "output_chars": 241
+            },
+            "opinion": {
+              "view": "接口已完成，剩余90分钟应全用于理解Agent工具调用并安排休息，避免疲劳。",
+              "recommendation": "用60分钟拆解Agent调用示例，休息15分钟，留15分钟复盘笔记。",
+              "concerns": [
+                "连续高强度学习易致疲劳，影响理解效果。",
+                "原计划时间分配已不适用当前进度。"
+              ],
+              "unknowns": [
+                "Agent工具调用的具体卡点在哪里？",
+                "是否有可用的调试或示例代码？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.953
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 409,
+              "input_tokens": 429,
+              "output_tokens": 113,
+              "total_tokens": 542,
+              "finish_reason": "stop",
+              "output_chars": 257
+            },
+            "opinion": {
+              "view": "接口练习已完成，剩余90分钟应全用于攻克Agent工具调用这一未达标目标。",
+              "recommendation": "取消原计划剩余部分，将90分钟拆为45分钟读文档加45分钟动手调试Agent调用。",
+              "concerns": [
+                "若继续按原计划分配时间，Agent目标将无法完成。",
+                "跳过休息可能影响最后阶段的理解效率。"
+              ],
+              "unknowns": [
+                "Agent工具调用的具体卡点在哪里？",
+                "是否有现成示例代码可供对照学习？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.609
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "90分钟Agent工具调用攻坚计划",
+          "steps": [
+            {
+              "action": "阅读Agent工具调用文档，理清调用链原理",
+              "done_when": "能用自己的话画出或写出调用流程图",
+              "minutes": 30,
+              "kind": "学习"
+            },
+            {
+              "action": "运行示例代码并尝试修改参数观察结果",
+              "done_when": "成功跑通至少一个工具调用示例并记录变化",
+              "minutes": 45,
+              "kind": "实践"
+            },
+            {
+              "action": "整理笔记，总结调用机制与遗留疑问",
+              "done_when": "输出包含关键概念和待解决问题的简短笔记",
+              "minutes": 15,
+              "kind": "复盘"
+            }
+          ],
+          "assumptions": [
+            "存在与所用框架匹配的官方文档或教程",
+            "有可运行的基础示例代码用于调试",
+            "用户能在无休息情况下维持90分钟专注"
+          ],
+          "revision_reason": "接口已完成故放弃原后端练习；因没看懂Agent调用，缩减原90分钟为读文档+调试；取消原30分钟休息以适配新90分钟预算。",
+          "source_excerpts": [
+            {
+              "evidence_ref": "user:current",
+              "quote": "接口练习已完成，但Agent工具调用没看懂，只剩90分钟，请修订原计划并解释理由。"
+            }
+          ],
+          "unknowns": [
+            "具体Agent框架版本未知，文档可能不匹配",
+            "不确定是否有现成示例代码可直接运行"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2048,
+          "input_tokens": 1294,
+          "output_tokens": 390,
+          "total_tokens": 1684,
+          "finish_reason": "stop",
+          "output_chars": 906,
+          "minutes_by_kind": {
+            "学习": 30,
+            "实践": 45,
+            "复盘": 15
+          },
+          "total_minutes": 90,
+          "time_budget_minutes": 90,
+          "seconds": 12.078
+        },
+        "agreement": [
+          "接口练习已完成，剩余90分钟应全部用于攻克Agent工具调用",
+          "原计划时间分配已不适用当前进度，需重新规划",
+          "动手前需先理解Agent调用原理或阅读文档"
+        ],
+        "disagreements": [
+          "是否安排休息：Balthasar建议15分钟休息，其余主张连续学习",
+          "时间拆分不同：读文档与动手调试的比例在30:45、60:15、45:45间分歧"
+        ],
+        "unknowns": [
+          "使用的具体Agent框架及版本是什么",
+          "Agent工具调用的具体卡点在哪里",
+          "是否有现成可运行的示例代码可供对照"
+        ],
+        "calls": 4,
+        "seconds": 26.297
+      },
+      "boundary_checks": {
+        "passed": true,
+        "checks": {
+          "call_limit": true,
+          "three_roles": true,
+          "candidate_requires_completion": true,
+          "all_roles_complete_before_candidate": true,
+          "known_evidence_only": true,
+          "executable_steps": true,
+          "valid_optional_labels": true,
+          "source_excerpts_match": true,
+          "positive_step_minutes": true,
+          "within_time_budget": true
+        }
+      }
+    }
+  ],
+  "summary": {
+    "attempted": 8,
+    "planned": 8,
+    "statuses": {
+      "PARTIAL": 4,
+      "COMPLETED": 4
+    },
+    "failure_codes": {
+      "UNMATCHED_SOURCE_EXCERPT": 2,
+      "TIMEOUT": 2
+    },
+    "boundary_checks_passed": 8,
+    "model_invocations": 31,
+    "usage": {
+      "calls_with_usage": 29,
+      "calls_without_usage": 2,
+      "known_input_tokens": 17807,
+      "known_output_tokens": 5429,
+      "known_total_tokens": 23236
+    },
+    "run_seconds": {
+      "min": 26.031,
+      "median": 30.117,
+      "max": 76.188
+    },
+    "seconds": 289.969,
+    "semantic_quality": "not automatically graded; review every candidate against the snapshot"
+  },
+  "export": {
+    "date": "2026-10-30",
+    "scope": "real Council generation only; no plan save or browser run",
+    "no_retries": true,
+    "baseline_commit_note": "source_commit identifies baseline; recorded source_files_sha256 identifies the modified council source actually tested",
+    "evaluation_script_sha256": "9a26c0203851a8346e8714c45f6fc0cca04acc1d33eae24fce971040d87b12ea",
+    "pytest": {
+      "passed": 263,
+      "warnings": 1,
+      "seconds": 17.04
+    },
+    "semantic_review": "010-semantic-review.json"
+  }
+}

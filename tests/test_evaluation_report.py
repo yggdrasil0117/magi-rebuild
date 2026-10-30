@@ -1,6 +1,13 @@
 from copy import deepcopy
 
-from scripts.evaluate_council import assess_result, summarize_report
+import pytest
+
+from scripts.evaluate_council import (
+    COMPATIBILITY_CASES,
+    assess_result,
+    build_snapshot,
+    summarize_report,
+)
 
 
 def completed_result():
@@ -18,7 +25,16 @@ def completed_result():
             }
             for role in ("MELCHIOR", "BALTHASAR", "CASPER")
         ],
-        "candidate": {"steps": [{"minutes": 30, "kind": "work"}]},
+        "candidate": {
+            "steps": [
+                {
+                    "action": "定位",
+                    "done_when": "记录复现",
+                    "minutes": 30,
+                    "kind": "work",
+                }
+            ]
+        },
         "synthesis_diagnostics": diagnostics,
     }
 
@@ -91,9 +107,61 @@ def test_report_accepts_missing_category_but_rejects_fabricated_excerpt():
 
 def test_report_allows_general_plan_without_budget_or_estimates():
     result = completed_result()
-    result["candidate"]["steps"] = [{"action": "比较方案", "kind": "采购"}]
+    result["candidate"]["steps"] = [
+        {"action": "比较方案", "done_when": "记录取舍", "kind": "采购"}
+    ]
     assessment = assess_result({"evidence_ids": []}, result)
     assert assessment["passed"]
     assert "within_time_budget" not in assessment["checks"]
     result["candidate"]["steps"][0]["minutes"] = -1
     assert not assess_result({"evidence_ids": []}, result)["passed"]
+
+
+def test_report_rejects_missing_actions_or_completion_conditions():
+    for steps in ([], [{"minutes": 30}], [{"action": "定位", "done_when": " "}]):
+        result = completed_result()
+        result["candidate"]["steps"] = steps
+        assert not assess_result({"evidence_ids": []}, result)["checks"][
+            "executable_steps"
+        ]
+
+
+def test_compatibility_suite_has_timed_and_untimed_independent_revisions():
+    snapshots = [
+        build_snapshot(c, p, 0)
+        for c in COMPATIBILITY_CASES
+        for p in ("create", "revision")
+    ]
+    assert len(snapshots) == 8
+    assert sum(s["time_budget_minutes"] is None for s in snapshots) == 6
+    assert all(s["old_plan"] is not None for s in snapshots[1::2])
+    report = {"planned_runs": 8, "repeats": 1, "runs": []}
+    assert summarize_report(report, 0)["planned"] == 8
+
+
+def test_missing_cloud_key_stops_before_model_call(monkeypatch, capsys):
+    from scripts import evaluate_council
+
+    monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
+    monkeypatch.setattr("sys.argv", ["evaluate_council", "--suite", "compatibility"])
+    monkeypatch.setattr(
+        evaluate_council, "Council", lambda *_: pytest.fail("不应调用模型")
+    )
+    with pytest.raises(SystemExit) as exc:
+        evaluate_council.main()
+    assert exc.value.code == 2
+    assert "尚未调用模型" in capsys.readouterr().err
+
+
+def test_compatibility_dry_run_needs_no_key_or_model(monkeypatch, capsys):
+    from scripts import evaluate_council
+
+    monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
+    monkeypatch.setattr(
+        "sys.argv", ["evaluate_council", "--suite", "compatibility", "--dry-run"]
+    )
+    monkeypatch.setattr(
+        evaluate_council, "Council", lambda *_: pytest.fail("不应调用模型")
+    )
+    assert evaluate_council.main() == 0
+    assert '"max_model_invocations": 32' in capsys.readouterr().out

@@ -7,7 +7,10 @@ from pydantic import ValidationError
 
 
 def generation_schema(model, snapshot):
-    """Constrain generation without narrowing already persisted plan revisions."""
+    """从业务模型派生本轮生成约束，不改变已存旧计划的读取规则。
+
+    展开引用、缩短文本并绑定允许的证据 ID；仅在有明确时间预算时强制分钟。
+    """
     original = model.model_json_schema()
     definitions = original.get("$defs", {})
 
