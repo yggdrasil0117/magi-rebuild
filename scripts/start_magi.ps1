@@ -18,8 +18,10 @@ if ($modelProfile.provider -eq 'qianwen' -and -not [Environment]::GetEnvironment
 }
 if (-not $env:MAGI_API_TOKEN) {
     $env:MAGI_API_TOKEN = [Guid]::NewGuid().ToString('N') + [Guid]::NewGuid().ToString('N')
-    Write-Host "本次服务凭据（粘贴到本机聊天页或 Pipe Valves）：$env:MAGI_API_TOKEN"
 }
+# 沿用当前进程凭据时也显示，避免重启后用户无法连接网页或终端。
+# 仅显示在本机启动窗口，不写入文件；这不是千问 API Key。
+Write-Host "本次服务凭据（粘贴到本机聊天页、终端或 Pipe Valves）：$env:MAGI_API_TOKEN"
 $env:MAGI_CONFIG = $Config
 Write-Host "MAGI: http://127.0.0.1:8765 ；Ctrl+C 停止。单 worker，不使用 reload。"
 try {
