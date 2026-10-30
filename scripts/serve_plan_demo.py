@@ -58,6 +58,22 @@ def demo_session(*args):
     yield session
 
 
+class DemoMemoryExtractor:
+    """仅用于界面验收的固定桩，绝不连接真实模型。"""
+
+    def extract(self, snapshot, diagnostics):
+        if "先讲原理" not in snapshot["question"]:
+            return None
+        return {
+            "key": "回答偏好",
+            "value": snapshot["question"],
+            "reason": "用户表达了长期回答偏好",
+            "sources": [
+                {"evidence_ref": "user:current", "quote": snapshot["question"]}
+            ],
+        }
+
+
 def main():
     """启动本机独立测试服务；数据目录可复用以验证进程重启后的版本保留。"""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -77,6 +93,7 @@ def main():
         "offline-demo",
         council=Council(settings, demo_response),
         session_factory=demo_session,
+        memory_extractor=DemoMemoryExtractor(),
     )
     if not service.plans.list_current():
         plan = service.plans.create(

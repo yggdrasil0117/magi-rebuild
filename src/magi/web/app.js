@@ -98,6 +98,7 @@ async function load() {
     lastReply = null;
     $('history').replaceChildren();
     turns.forEach(show);
+    loadMemorySuggestions($('chat').value); // 只读取已有候选，刷新不触发提取。
     $('welcome').hidden = turns.length > 0;
     $('status').textContent = '历史已加载';
     return true;
@@ -266,6 +267,7 @@ $('send').onclick = async () => {
   $('reset').disabled = true;
   $('analyze').disabled = true;
   $('status').textContent = '正在处理，请等待；断线后可重试相同消息。';
+  const pendingChat = pending.body.chat_id;
   try {
     const turn = await api(pending.path, pending.body);
     pending = null;
@@ -273,6 +275,11 @@ $('send').onclick = async () => {
     $('text').value = '';
     await load();
     $('status').textContent = turn.status === 'COMPLETED' ? (turn.proposal_id ? '建议已生成，由你决定是否保存。' : '已回复。') : '本次分析未完整完成，请查看回复中的说明。';
+    if (turn.status === 'COMPLETED' && $('autoMemorySuggestions').checked) {
+      const chat = pendingChat;
+      api('/v1/turns/' + encodeURIComponent(turn.id) + '/memory-suggestions', {})
+        .then(() => loadMemorySuggestions(chat)).catch(() => {});
+    }
   } catch (e) { $('reset').hidden = false; $('status').textContent = e.message + '；再次点击发送会重试原消息，也可取消后重新填写。'; }
   finally { sending = false; $('send').disabled = false; $('reset').disabled = false; $('analyze').disabled = false; }
 };

@@ -16,6 +16,7 @@ from magi.personal.models import PersonalError
 from magi.web.schemas import (
     Confirmation,
     MemoryCreate,
+    MemorySuggestionConfirm,
     MemoryUpdate,
     MemoryVersion,
     TurnInput,
@@ -115,6 +116,22 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
         return {"status": "ready", "single_worker": True}
 
     guarded = [Depends(identity)]
+
+    @app.post("/v1/turns/{turn_id}/memory-suggestions", dependencies=guarded)
+    def propose_memory(turn_id: str):
+        return service.propose_memory(turn_id)
+
+    @app.get("/v1/chats/{chat_id}/memory-suggestions", dependencies=guarded)
+    def memory_suggestions(chat_id: str):
+        return service.suggestions.pending(chat_id)
+
+    @app.post("/v1/memory-suggestions/{suggestion_id}/confirm", dependencies=guarded)
+    def confirm_memory_suggestion(suggestion_id: str, body: MemorySuggestionConfirm):
+        return service.decide_memory_suggestion(suggestion_id, body.value)
+
+    @app.post("/v1/memory-suggestions/{suggestion_id}/dismiss", dependencies=guarded)
+    def dismiss_memory_suggestion(suggestion_id: str):
+        return service.decide_memory_suggestion(suggestion_id)
 
     @app.get("/v1/memories", dependencies=guarded)
     def memories():

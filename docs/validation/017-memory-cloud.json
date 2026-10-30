@@ -1,0 +1,339 @@
+{
+  "created_at": "2026-10-30T07:18:20.571281+00:00",
+  "model": "qwen3.8-max",
+  "scope": "real memory extraction only; fake primary answer; no confirmation",
+  "max_calls": 8,
+  "source_commit": "2fc387d7dc7a595bafe91aae31791109fb190b79",
+  "case_set_sha256": "badf9ac647cbcb6774bb55130d06ff56be8eb2094df5065ed89c46b5785f61c5",
+  "source_files_sha256": {
+    "src\\magi\\personal\\extraction.py": "3b5266155d110e5b998501b96437f31ead6f405ccb168df58290228c73b21122",
+    "src\\magi\\personal\\suggestions.py": "fe97b57d9647276e88af1e6ec1f7737c5ce8b9f181e13a958b91316bd0ddc2ef",
+    "src\\magi\\web\\service.py": "574eb23d476255c64ab0e9ff8f548bf59820ed90ec4958b671d88db6e2c21cd7"
+  },
+  "runs": [
+    {
+      "case": "preference",
+      "question": "以后解释代码时，我更喜欢先讲原理，再给代码。",
+      "expected": "add",
+      "actual": "add",
+      "result": {
+        "status": "PROPOSED",
+        "diagnostics": {
+          "calls": 1,
+          "output_budget": 512,
+          "timeout_seconds": 20,
+          "input_tokens": 398,
+          "output_tokens": 37,
+          "total_tokens": 435,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {},
+          "seconds": 3.562
+        }
+      },
+      "candidates": [
+        {
+          "id": "b2b02e06d7ad4f32ac9bb08050f7d686",
+          "turn_id": "c4a39baf1d91474dbb8c97640ff664bc",
+          "owner": "evaluation",
+          "chat": "eval",
+          "epoch": 0,
+          "key": "代码解释偏好",
+          "value": "先讲原理，再给代码",
+          "reason": "用户明确表达了长期稳定的偏好",
+          "fingerprint": "08b3b93f7b3e9929dcb3449b61b177632e8287e6605071dbed4613fd2a23585e",
+          "target_id": null,
+          "expected_version": null,
+          "old_value": null,
+          "status": "PENDING",
+          "confirmed_value": null,
+          "sources": [
+            {
+              "evidence_ref": "user:current",
+              "quote": "以后解释代码时，我更喜欢先讲原理，再给代码。"
+            }
+          ],
+          "stale": false
+        }
+      ],
+      "decision_check": true,
+      "confirmed_memory_unchanged": true
+    },
+    {
+      "case": "background",
+      "question": "我目前是计算机专业的研究生，这个背景可以作为之后讨论科研问题的参考。",
+      "expected": "add",
+      "actual": "add",
+      "result": {
+        "status": "PROPOSED",
+        "diagnostics": {
+          "calls": 1,
+          "output_budget": 512,
+          "timeout_seconds": 20,
+          "input_tokens": 398,
+          "output_tokens": 45,
+          "total_tokens": 443,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {},
+          "seconds": 2.718
+        }
+      },
+      "candidates": [
+        {
+          "id": "d2830e16adfd485082342462bb967f23",
+          "turn_id": "3be2528efa6c4045b5c767466c952437",
+          "owner": "evaluation",
+          "chat": "eval",
+          "epoch": 0,
+          "key": "专业背景",
+          "value": "计算机专业研究生",
+          "reason": "用户主动说明当前学历与专业，并明确希望作为后续科研讨论的参考背景。",
+          "fingerprint": "c153dfa0ba6ee3400a8e41c69560bc40ce3dee9073d190eadf16c85be2091513",
+          "target_id": null,
+          "expected_version": null,
+          "old_value": null,
+          "status": "PENDING",
+          "confirmed_value": null,
+          "sources": [
+            {
+              "evidence_ref": "user:current",
+              "quote": "我目前是计算机专业的研究生，这个背景可以作为之后讨论科研问题的参考。"
+            }
+          ],
+          "stale": false
+        }
+      ],
+      "decision_check": true,
+      "confirmed_memory_unchanged": true
+    },
+    {
+      "case": "goal",
+      "question": "接下来一年，我打算持续学习后端与Agent开发，目标是能独立维护自己的项目。",
+      "expected": "add",
+      "actual": "add",
+      "result": {
+        "status": "PROPOSED",
+        "diagnostics": {
+          "calls": 1,
+          "output_budget": 512,
+          "timeout_seconds": 20,
+          "input_tokens": 406,
+          "output_tokens": 43,
+          "total_tokens": 449,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {},
+          "seconds": 2.953
+        }
+      },
+      "candidates": [
+        {
+          "id": "4e7d6ca3e75d480a80092b4aa08ce8a0",
+          "turn_id": "562880ddfc3f47c9a890a8dc8b091b70",
+          "owner": "evaluation",
+          "chat": "eval",
+          "epoch": 0,
+          "key": "长期目标",
+          "value": "持续学习后端与Agent开发，目标是能独立维护自己的项目",
+          "reason": "用户明确表达了一年期的稳定学习目标",
+          "fingerprint": "44a7c7d152e2443516b92f52b23badff15a1ee2d5b4ea9051add29d3d841d5d0",
+          "target_id": null,
+          "expected_version": null,
+          "old_value": null,
+          "status": "PENDING",
+          "confirmed_value": null,
+          "sources": [
+            {
+              "evidence_ref": "user:current",
+              "quote": "接下来一年，我打算持续学习后端与Agent开发，目标是能独立维护自己的项目。"
+            }
+          ],
+          "stale": false
+        }
+      ],
+      "decision_check": true,
+      "confirmed_memory_unchanged": true
+    },
+    {
+      "case": "temporary",
+      "question": "今天只剩90分钟，请安排一下今天的练习。",
+      "expected": "none",
+      "actual": "none",
+      "result": {
+        "status": "NO_SUGGESTION",
+        "diagnostics": {
+          "calls": 1,
+          "output_budget": 512,
+          "timeout_seconds": 20,
+          "input_tokens": 392,
+          "output_tokens": 33,
+          "total_tokens": 425,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {},
+          "seconds": 2.547
+        }
+      },
+      "candidates": [],
+      "decision_check": true,
+      "confirmed_memory_unchanged": true
+    },
+    {
+      "case": "quoted_document",
+      "question": "下面是一段文档示例，不是我的偏好：用户喜欢先看代码，不喜欢解释。",
+      "expected": "none",
+      "actual": "none",
+      "result": {
+        "status": "NO_SUGGESTION",
+        "diagnostics": {
+          "calls": 1,
+          "output_budget": 512,
+          "timeout_seconds": 20,
+          "input_tokens": 402,
+          "output_tokens": 32,
+          "total_tokens": 434,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {},
+          "seconds": 2.968
+        }
+      },
+      "candidates": [],
+      "decision_check": true,
+      "confirmed_memory_unchanged": true
+    },
+    {
+      "case": "uncertain",
+      "question": "如果我以后改做前端，可能会喜欢先看界面，现在还没决定。",
+      "expected": "none",
+      "actual": "none",
+      "result": {
+        "status": "NO_SUGGESTION",
+        "diagnostics": {
+          "calls": 1,
+          "output_budget": 512,
+          "timeout_seconds": 20,
+          "input_tokens": 398,
+          "output_tokens": 31,
+          "total_tokens": 429,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {},
+          "seconds": 2.797
+        }
+      },
+      "candidates": [],
+      "decision_check": true,
+      "confirmed_memory_unchanged": true
+    },
+    {
+      "case": "duplicate",
+      "question": "解释代码时，我喜欢先讲原理，再给代码。",
+      "expected": "none",
+      "actual": "none",
+      "result": {
+        "status": "NO_SUGGESTION",
+        "diagnostics": {
+          "calls": 1,
+          "output_budget": 512,
+          "timeout_seconds": 20,
+          "input_tokens": 452,
+          "output_tokens": 31,
+          "total_tokens": 483,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {},
+          "seconds": 2.906
+        }
+      },
+      "candidates": [],
+      "decision_check": true,
+      "confirmed_memory_unchanged": true
+    },
+    {
+      "case": "update",
+      "question": "我调整一下长期回答偏好：以后先给具体例子，再解释原理。",
+      "expected": "update",
+      "actual": "update",
+      "result": {
+        "status": "PROPOSED",
+        "diagnostics": {
+          "calls": 1,
+          "output_budget": 512,
+          "timeout_seconds": 20,
+          "input_tokens": 463,
+          "output_tokens": 49,
+          "total_tokens": 512,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {},
+          "seconds": 2.875
+        }
+      },
+      "candidates": [
+        {
+          "id": "d6e70ece0b1041a2ac22bf1abf6f3026",
+          "turn_id": "7039f0a38e2d4d6db481193694edd362",
+          "owner": "evaluation",
+          "chat": "eval",
+          "epoch": 1,
+          "key": "回答偏好",
+          "value": "先给具体例子，再解释原理。",
+          "reason": "用户明确调整长期回答偏好，与已有同名记忆值不同，建议更新。",
+          "fingerprint": "2129090ee1d455b2112a04be9a229a6e707a0e6d575afc17a7bec00878a2f1eb",
+          "target_id": "3659b9f446944f61be8d5b5739e6a796",
+          "expected_version": 1,
+          "old_value": "先讲原理，再给代码。",
+          "status": "PENDING",
+          "confirmed_value": null,
+          "sources": [
+            {
+              "evidence_ref": "user:current",
+              "quote": "我调整一下长期回答偏好：以后先给具体例子，再解释原理。"
+            }
+          ],
+          "stale": false
+        }
+      ],
+      "decision_check": true,
+      "confirmed_memory_unchanged": true
+    }
+  ],
+  "summary": {
+    "attempted": 8,
+    "decision_checks_passed": 8,
+    "confirmed_memory_unchanged": true,
+    "semantic_quality": "manual review required; no general accuracy claim"
+  },
+  "export": {
+    "date": "2026-10-30",
+    "source_hashes_verified": true,
+    "baseline_commit_note": "source_commit is baseline; source file fingerprints identify tested modified extraction code",
+    "pytest": {
+      "passed": 304,
+      "warnings": 1,
+      "seconds": 33.56
+    },
+    "usage": {
+      "known_input_tokens": 3309,
+      "known_output_tokens": 301,
+      "known_total_tokens": 3610,
+      "calls_with_usage": 8
+    },
+    "latency_seconds": {
+      "min": 2.547,
+      "median": 2.8905000000000003,
+      "max": 3.562
+    },
+    "manual_review": "017-memory-review.json"
+  }
+}

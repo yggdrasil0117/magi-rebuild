@@ -12,6 +12,7 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 <details id="settings"><summary>设置</summary>
 <p><small>首次使用，填写启动终端提供的本机服务凭据。凭据仅留在当前页面，刷新后需重新连接。</small></p>
 <label>本机服务凭据 <input id="token" type="password" autocomplete="off"></label><button id="connect">连接</button>
+<p><label><input id="autoMemorySuggestions" type="checkbox" checked> 自动提出记忆建议</label><small>每次回复最多额外分析一次；未经确认不会成为有效记忆。</small></p>
 <details><summary>开发者选项</summary>
 <label>会话 <input id="chat" value="study"></label><button id="load">加载历史</button>
 <label>时间预算 <input id="budget" type="number" min="1" max="10080" placeholder="分钟，可选"></label>
@@ -20,6 +21,7 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 </details></details>
 <p id="status" role="status" aria-live="polite">先在设置中连接本机服务，就可以开始聊天。</p>
 <p id="welcome" class="muted">可以聊日常问题，也可以说说你的目标、遇到的困难，或计划执行得怎么样。</p><div id="history"></div>
+<div id="memorySuggestions" aria-live="polite"></div>
 <p id="revisionNote" hidden></p>
 <label for="text">想聊些什么？</label><textarea id="text" placeholder="直接说出你的问题，或告诉我现在的想法…"></textarea>
 <select id="mode" hidden><option value="chat">日常助手</option><option value="deliberations">三人格审议</option></select>

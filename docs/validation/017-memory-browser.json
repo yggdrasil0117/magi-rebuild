@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-30",
+  "method": "real Edge via Playwright CLI; real API and SQLite; primary and extraction models are stubs",
+  "cloud_calls": 0,
+  "checks": {
+    "candidate_appears_without_manual_memory_form": true,
+    "old_value_and_source_shown": true,
+    "ignore_leaves_epoch1_unchanged": true,
+    "reload_restores_pending_without_new_model_run": true,
+    "edited_confirmation_updates_same_memory_to_v2": true,
+    "pause_allows_chat_without_new_extraction": true,
+    "pause_persists_in_local_browser": true,
+    "service_token_not_persisted": true
+  },
+  "turn_count": 3,
+  "run_count": 2,
+  "candidate_states": [
+    [
+      "DISMISSED",
+      null
+    ],
+    [
+      "CONFIRMED",
+      "解释技术问题时先给具体例子，再讲原理。"
+    ]
+  ],
+  "effective_memories": [
+    [
+      "回答偏好",
+      "解释技术问题时先给具体例子，再讲原理。",
+      2
+    ]
+  ],
+  "final_epoch": 2,
+  "operations": 5,
+  "seed_note": "three demo plan operations and one memory seed precede a single user-confirmed memory update",
+  "cleanup": "API processes 306732 and 309552 stopped, dedicated browser closed",
+  "limits": [
+    "no mobile-specific test",
+    "no live primary chat model in browser test",
+    "no API-process restart in browser; interruption recovery covered by offline tests"
+  ]
+}

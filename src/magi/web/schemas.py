@@ -48,3 +48,17 @@ class MemoryVersion(MemoryConfirmation):
 
 class MemoryUpdate(MemoryVersion):
     value: str = Field(min_length=1, max_length=4000)
+
+
+class MemorySuggestionConfirm(Request):
+    """候选编号已绑定固定操作ID；仅允许用户编辑内容并明确确认。"""
+
+    value: str = Field(min_length=1, max_length=4000)
+    confirmed: bool = Field(strict=True)
+
+    @field_validator("confirmed")
+    @classmethod
+    def require_confirmation(cls, value):
+        if not value:
+            raise ValueError("explicit confirmation required")
+        return value

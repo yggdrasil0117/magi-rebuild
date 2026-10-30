@@ -1,6 +1,7 @@
 import hashlib
 import json
 import sqlite3
+import time
 from dataclasses import asdict
 from datetime import datetime, timezone
 from threading import Lock
@@ -8,13 +9,16 @@ from uuid import uuid4
 
 from langchain_core.messages import AIMessage, HumanMessage
 
+from magi.council.generation import failure_details, timeout_diagnostics
 from magi.council.service import Candidate, Council, candidate_body, render
 from magi.harness.runtime import open_personal_session
 from magi.personal.context import ContextService
+from magi.personal.extraction import MemoryExtractor
 from magi.personal.memory import MemoryService
 from magi.personal.models import PersonalError
 from magi.personal.plans import PlanService
 from magi.personal.store import PersonalStore
+from magi.personal.suggestions import MemorySuggestions
 
 
 def digest(value):
@@ -33,7 +37,15 @@ class WebError(Exception):
 
 
 class WebService:
-    def __init__(self, settings, owner, *, council=None, session_factory=None):
+    def __init__(
+        self,
+        settings,
+        owner,
+        *,
+        council=None,
+        session_factory=None,
+        memory_extractor=None,
+    ):
         self.settings, self.owner = settings, owner
         self.store = PersonalStore(settings.business_db_path)
         self.plans = PlanService(self.store)
@@ -42,6 +54,61 @@ class WebService:
         self.gate = Lock()
         self.council = council or Council(settings)
         self.session_factory = session_factory or open_personal_session
+        self.suggestions = MemorySuggestions(self.store, owner)
+        self.memory_extractor = memory_extractor or MemoryExtractor(settings)
+        self.extraction_gate = Lock()
+
+    def propose_memory(self, turn_id):
+        """回答后的独立有界提取；失败不改原回答、不重放，模型等待不占聊天串行门。"""
+        turn = self.get_turn(turn_id)
+        if turn["status"] != "COMPLETED":
+            raise WebError("INVALID_INPUT", "只有已完成回复可提出记忆建议", 422)
+        if self.suggestions.run_status(turn_id)["status"] != "NOT_STARTED":
+            return self.suggestions.run_status(turn_id)
+        if not self.extraction_gate.acquire(blocking=False):
+            self.suggestions.skip(turn, "SKIPPED_BUSY")
+            return self.suggestions.run_status(turn_id)
+        try:
+            if not self.gate.acquire(blocking=False):
+                self.suggestions.skip(turn, "SKIPPED_BUSY")
+                return self.suggestions.run_status(turn_id)
+            try:
+                snapshot = self.suggestions.start(turn)
+            finally:
+                self.gate.release()
+            if snapshot is not None:
+                diagnostics = {"calls": 1}
+                started = time.monotonic()
+                try:
+                    candidate = self.memory_extractor.extract(snapshot, diagnostics)
+                    if time.monotonic() - started > min(
+                        20, self.settings.timeout_seconds
+                    ):
+                        raise TimeoutError("memory extraction deadline exceeded")
+                    diagnostics["seconds"] = round(time.monotonic() - started, 3)
+                    self.suggestions.finish(turn, snapshot, candidate, diagnostics)
+                except Exception as exc:
+                    diagnostics["error_code"], diagnostics["validation_errors"] = (
+                        failure_details(exc)
+                    )
+                    diagnostics["seconds"] = round(time.monotonic() - started, 3)
+                    if diagnostics["error_code"] == "TIMEOUT":
+                        diagnostics.update(timeout_diagnostics(exc))
+                    self.suggestions.fail(turn_id, diagnostics)
+            return self.suggestions.run_status(turn_id)
+        finally:
+            self.extraction_gate.release()
+
+    def decide_memory_suggestion(self, suggestion_id, value=None):
+        """确认或忽略候选与已有写操作共用串行门；确认才推进有效上下文。"""
+        if not self.gate.acquire(blocking=False):
+            raise WebError("BUSY", "正在处理其他任务，请稍后确认记忆", 429)
+        try:
+            if value is None:
+                return self.suggestions.dismiss(suggestion_id)
+            return self.suggestions.confirm(suggestion_id, value)
+        finally:
+            self.gate.release()
 
     def change_memory(self, action, command, memory_id=None):
         """显式网页操作复用记忆事务，与审议共享串行门，避免生成中途改变背景。
@@ -85,6 +152,7 @@ class WebService:
             self.gate.release()
 
     def recover(self):
+        self.suggestions.recover()
         with self.store.transaction() as db:
             db.execute(
                 "UPDATE web_turns SET status='INTERRUPTED',text='服务中断；请新发消息，不自动重跑。' WHERE status='RUNNING'"

@@ -1,5 +1,11 @@
-// 独立的按需记忆管理面板；共享app.js的认证请求，不自动从聊天提取记忆。
+// 独立管理面板与待确认候选；共享认证，模型建议不会自行成为有效记忆。
 const memoryUI = {item: null, pending: null, busy: false, uncertain: false};
+let suggestionReadTicket = 0;
+// 仅保存自动分析开关，不保存凭据或记忆内容；浏览器禁用存储时仍可本页使用。
+try { $('autoMemorySuggestions').checked = localStorage.getItem('magi.autoMemorySuggestions') !== 'off'; } catch (e) {}
+$('autoMemorySuggestions').onchange = () => {
+  try { localStorage.setItem('magi.autoMemorySuggestions', $('autoMemorySuggestions').checked ? 'on' : 'off'); } catch (e) {}
+};
 
 // 面板按需打开，不把记忆表单常驻在聊天界面。
 function showMemories(open) {
@@ -89,6 +95,7 @@ async function confirmMemory() {
     memoryUI.uncertain = false;
     $('memoryReview').hidden = true;
     await loadMemories();
+    loadMemorySuggestions($('chat').value);
     $('memoryStatus').textContent += result.receipt.duplicate ? ' 原请求已处理，列表显示当前有效状态。' : ' 更改已保存，后续交流将重新加载有效记忆。';
     $('status').textContent = '个人记忆已更新，未保存的旧候选请重新生成。';
   } catch (e) {
@@ -109,3 +116,56 @@ $('newMemory').onclick = () => beginMemoryEdit();
 $('previewMemory').onclick = () => previewMemory(memoryUI.item ? 'update' : 'add');
 $('confirmMemory').onclick = confirmMemory;
 $('cancelMemoryEdit').onclick = $('cancelMemoryReview').onclick = cancelMemory;
+
+// 仅恢复当前会话、当前背景下的待确认候选。旧聊天的回调不能覆盖新会话。
+async function loadMemorySuggestions(chat) {
+  if (chat !== $('chat').value) return;
+  const ticket = ++suggestionReadTicket;
+  try {
+    const items = await api('/v1/chats/' + encodeURIComponent(chat) + '/memory-suggestions');
+    if (chat !== $('chat').value || ticket !== suggestionReadTicket) return;
+    $('memorySuggestions').replaceChildren();
+    for (const item of items) {
+      const card = document.createElement('article'), title = document.createElement('h3');
+      title.textContent = item.target_id ? '要更新这条记忆吗？' : '要记住这个信息吗？';
+      const label = document.createElement('p');
+      label.textContent = item.key + ' · ' + item.reason;
+      const original = document.createElement('p');
+      original.textContent = item.target_id ? '原记忆：' + item.old_value : '不会自动生效，你可以修改内容后再确认。';
+      original.textContent += '\n确认会更新后续交流背景，旧背景下的其他候选需重新生成。';
+      const value = document.createElement('textarea');
+      value.setAttribute('aria-label', '记忆建议内容');
+      value.maxLength = 4000;
+      value.value = item.confirmed_value === null ? item.value : item.confirmed_value;
+      value.disabled = item.confirmed_value !== null;
+      const sources = document.createElement('pre');
+      sources.textContent = '来自你的表达：\n' + item.sources.map(s => s.quote).join('\n');
+      const confirm = document.createElement('button'), dismiss = document.createElement('button'), status = document.createElement('p');
+      confirm.textContent = item.target_id ? '确认替换记忆' : '确认记住';
+      dismiss.textContent = '忽略';
+      let frozenValue = item.confirmed_value, busy = false;
+      // 一次候选的确认值首次发送后冻结，失败重试不能替换成不同内容。
+      async function decide(accept) {
+        if (busy) return;
+        if (accept && !value.value.trim()) { status.textContent = '请填写要记住的内容。'; return; }
+        busy = true;
+        confirm.disabled = dismiss.disabled = true;
+        if (accept && frozenValue === null) frozenValue = value.value.trim();
+        if (accept) value.disabled = true;
+        try {
+          await api('/v1/memory-suggestions/' + item.id + (accept ? '/confirm' : '/dismiss'), accept ? {value: frozenValue, confirmed: true} : {});
+          await loadMemorySuggestions(chat);
+          if (accept) {
+            if (!$('memoriesPanel').hidden) await loadMemories();
+            $('status').textContent = '记忆已保存，后续交流会使用；旧背景下的其他候选需重新生成。';
+          }
+        } catch (e) { status.textContent = e.message + '；可重试原操作，或忽略后重新交流。'; }
+        finally { busy = false; confirm.disabled = dismiss.disabled = false; }
+      }
+      confirm.onclick = () => decide(true);
+      dismiss.onclick = () => decide(false);
+      card.append(title, label, original, value, sources, confirm, dismiss, status);
+      $('memorySuggestions').append(card);
+    }
+  } catch (e) { /* 可选候选读取失败不覆盖正常聊天回复；服务端保留提取状态。 */ }
+}

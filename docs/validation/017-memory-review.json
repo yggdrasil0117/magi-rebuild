@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-30",
+  "method": "manual review of eight fixed cases; decision checks and content fidelity graded separately",
+  "summary": {"decision_checks_passed": 8, "candidate_content_faithful": 3, "candidate_needs_edit": 1, "appropriate_no_candidate": 4},
+  "reviews": [
+    {"case":"preference","verdict":"faithful_candidate","reason":"保留先讲原理、再给代码的代码解释偏好；只提出候选，无自动保存。"},
+    {"case":"background","verdict":"faithful_candidate","reason":"计算机专业研究生与当前用户原话一致，后续身份变化仍需更新。"},
+    {"case":"goal","verdict":"needs_edit","reason":"正确识别长期目标，但value遗漏了用户明确的一年期限，reason中虽保留一年，实际记忆内容仍应由用户补上期限。"},
+    {"case":"temporary","verdict":"appropriate_none","reason":"今天90分钟是临时任务约束，没有提为长期记忆。"},
+    {"case":"quoted_document","verdict":"appropriate_none","reason":"未把文档示例中的第三方偏好当作用户自己的偏好。"},
+    {"case":"uncertain","verdict":"appropriate_none","reason":"条件性、未确定的想法没有保存为稳定背景。"},
+    {"case":"duplicate","verdict":"appropriate_none","reason":"已有同义偏好时未提出重复候选。"},
+    {"case":"update","verdict":"faithful_candidate","reason":"复用回答偏好名称，绑定旧记忆与版本，建议先举例后解释，未直接覆盖。"}
+  ],
+  "limits": ["single small batch, not general accuracy", "all four proposed candidates remain unconfirmed", "no semantic-equivalence guarantee for differently named memories", "no sensitive-data or adversarial-corpus certification"]
+}

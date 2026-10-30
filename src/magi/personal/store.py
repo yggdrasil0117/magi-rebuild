@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 
 class ClosingConnection(sqlite3.Connection):
@@ -27,7 +27,11 @@ class PersonalStore:
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
         connection.execute("PRAGMA busy_timeout = 5000")
-        self._migrate(connection)
+        try:
+            self._migrate(connection)
+        except BaseException:
+            connection.close()  # 关闭失败迁移的连接，回滚仍未提交的新增结构。
+            raise
         return connection
 
     @staticmethod
@@ -161,6 +165,38 @@ class PersonalStore:
                     created_at TEXT NOT NULL
                 );
                 UPDATE schema_meta SET version=3;
+                """
+            )
+        if version < 4:
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE memory_suggestion_runs (
+                    turn_id TEXT PRIMARY KEY REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    diagnostics_json TEXT NOT NULL DEFAULT '{}'
+                );
+                CREATE TABLE memory_suggestions (
+                    id TEXT PRIMARY KEY,
+                    turn_id TEXT NOT NULL UNIQUE REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    key TEXT NOT NULL,
+                    value TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    sources_json TEXT NOT NULL,
+                    fingerprint TEXT NOT NULL,
+                    target_id TEXT,
+                    expected_version INTEGER,
+                    old_value TEXT,
+                    status TEXT NOT NULL CHECK(status IN ('PENDING','DISMISSED','CONFIRMED')),
+                    confirmed_value TEXT
+                );
+                CREATE INDEX memory_suggestions_owner ON memory_suggestions(owner,chat,status);
+                UPDATE schema_meta SET version=4;
+                COMMIT;
                 """
             )
         connection.commit()
