@@ -1,0 +1,18 @@
+{
+  "scope": "manual review of the three fixed real-model requests; separate from flow acceptance",
+  "daily": {
+    "result": "needs_attention",
+    "notes": ["用户要求简短回应、不制定计划，回复仍主动给出时间分段。", "分段与额外休息的关系不够清楚，不将其当成已验证时间安排。"]
+  },
+  "create_v1": {
+    "result": "usable_with_review",
+    "program_checks": "步骤总计120分钟，保留20分钟休息，来源摘录可定位。",
+    "notes": ["环境未知、假设和待确认事项有显示。", "新建候选理由误称日常聊天建议为旧计划；实际程序仍是新建计划。", "环境失败后的缩减取舍仍需用户选择。"]
+  },
+  "revise_v2": {
+    "result": "needs_user_tradeoff_confirmation",
+    "program_checks": "步骤总计60分钟，保留10分钟休息，绑定既有计划v1。",
+    "notes": ["明确说明缩减任务并允许记录验证缺口。", "将本机可调用目标降为代码保存和语法检查，放弃测试；不能据此声称接口已可用。", "环境失败则跳过编码，与待确认事项中编码是否执行未知的表述需进一步澄清。"]
+  },
+  "conclusion": "流程及持久化验收通过，内容仍需人工复核；未改提示重跑或删除不理想回复。"
+}
