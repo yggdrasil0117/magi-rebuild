@@ -8,6 +8,7 @@
 # Local conversations, checkpoints and execution events
 .magi/
 output/playwright/
+output/approval*/
 .playwright-cli/
 
 # Python and development tool caches

@@ -1,0 +1,287 @@
+{
+  "mode": "scripted model; real Deep Agents + SQLite + filesystem; separate process per command",
+  "versions": {
+    "deepagents": "0.7.32",
+    "langgraph": "1.2.18",
+    "langchain": "1.4.7",
+    "langgraph-checkpoint-sqlite": "3.1.2"
+  },
+  "commands": [
+    {
+      "case": "approve",
+      "action": "init",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "id": "8527f1bc2fe34f228c3468c934216f0b",
+        "payload_hash": "7468eee0685334f263e6226cdb755efacdf5315f2d676c6bbe898a14d7140b61",
+        "status": "PREVIEW"
+      }
+    },
+    {
+      "case": "approve",
+      "action": "start",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "phase": "PENDING",
+        "thread_id": "approval-347c20e242924a7c4b3a5f782642fdb5287d350c2821c6b3",
+        "document_id": "8527f1bc2fe34f228c3468c934216f0b",
+        "payload_hash": "7468eee0685334f263e6226cdb755efacdf5315f2d676c6bbe898a14d7140b61",
+        "document_status": "PREVIEW",
+        "interrupt_id": "c4aa70af8c96c56c285eec722394b2bc",
+        "allowed_decisions": [
+          "approve",
+          "reject"
+        ]
+      }
+    },
+    {
+      "case": "approve",
+      "action": "status",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "phase": "PENDING",
+        "thread_id": "approval-347c20e242924a7c4b3a5f782642fdb5287d350c2821c6b3",
+        "document_id": "8527f1bc2fe34f228c3468c934216f0b",
+        "payload_hash": "7468eee0685334f263e6226cdb755efacdf5315f2d676c6bbe898a14d7140b61",
+        "document_status": "PREVIEW",
+        "interrupt_id": "c4aa70af8c96c56c285eec722394b2bc",
+        "allowed_decisions": [
+          "approve",
+          "reject"
+        ]
+      }
+    },
+    {
+      "case": "approve",
+      "action": "approve",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "phase": "COMPLETED",
+        "thread_id": "approval-347c20e242924a7c4b3a5f782642fdb5287d350c2821c6b3",
+        "document_id": "8527f1bc2fe34f228c3468c934216f0b",
+        "payload_hash": "7468eee0685334f263e6226cdb755efacdf5315f2d676c6bbe898a14d7140b61",
+        "document_status": "CREATED"
+      }
+    },
+    {
+      "case": "reject",
+      "action": "init",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "id": "61bf7b5eaac0458fb9e0aaef500ae1f5",
+        "payload_hash": "9ca7212bb708611ca421a5e97b9a99fe32549cc89843dc46a1524737740cb96a",
+        "status": "PREVIEW"
+      }
+    },
+    {
+      "case": "reject",
+      "action": "start",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "phase": "PENDING",
+        "thread_id": "approval-7e19db91e4273d9a5e791245c889da5d90cdcea7dd060519",
+        "document_id": "61bf7b5eaac0458fb9e0aaef500ae1f5",
+        "payload_hash": "9ca7212bb708611ca421a5e97b9a99fe32549cc89843dc46a1524737740cb96a",
+        "document_status": "PREVIEW",
+        "interrupt_id": "4a2bb371e286e4ee56b032f32e9d9df5",
+        "allowed_decisions": [
+          "approve",
+          "reject"
+        ]
+      }
+    },
+    {
+      "case": "reject",
+      "action": "status",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "phase": "PENDING",
+        "thread_id": "approval-7e19db91e4273d9a5e791245c889da5d90cdcea7dd060519",
+        "document_id": "61bf7b5eaac0458fb9e0aaef500ae1f5",
+        "payload_hash": "9ca7212bb708611ca421a5e97b9a99fe32549cc89843dc46a1524737740cb96a",
+        "document_status": "PREVIEW",
+        "interrupt_id": "4a2bb371e286e4ee56b032f32e9d9df5",
+        "allowed_decisions": [
+          "approve",
+          "reject"
+        ]
+      }
+    },
+    {
+      "case": "reject",
+      "action": "reject",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "phase": "COMPLETED",
+        "thread_id": "approval-7e19db91e4273d9a5e791245c889da5d90cdcea7dd060519",
+        "document_id": "61bf7b5eaac0458fb9e0aaef500ae1f5",
+        "payload_hash": "9ca7212bb708611ca421a5e97b9a99fe32549cc89843dc46a1524737740cb96a",
+        "document_status": "PREVIEW"
+      }
+    },
+    {
+      "case": "stale_and_duplicate",
+      "action": "init",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "id": "45b01b47ae3c4b49b07fff1f73c06ff3",
+        "payload_hash": "b049be95cd469cb8ed9acedb8a5647aaa45776e667d8eb75ea18c1125a793b58",
+        "status": "PREVIEW"
+      }
+    },
+    {
+      "case": "stale_and_duplicate",
+      "action": "start",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "phase": "PENDING",
+        "thread_id": "approval-7f2269160b19fbd63aeaee9e10787c8f1981cd678a09d008",
+        "document_id": "45b01b47ae3c4b49b07fff1f73c06ff3",
+        "payload_hash": "b049be95cd469cb8ed9acedb8a5647aaa45776e667d8eb75ea18c1125a793b58",
+        "document_status": "PREVIEW",
+        "interrupt_id": "d296fd23efae8ddeee89a406c19224bc",
+        "allowed_decisions": [
+          "approve",
+          "reject"
+        ]
+      }
+    },
+    {
+      "case": "stale_and_duplicate",
+      "action": "status",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "phase": "PENDING",
+        "thread_id": "approval-7f2269160b19fbd63aeaee9e10787c8f1981cd678a09d008",
+        "document_id": "45b01b47ae3c4b49b07fff1f73c06ff3",
+        "payload_hash": "b049be95cd469cb8ed9acedb8a5647aaa45776e667d8eb75ea18c1125a793b58",
+        "document_status": "PREVIEW",
+        "interrupt_id": "d296fd23efae8ddeee89a406c19224bc",
+        "allowed_decisions": [
+          "approve",
+          "reject"
+        ]
+      }
+    },
+    {
+      "case": "stale_and_duplicate",
+      "action": "approve",
+      "returncode": 1,
+      "expected_returncode": 1,
+      "result": {
+        "error_code": "STALE_INTERRUPT",
+        "error_type": "ApprovalError"
+      }
+    },
+    {
+      "case": "stale_and_duplicate",
+      "action": "status",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "phase": "PENDING",
+        "thread_id": "approval-7f2269160b19fbd63aeaee9e10787c8f1981cd678a09d008",
+        "document_id": "45b01b47ae3c4b49b07fff1f73c06ff3",
+        "payload_hash": "b049be95cd469cb8ed9acedb8a5647aaa45776e667d8eb75ea18c1125a793b58",
+        "document_status": "PREVIEW",
+        "interrupt_id": "d296fd23efae8ddeee89a406c19224bc",
+        "allowed_decisions": [
+          "approve",
+          "reject"
+        ]
+      }
+    },
+    {
+      "case": "stale_and_duplicate",
+      "action": "approve",
+      "returncode": 0,
+      "expected_returncode": 0,
+      "result": {
+        "phase": "COMPLETED",
+        "thread_id": "approval-7f2269160b19fbd63aeaee9e10787c8f1981cd678a09d008",
+        "document_id": "45b01b47ae3c4b49b07fff1f73c06ff3",
+        "payload_hash": "b049be95cd469cb8ed9acedb8a5647aaa45776e667d8eb75ea18c1125a793b58",
+        "document_status": "CREATED"
+      }
+    },
+    {
+      "case": "stale_and_duplicate",
+      "action": "approve",
+      "returncode": 1,
+      "expected_returncode": 1,
+      "result": {
+        "error_code": "NO_PENDING_APPROVAL",
+        "error_type": "ApprovalError"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "case": "approve",
+      "pending_restored_in_new_process": true,
+      "status": {
+        "phase": "COMPLETED",
+        "thread_id": "approval-347c20e242924a7c4b3a5f782642fdb5287d350c2821c6b3",
+        "document_id": "8527f1bc2fe34f228c3468c934216f0b",
+        "payload_hash": "7468eee0685334f263e6226cdb755efacdf5315f2d676c6bbe898a14d7140b61",
+        "document_status": "CREATED"
+      },
+      "file_count": 1,
+      "sha256": "7468eee0685334f263e6226cdb755efacdf5315f2d676c6bbe898a14d7140b61",
+      "passed": true
+    },
+    {
+      "case": "reject",
+      "pending_restored_in_new_process": true,
+      "status": {
+        "phase": "COMPLETED",
+        "thread_id": "approval-7e19db91e4273d9a5e791245c889da5d90cdcea7dd060519",
+        "document_id": "61bf7b5eaac0458fb9e0aaef500ae1f5",
+        "payload_hash": "9ca7212bb708611ca421a5e97b9a99fe32549cc89843dc46a1524737740cb96a",
+        "document_status": "PREVIEW"
+      },
+      "file_count": 0,
+      "sha256": null,
+      "passed": true
+    },
+    {
+      "case": "stale_and_duplicate",
+      "pending_restored_in_new_process": true,
+      "status": {
+        "phase": "COMPLETED",
+        "thread_id": "approval-7f2269160b19fbd63aeaee9e10787c8f1981cd678a09d008",
+        "document_id": "45b01b47ae3c4b49b07fff1f73c06ff3",
+        "payload_hash": "b049be95cd469cb8ed9acedb8a5647aaa45776e667d8eb75ea18c1125a793b58",
+        "document_status": "CREATED"
+      },
+      "file_count": 1,
+      "sha256": "b049be95cd469cb8ed9acedb8a5647aaa45776e667d8eb75ea18c1125a793b58",
+      "passed": true
+    }
+  ],
+  "source_sha256": {
+    "src/magi/harness/runtime.py": "ce5eb2400fc79d517fb5186742120122027431aa0e03a9a52779368de566c088",
+    "src/magi/harness/approval_trial.py": "d5623f8b3b6ffbaacbfbfe4e9cf29126f97d173bfcd9d1a4ba273d5cf1bb4d5b",
+    "scripts/probe_approval.py": "3a8da6edfeb59841f7c05b432b871d421ae3dcbecf1dc003c1de0fd288a4975a",
+    "scripts/evaluate_approval.py": "8a6e6c06270cd63f42b92392b606b60b101cf16094701b27bf0bb13c018fb86c"
+  },
+  "baseline_commit": "8a43485a29f4db8717e30eeb3be5e4f45cf35809",
+  "post_evaluation_change": "Added model=None rejection after process evaluation; all fixed process cases supply a scripted model. Final full regression covers the additional rejection.",
+  "final_source_sha256": {
+    "src/magi/harness/runtime.py": "ce5eb2400fc79d517fb5186742120122027431aa0e03a9a52779368de566c088",
+    "src/magi/harness/approval_trial.py": "d16f6a97f9f3070b2141e369aec5ac7edd5902423cc838521867bce3067bc987",
+    "scripts/probe_approval.py": "3a8da6edfeb59841f7c05b432b871d421ae3dcbecf1dc003c1de0fd288a4975a",
+    "scripts/evaluate_approval.py": "8a6e6c06270cd63f42b92392b606b60b101cf16094701b27bf0bb13c018fb86c"
+  }
+}

@@ -292,8 +292,12 @@ def open_session(
     model=None,
     system_prompt=None,
     extra_tools=(),
+    interrupt_on=None,
 ):
-    """One local CLI session at a time; completed turns can resume after restart."""
+    """创建有界会话；可选审批配置仅由可信宿主提供，默认入口不启用中断。
+
+    启用interrupt_on后应由适配层处理暂停与恢复，不能把中断当成ask已完整回答。
+    """
     if not isinstance(session_id, str) or not re.fullmatch(
         r"[A-Za-z0-9_-]{1,80}", session_id
     ):
@@ -336,6 +340,7 @@ def open_session(
                 AllowedToolBoundary(events, settings, allowed_tools),
             ],
             checkpointer=saver,
+            interrupt_on=interrupt_on,
         )
         yield HarnessSession(agent, session_id, events)
 

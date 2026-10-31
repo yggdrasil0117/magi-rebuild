@@ -1,0 +1,13 @@
+{
+  "kind": "early manual compatibility smoke; fixed model; separate CLI processes",
+  "document_id": "b6ce15ff98b044f8af4596643e3ad371",
+  "steps": [
+    "init returned PREVIEW",
+    "start returned PENDING with interrupt_id",
+    "verified no task-documents directory before approval",
+    "new approve process returned COMPLETED + CREATED"
+  ],
+  "interrupt_id": "1188a6914a84fb374970a209aa95485b",
+  "final_file_sha256": "fc95453b0d8ad694694e22e913502041b3a59f931b1e1cf5771855c9eb1b7b8d",
+  "real_model_calls": 0
+}
