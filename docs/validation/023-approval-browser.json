@@ -1,0 +1,105 @@
+{
+  "round": 23,
+  "mode": "real Edge + FastAPI + LangGraph interrupts + SQLite + filesystem; no model calls",
+  "phases": [
+    {
+      "phase": "first_pending",
+      "rows": [
+        {
+          "id": "c18121e93ddf4070809d3399f81fa0b9",
+          "status": "PREVIEW",
+          "interrupt_id": "3aaf2ac5a8b3597e6a77c4cd7aa742d9",
+          "decision": null,
+          "payload_hash": "1ca40527b5eb4547c671f5d96612a795148fe7b61c42a211935179edcbf04c57"
+        }
+      ],
+      "file_count": 0
+    },
+    {
+      "phase": "rejected_persists_and_new_pending",
+      "rows": [
+        {
+          "id": "c18121e93ddf4070809d3399f81fa0b9",
+          "status": "PREVIEW",
+          "interrupt_id": "3aaf2ac5a8b3597e6a77c4cd7aa742d9",
+          "decision": "reject",
+          "payload_hash": "1ca40527b5eb4547c671f5d96612a795148fe7b61c42a211935179edcbf04c57"
+        },
+        {
+          "id": "801286f20feb46cda26793b0900a2c8d",
+          "status": "PREVIEW",
+          "interrupt_id": "08f8c2a318940dc669043af78cb55426",
+          "decision": null,
+          "payload_hash": "1ca40527b5eb4547c671f5d96612a795148fe7b61c42a211935179edcbf04c57"
+        }
+      ],
+      "file_count": 0
+    },
+    {
+      "phase": "after_api_process_restart",
+      "rows": [
+        {
+          "id": "c18121e93ddf4070809d3399f81fa0b9",
+          "status": "PREVIEW",
+          "interrupt_id": "3aaf2ac5a8b3597e6a77c4cd7aa742d9",
+          "decision": "reject",
+          "payload_hash": "1ca40527b5eb4547c671f5d96612a795148fe7b61c42a211935179edcbf04c57"
+        },
+        {
+          "id": "801286f20feb46cda26793b0900a2c8d",
+          "status": "PREVIEW",
+          "interrupt_id": "08f8c2a318940dc669043af78cb55426",
+          "decision": null,
+          "payload_hash": "1ca40527b5eb4547c671f5d96612a795148fe7b61c42a211935179edcbf04c57"
+        }
+      ],
+      "file_count": 0
+    },
+    {
+      "phase": "approved_after_restart_and_repeated_confirmation",
+      "rows": [
+        {
+          "id": "c18121e93ddf4070809d3399f81fa0b9",
+          "status": "PREVIEW",
+          "interrupt_id": "3aaf2ac5a8b3597e6a77c4cd7aa742d9",
+          "decision": "reject",
+          "payload_hash": "1ca40527b5eb4547c671f5d96612a795148fe7b61c42a211935179edcbf04c57"
+        },
+        {
+          "id": "801286f20feb46cda26793b0900a2c8d",
+          "status": "CREATED",
+          "interrupt_id": "08f8c2a318940dc669043af78cb55426",
+          "decision": "approve",
+          "payload_hash": "1ca40527b5eb4547c671f5d96612a795148fe7b61c42a211935179edcbf04c57"
+        }
+      ],
+      "file_count": 1
+    }
+  ],
+  "initial_ui_issue": "Prepare completion left approval buttons disabled; fixed unlock logic, reloaded, rejected first preview and verified enabled buttons on fresh preview.",
+  "real_model_calls": 0,
+  "context_epoch": 0,
+  "schema_version": 7,
+  "api_process_restart": true,
+  "limits": [
+    "single worker; no distributed concurrency test",
+    "no mobile or real power-loss test"
+  ],
+  "checkpoint_threads": 2,
+  "source_sha256": {
+    "src/magi/personal/approvals.py": "bc61dd7fb0aadce3b93bc23c70ceacfe0b89a2b8971d63b94f0762bb87feca14",
+    "src/magi/web/service.py": "8c42f2e26d537e32e75685688f4fb4dcff3bc4410f3bde446fe11a72d5d97c5a",
+    "src/magi/web/app.py": "5dec03852e9ef0789ca83dd8c147c8a1b895ac1845635f2e20dae17583f92e5a",
+    "src/magi/web/app.js": "a4771574cd57696cee3f7a15de61149feb037848320455c5929057a9d3effdfc",
+    "src/magi/web/document_tools.py": "9b21b197515ccfb747b3d17f3a5438f1deacbd77111a54a072c7b2ca88b753b0"
+  },
+  "baseline_commit": "c188ccdab1773f1e2a077bd703c0667539a364fd",
+  "final_source_sha256": {
+    "src/magi/personal/approvals.py": "bc61dd7fb0aadce3b93bc23c70ceacfe0b89a2b8971d63b94f0762bb87feca14",
+    "src/magi/web/service.py": "830548db085c961e11b2f338b8494744c96d3cea6e7a0e0d5106f5c73527818b",
+    "src/magi/web/app.py": "5dec03852e9ef0789ca83dd8c147c8a1b895ac1845635f2e20dae17583f92e5a",
+    "src/magi/web/app.js": "a4771574cd57696cee3f7a15de61149feb037848320455c5929057a9d3effdfc",
+    "src/magi/web/document_tools.py": "9b21b197515ccfb747b3d17f3a5438f1deacbd77111a54a072c7b2ca88b753b0"
+  },
+  "post_validation_change": "Only clarified Python docstrings for persistent failure state and legacy-compatible decision fields; behavior unchanged."
+}

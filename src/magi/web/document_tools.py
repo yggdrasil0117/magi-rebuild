@@ -15,13 +15,13 @@ class DocumentArguments(BaseModel):
     version: int = Field(ge=1, strict=True)
 
 
-def build_document_tool(documents, turn_id):
+def build_document_tool(documents, turn_id, *, prepare=None):
     """服务端闭包绑定owner与轮次；同轮同版本使用固定请求编号去重。"""
 
     def magi_prepare_task_document(plan_id: str, version: int) -> str:
         """只准备可恢复的工作单预览，返回简短真实元数据，不创建最终文件。"""
         signature = hashlib.sha256(json.dumps([plan_id, version]).encode()).hexdigest()
-        result = documents.preview(
+        result = (prepare or documents.preview)(
             plan_id,
             version,
             "tool:" + turn_id + ":" + signature,

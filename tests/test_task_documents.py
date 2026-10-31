@@ -189,8 +189,9 @@ def test_authenticated_api_requires_explicit_confirmation(setup):
 def test_schema4_upgrade_preserves_plan(setup):
     _, service, plan_id = setup
     with service.store.transaction() as db:
+        db.execute("DROP TABLE document_approvals")
         db.execute("DROP TABLE task_documents")
         db.execute("UPDATE schema_meta SET version=4")
     assert service.plans.get(plan_id).body == "实现接口；完成条件：响应符合约定。"
     with service.store.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 6
+        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 7

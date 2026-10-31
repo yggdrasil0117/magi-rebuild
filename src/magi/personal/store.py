@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 
 class ClosingConnection(sqlite3.Connection):
@@ -227,6 +227,22 @@ class PersonalStore:
                 ALTER TABLE task_documents ADD COLUMN source_turn_id TEXT REFERENCES web_turns(id);
                 CREATE INDEX task_documents_turn ON task_documents(owner,source_turn_id);
                 UPDATE schema_meta SET version=6;
+                COMMIT;
+                """
+            )
+        if version < 7:
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE document_approvals (
+                    document_id TEXT PRIMARY KEY REFERENCES task_documents(id),
+                    owner TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    interrupt_id TEXT,
+                    decision TEXT CHECK(decision IN ('approve','reject')),
+                    error_code TEXT
+                );
+                UPDATE schema_meta SET version=7;
                 COMMIT;
                 """
             )

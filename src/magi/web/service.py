@@ -12,6 +12,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from magi.council.generation import failure_details, timeout_diagnostics
 from magi.council.service import Candidate, Council, candidate_body, render
 from magi.harness.runtime import open_personal_session
+from magi.personal.approvals import DocumentApprovals
 from magi.personal.context import ContextService
 from magi.personal.documents import TaskDocuments
 from magi.personal.extraction import MemoryExtractor
@@ -60,12 +61,37 @@ class WebService:
         self.memory_extractor = memory_extractor or MemoryExtractor(settings)
         self.extraction_gate = Lock()
         self.documents = TaskDocuments(self.store, owner)
+        self.approvals = DocumentApprovals(self.documents)
+
+    def document_view(self, document_id):
+        """将持久审批状态附在预览上，GET只读取，不恢复任何执行节点。"""
+        return {
+            **self.documents.get(document_id),
+            "approval": self.approvals.status(document_id),
+        }
+
+    def prepare_document(self, *args, **kwargs):
+        """调用方已持串行门；手动和模型准备预览都初始化同一框架待审流程。"""
+        saved = self.documents.preview(*args, **kwargs)
+        self.approvals.prepare(saved["id"])
+        return self.document_view(saved["id"])
 
     def document_action(self, action, *args):
-        """本机文件操作与其他业务修改串行；I/O失败保持可重试状态，不伪造成功。"""
+        """文件操作与业务修改串行；失败明确报告，是否重试由持久审批状态决定。"""
         with self.gate:
             try:
-                return getattr(self.documents, action)(*args)
+                if action not in {"preview", "confirm", "reject"}:
+                    raise WebError("INVALID_INPUT", "未知工作单操作", 422)
+                if action == "preview":
+                    return self.prepare_document(*args)
+                document_id, payload_hash, *extra = args
+                result = self.approvals.decide(
+                    document_id,
+                    payload_hash,
+                    "approve" if action == "confirm" else "reject",
+                    *extra,
+                )
+                return {**result, "approval": self.approvals.status(document_id)}
             except OSError as exc:
                 raise WebError(
                     "DOCUMENT_IO_ERROR", "文件操作未完成，请检查输出目录后重试", 409
@@ -308,7 +334,9 @@ class WebService:
                 options = {}
                 if self.session_factory is open_personal_session:
                     options["extra_tools"] = [
-                        build_document_tool(self.documents, turn_id)
+                        build_document_tool(
+                            self.documents, turn_id, prepare=self.prepare_document
+                        )
                     ]
                 with self.session_factory(self.settings, logical, **options) as session:
                     text = session.ask(request.user_text)

@@ -72,10 +72,11 @@ class DocumentPreview(Request):
 
 
 class DocumentConfirm(Request):
-    """严格确认布尔值和预览摘要共同约束文件创建。"""
+    """明确批准或拒绝，绑定冻结摘要；中断编号可空以兼容旧客户端。"""
 
     confirmed: bool = Field(strict=True)
     payload_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    interrupt_id: str | None = Field(default=None, min_length=1, max_length=120)
 
     @field_validator("confirmed")
     @classmethod

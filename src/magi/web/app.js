@@ -61,7 +61,7 @@ function show(turn) {
   // 按真实数据库产物显示入口；回答中出现“已生成”不构成工具执行证据。
   for (const document of turn.documents || []) {
     const button = window.document.createElement('button');
-    button.textContent = document.status === 'CREATED' ? '查看工作单创建记录 · v' + document.version : '查看待确认工作单 · v' + document.version;
+    button.textContent = document.status === 'CREATED' ? '查看工作单创建记录 · v' + document.version : '查看工作单 · v' + document.version;
     button.onclick = async () => {
       button.disabled = true;
       try {
@@ -202,8 +202,14 @@ function showTaskDocument(document) {
   $('documentPanel').hidden = false;
   $('documentPath').textContent = '输入计划版本：v' + document.version + '；输出位置：' + document.path;
   $('documentContent').textContent = document.content;
-  $('confirmDocument').textContent = document.status === 'CREATED' ? '核对已创建文件' : '确认在本机创建文件';
-  $('documentStatus').textContent = document.status === 'CREATED' ? '记录显示此前已创建；再次确认可核对文件，外部编辑不会被覆盖。' : '尚未创建文件，请核对预览。';
+  const state = document.approval?.status || (document.status === 'CREATED' ? 'CREATED' : 'NOT_STARTED');
+  $('confirmDocument').textContent = state === 'CREATED' ? '核对已创建文件' : state === 'APPROVED' ? '继续已批准操作' : '批准并创建文件';
+  $('confirmDocument').disabled = documentBusy || ['REJECTED', 'BLOCKED'].includes(state);
+  $('rejectDocument').hidden = ['CREATED', 'REJECTED', 'BLOCKED', 'APPROVED'].includes(state);
+  $('rejectDocument').disabled = documentBusy;
+  $('prepareDocument').textContent = ['REJECTED', 'BLOCKED'].includes(state) ? '准备新工作单' : '准备任务工作单';
+  if (['REJECTED', 'BLOCKED'].includes(state)) documentRequest = null;
+  $('documentStatus').textContent = state === 'CREATED' ? '记录显示此前已创建；再次确认可核对文件，外部编辑不会被覆盖。' : state === 'REJECTED' ? '本次创建已拒绝，未创建文件。需要时可准备一份新工作单。' : state === 'BLOCKED' ? '执行受阻，不自动重放。请检查实际文件状态，或准备新预览。' : state === 'APPROVED' ? '批准已记录，执行尚未确认完成。点击继续核对或恢复。' : state === 'NOT_STARTED' ? '这是一份旧预览，批准或拒绝时会初始化持久审批流程，尚未创建文件。' : '审批已等待你的决定，尚未创建文件，请核对预览。';
 }
 
 // 断线保留请求ID；切换计划后的迟到结果不能覆盖当前预览。
@@ -216,25 +222,47 @@ async function prepareTaskDocument() {
     const result = await api('/v1/plans/' + encodeURIComponent(id) + '/documents', documentRequest);
     if (ticket === viewTicket) showTaskDocument(result);
   } catch (e) { if (ticket === viewTicket) $('planStatus').textContent = '工作单预览失败：' + e.message; }
-  finally { documentBusy = false; }
+  finally {
+    documentBusy = false;
+    $('confirmDocument').disabled = ['REJECTED', 'BLOCKED'].includes(taskDocument?.approval?.status);
+    $('rejectDocument').disabled = false;
+  }
 }
 
 // 确认仅使用展示的文档编号和摘要；重复点击不产生第二份文件。
-async function confirmTaskDocument() {
+async function decideTaskDocument(action) {
   if (!taskDocument || documentBusy) return;
   const document = taskDocument, ticket = viewTicket;
   documentBusy = true;
   $('confirmDocument').disabled = true;
+  $('rejectDocument').disabled = true;
   try {
-    const result = await api('/v1/documents/' + document.id + '/confirm', {confirmed: true, payload_hash: document.payload_hash});
+    const body = {confirmed: true, payload_hash: document.payload_hash};
+    if (document.approval?.interrupt_id) body.interrupt_id = document.approval.interrupt_id;
+    const result = await api('/v1/documents/' + document.id + '/' + action, body);
     if (ticket === viewTicket) {
       showTaskDocument(result);
-      $('documentStatus').textContent = '已核对文件创建成功：' + result.path + '。计划任务尚未执行。';
+      $('documentStatus').textContent = action === 'reject' ? '本次创建已拒绝，未创建文件。需要时可准备一份新工作单。' : '已核对文件创建成功：' + result.path + '。计划任务尚未执行。';
       await load(); // 从真实状态刷新聊天中的待确认/已创建入口，不触发新一轮推理。
     }
-  } catch (e) { if (ticket === viewTicket) $('documentStatus').textContent = '文件创建或核对未完成：' + e.message + '；可重试同一文档。'; }
-  finally { documentBusy = false; $('confirmDocument').disabled = false; }
+  } catch (e) {
+    if (ticket === viewTicket) {
+      try {
+        const refreshed = await api('/v1/documents/' + document.id);
+        if (ticket === viewTicket) showTaskDocument(refreshed);
+      } catch (_) {}
+      if (ticket === viewTicket) $('documentStatus').textContent = '审批或文件核对未完成：' + e.message;
+    }
+  }
+  finally {
+    documentBusy = false;
+    $('confirmDocument').disabled = ['REJECTED', 'BLOCKED'].includes(taskDocument?.approval?.status);
+    $('rejectDocument').disabled = false;
+  }
 }
+
+// 创建与拒绝都需要用户按钮事件，模型不能提交这两个决定。
+async function confirmTaskDocument() { return decideTaskDocument('confirm'); }
 
 // 点击时冻结计划和版本；即使随后切换详情，下载内容也不会漂移成其他版本。
 async function downloadPlan() {
@@ -317,6 +345,7 @@ $('feedback').onclick = beginFeedback;
 $('downloadPlan').onclick = downloadPlan;
 $('prepareDocument').onclick = prepareTaskDocument;
 $('confirmDocument').onclick = confirmTaskDocument;
+$('rejectDocument').onclick = () => decideTaskDocument('reject');
 $('exitRevision').onclick = () => { exitRevision(); setMode('chat'); };
 $('mode').onchange = () => setMode($('mode').value);
 $('reset').onclick = () => { if (!sending) { pending = null; $('reset').hidden = true; $('status').textContent = '可以修改后重新发送。已发生的处理仍可在历史中查看。'; } };

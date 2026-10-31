@@ -198,17 +198,26 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
                 "SELECT id FROM task_documents WHERE owner=? AND plan_id=? AND version=? ORDER BY rowid DESC LIMIT 20",
                 (service.owner, plan_id, version),
             ).fetchall()
-        return [service.documents.get(row["id"]) for row in rows]
+        return [service.document_view(row["id"]) for row in rows]
 
     @app.get("/v1/documents/{document_id}", dependencies=guarded)
     def get_document(document_id: str):
         """只读持久预览；CREATED状态是历史记录，不重新验证外部编辑。"""
-        return service.documents.get(document_id)
+        return service.document_view(document_id)
 
     @app.post("/v1/documents/{document_id}/confirm", dependencies=guarded)
     def confirm_document(document_id: str, body: DocumentConfirm):
         """只有显式确认才发布文件，重试使用同一文档和摘要。"""
-        return service.document_action("confirm", document_id, body.payload_hash)
+        return service.document_action(
+            "confirm", document_id, body.payload_hash, body.interrupt_id
+        )
+
+    @app.post("/v1/documents/{document_id}/reject", dependencies=guarded)
+    def reject_document(document_id: str, body: DocumentConfirm):
+        """拒绝当前文档的唯一审批，不删除预览，不撤销已创建文件。"""
+        return service.document_action(
+            "reject", document_id, body.payload_hash, body.interrupt_id
+        )
 
     @app.get("/v1/plans/{plan_id}", dependencies=guarded)
     def plan(plan_id: str, version: int | None = None):
