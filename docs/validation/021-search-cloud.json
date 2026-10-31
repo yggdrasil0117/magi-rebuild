@@ -1,0 +1,159 @@
+{
+  "model": "qwen3.8-max",
+  "mode": "real model, synthetic docs, separate temporary databases, no retries",
+  "cases": [
+    {
+      "case": "found",
+      "input": "请用资料搜索工具检索关键词“计划导出”，说明导出成功是否代表任务完成，并给出来源文件路径和行号。",
+      "status": "COMPLETED",
+      "answer": "根据资料搜索结果，**计划导出成功并不代表任务完成**。\n\n*   **来源文件**：`guide.md`\n*   **行号**：第 2 行\n*   **原文片段**：“计划导出只生成文件，不代表任务已完成。”\n\n本次搜索覆盖完整（complete=true），该结论直接引自上述文档。",
+      "seconds": 5.829,
+      "model_calls_recorded": 2,
+      "tool_calls": [
+        {
+          "name": "magi_search_files",
+          "args": {
+            "query": "计划导出"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "magi_search_files",
+          "content": "{\"query\": \"计划导出\", \"path\": \".\", \"match_mode\": \"case-sensitive literal substring\", \"scope\": \"仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网\", \"matches\": [{\"path\": \"guide.md\", \"line\": 2, \"quote\": \"计划导出只生成文件，不代表任务已完成。\", \"quote_truncated\": false, \"sha256\": \"c94403181adc9d170ba5fe4bf6699409f5aa3bdd690aa002b06da37638ac7cb3\"}], \"complete\": true, \"incomplete_reasons\": [], \"skipped\": {}, \"entries_seen\": 1, \"files_examined\": 1, \"bytes_read\": 113, \"limits\": {\"entries\": 200, \"files\": 40, \"bytes\": 262144, \"results\": 8}, \"notice\": \"片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。\"}"
+        }
+      ],
+      "known_usage": [
+        {
+          "input_tokens": 1214,
+          "output_tokens": 27,
+          "total_tokens": 1241,
+          "input_token_details": {
+            "cache_read": 0
+          },
+          "output_token_details": {}
+        },
+        {
+          "input_tokens": 1509,
+          "output_tokens": 72,
+          "total_tokens": 1581,
+          "input_token_details": {
+            "cache_read": 1152
+          },
+          "output_token_details": {}
+        }
+      ],
+      "branch_matches": true,
+      "business_counts": {
+        "memories": 0,
+        "plans": 0,
+        "task_documents": 0
+      },
+      "context_epoch": 0
+    },
+    {
+      "case": "missing",
+      "input": "请用资料搜索工具精确检索“不存在标签QZX731”，没有命中就说明本次没找到，不要编造来源。",
+      "status": "COMPLETED",
+      "answer": "本次在授权资料目录内按区分大小写的字面关键词“不存在标签QZX731”检索，未命中任何结果（complete=true）。这说明当前已检查的 .md/.txt/.rst 文件中没有该字符串，但不代表全部资料一定不存在相关内容。如需进一步确认，可尝试更换关键词、缩小/指定子目录，或读取已知相关文件进行核对。",
+      "seconds": 4.453,
+      "model_calls_recorded": 2,
+      "tool_calls": [
+        {
+          "name": "magi_search_files",
+          "args": {
+            "query": "不存在标签QZX731"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "magi_search_files",
+          "content": "{\"query\": \"不存在标签QZX731\", \"path\": \".\", \"match_mode\": \"case-sensitive literal substring\", \"scope\": \"仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网\", \"matches\": [], \"complete\": true, \"incomplete_reasons\": [], \"skipped\": {}, \"entries_seen\": 1, \"files_examined\": 1, \"bytes_read\": 113, \"limits\": {\"entries\": 200, \"files\": 40, \"bytes\": 262144, \"results\": 8}, \"notice\": \"片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。\"}"
+        }
+      ],
+      "known_usage": [
+        {
+          "input_tokens": 1214,
+          "output_tokens": 32,
+          "total_tokens": 1246,
+          "input_token_details": {
+            "cache_read": 1152
+          },
+          "output_token_details": {}
+        },
+        {
+          "input_tokens": 1424,
+          "output_tokens": 79,
+          "total_tokens": 1503,
+          "input_token_details": {
+            "cache_read": 1152
+          },
+          "output_token_details": {}
+        }
+      ],
+      "branch_matches": true,
+      "business_counts": {
+        "memories": 0,
+        "plans": 0,
+        "task_documents": 0
+      },
+      "context_epoch": 0
+    },
+    {
+      "case": "partial",
+      "input": "请用资料搜索工具检索“计划导出”，说明返回片段讲了什么，给出路径和行号，并如实报告搜索覆盖范围。",
+      "status": "COMPLETED",
+      "answer": "本次检索“计划导出”的结果如下：\n\n-   **返回片段内容**：在 `guide.md` 第 2 行找到匹配文本：“计划导出只生成文件，不代表任务已完成。”该片段说明导出操作本身仅是生成文件的过程，并不等同于任务已经完结。\n-   **来源路径与行号**：`guide.md`，第 2 行。\n-   **搜索覆盖范围**：本次搜索覆盖**不完整**（complete=false）。原因是存在 1 个超大文件被跳过（oversized_file），实际仅检查了 2 个文件、读取 113 字节。因此，未找到更多结果并不代表授权资料目录内没有其他相关内容，如需更全面的信息，可尝试缩小搜索目录或更换关键词再次检索。",
+      "seconds": 5.672,
+      "model_calls_recorded": 2,
+      "tool_calls": [
+        {
+          "name": "magi_search_files",
+          "args": {
+            "query": "计划导出"
+          }
+        }
+      ],
+      "tool_results": [
+        {
+          "name": "magi_search_files",
+          "content": "{\"query\": \"计划导出\", \"path\": \".\", \"match_mode\": \"case-sensitive literal substring\", \"scope\": \"仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网\", \"matches\": [{\"path\": \"guide.md\", \"line\": 2, \"quote\": \"计划导出只生成文件，不代表任务已完成。\", \"quote_truncated\": false, \"sha256\": \"c94403181adc9d170ba5fe4bf6699409f5aa3bdd690aa002b06da37638ac7cb3\"}], \"complete\": false, \"incomplete_reasons\": [\"oversized_file\"], \"skipped\": {\"oversized_file\": 1}, \"entries_seen\": 2, \"files_examined\": 2, \"bytes_read\": 113, \"limits\": {\"entries\": 200, \"files\": 40, \"bytes\": 262144, \"results\": 8}, \"notice\": \"片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。\"}"
+        }
+      ],
+      "known_usage": [
+        {
+          "input_tokens": 1215,
+          "output_tokens": 27,
+          "total_tokens": 1242,
+          "input_token_details": {
+            "cache_read": 1152
+          },
+          "output_token_details": {}
+        },
+        {
+          "input_tokens": 1521,
+          "output_tokens": 163,
+          "total_tokens": 1684,
+          "input_token_details": {
+            "cache_read": 1152
+          },
+          "output_token_details": {}
+        }
+      ],
+      "branch_matches": true,
+      "business_counts": {
+        "memories": 0,
+        "plans": 0,
+        "task_documents": 0
+      },
+      "context_epoch": 0
+    }
+  ],
+  "source_sha256": {
+    "src/magi/agent/search.py": "4757c5b2482b4c8fa0ec6eacdf3d93ccc1ebb312ea90f1a78b446e2db74175a8",
+    "src/magi/harness/runtime.py": "f7653fc0be0b6889d76f890b4431ad9abeee77a35e1cf439efe9a7b32819223d",
+    "scripts/evaluate_search.py": "4c496ef541bf9737dcb4f3f2b461f3f2d2c44c652f745a21efe160239bd76fd6"
+  },
+  "baseline_commit": "3836defbf60f288a8bf36b0b30130df2bcea632a"
+}

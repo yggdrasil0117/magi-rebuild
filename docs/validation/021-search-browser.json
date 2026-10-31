@@ -1,0 +1,25 @@
+{
+  "round": 21,
+  "mode": "real Edge + scripted model + real Agent tools + FastAPI + SQLite",
+  "real_model_calls": 0,
+  "refresh_restored_same_answer": true,
+  "search_tool_calls": [
+    "magi_search_files"
+  ],
+  "model_responses": 2,
+  "source_path": "guide.md",
+  "source_line": 2,
+  "source_sha256": "2b2412b2f92adbdac50b25e267ca4d48cd4c8360413e6272535c7bc259ecca4c",
+  "business_counts": {
+    "plans": 0,
+    "memories": 0,
+    "task_documents": 0,
+    "memory_suggestion_runs": 0
+  },
+  "context_epoch": 0,
+  "limitations": [
+    "no mobile test",
+    "no API process restart test this round",
+    "scripted model does not evaluate natural language accuracy"
+  ]
+}

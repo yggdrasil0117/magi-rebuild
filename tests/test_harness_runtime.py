@@ -153,7 +153,7 @@ def test_existing_file_tools_are_used_and_only_read_tools_are_exposed(settings):
 
     assert model.tool_bindings
     assert all(
-        set(tools) == {"magi_read_file", "magi_list_files"}
+        set(tools) == {"magi_read_file", "magi_list_files", "magi_search_files"}
         for tools in model.tool_bindings
     )
     returned = [m for m in messages if isinstance(m, ToolMessage)]
@@ -418,7 +418,13 @@ def test_personal_session_exposes_read_only_plan_tools(settings):
     assert "PLAN-BODY-771" in repr(model.requests[-1])
     assert all(
         set(tools)
-        == {"magi_read_file", "magi_list_files", "magi_list_plans", "magi_get_plan"}
+        == {
+            "magi_read_file",
+            "magi_list_files",
+            "magi_search_files",
+            "magi_list_plans",
+            "magi_get_plan",
+        }
         for tools in model.tool_bindings
     )
 

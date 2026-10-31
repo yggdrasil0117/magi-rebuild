@@ -176,6 +176,7 @@ def test_cloud_harness_preserves_read_only_boundary(settings, monkeypatch):
         "magi_list_files",
         "magi_get_plan",
         "magi_list_plans",
+        "magi_search_files",
     }
     assert len(requests) == 2
     events = settings.events_path.read_text(encoding="utf-8")
