@@ -62,7 +62,7 @@ function show(turn) {
   const retrieval = turn.retrieval || turn.result?.snapshot?.retrieval;
   if (retrieval) {
     const evidence = document.createElement('details'), label = document.createElement('summary');
-    label.textContent = '本轮参考资料 · ' + ({FOUND: '找到相关字词', NO_RESULTS: '未找到匹配', FAILED: '检索失败'}[retrieval.status] || retrieval.status);
+    label.textContent = '本轮参考资料 · ' + ({FOUND: retrieval.method?.startsWith('dense') ? '找到相似片段' : '找到相关字词', NO_RESULTS: '未找到匹配', FAILED: '检索失败'}[retrieval.status] || retrieval.status);
     evidence.append(label);
     const notice = document.createElement('p');
     notice.textContent = retrieval.notice + (retrieval.complete ? ' 本次扫描与返回未超限。' : ' 本次覆盖或返回不完整。');

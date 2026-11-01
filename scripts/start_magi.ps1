@@ -1,7 +1,7 @@
 ﻿param([string]$Config = "magi.qianwen.toml")
 $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)
-$profileJson = & .\.venv-harness\Scripts\python.exe -c "import json,sys; from pathlib import Path; from magi.harness.config import load_config; c=load_config(Path(sys.argv[1])); print(json.dumps({'provider':c.provider,'api_key_env':c.api_key_env}))" $Config
+$profileJson = & .\.venv-harness\Scripts\python.exe -c "import json,sys; from pathlib import Path; from magi.harness.config import load_config; c=load_config(Path(sys.argv[1])); print(json.dumps({'provider':c.provider,'api_key_env':c.api_key_env,'embedding_enabled':c.embedding_enabled}))" $Config
 if ($LASTEXITCODE -ne 0) { throw '模型配置加载失败' }
 $modelProfile = $profileJson | ConvertFrom-Json
 $enteredKey = $false
@@ -16,6 +16,18 @@ if ($modelProfile.provider -eq 'qianwen' -and -not [Environment]::GetEnvironment
         $secureKey.Dispose()
     }
 }
+$enteredEmbeddingKey = $false
+if ($modelProfile.embedding_enabled -and -not $env:SILICONFLOW_API_KEY) {
+    $embeddingKey = Read-Host '输入硅基流动 API Key（用于BGE-M3，不显示、不保存）' -AsSecureString
+    $embeddingPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($embeddingKey)
+    try {
+        $env:SILICONFLOW_API_KEY = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($embeddingPointer)
+        $enteredEmbeddingKey = $true
+    } finally {
+        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($embeddingPointer)
+        $embeddingKey.Dispose()
+    }
+}
 if (-not $env:MAGI_API_TOKEN) {
     $env:MAGI_API_TOKEN = [Guid]::NewGuid().ToString('N') + [Guid]::NewGuid().ToString('N')
 }
@@ -27,5 +39,6 @@ Write-Host "MAGI: http://127.0.0.1:8765 ；Ctrl+C 停止。单 worker，不使�
 try {
     & .\.venv-harness\Scripts\python.exe -X utf8 -m magi.web
 } finally {
+    if ($enteredEmbeddingKey) { Remove-Item Env:SILICONFLOW_API_KEY -ErrorAction SilentlyContinue }
     if ($enteredKey) { [Environment]::SetEnvironmentVariable($modelProfile.api_key_env, $null, 'Process') }
 }

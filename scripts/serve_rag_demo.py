@@ -54,6 +54,9 @@ def main():
     """复用数据目录便于真实进程重启；已有资料不覆盖。"""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path, required=True)
+    parser.add_argument(
+        "--embedding", action="store_true", help="明确启用真实云端向量，生成仍为脚本桩"
+    )
     parser.add_argument("--port", type=int, default=8883)
     args = parser.parse_args()
     docs = args.data_dir / "docs"
@@ -64,6 +67,7 @@ def main():
             "# 合成资料\n计划导出只生成文件，不代表执行完成。\n", encoding="utf-8"
         )
     settings = HarnessConfig(
+        embedding_enabled=args.embedding,
         docs_root=docs,
         db_path=args.data_dir / "checkpoint.db",
         events_path=args.data_dir / "events.jsonl",

@@ -1,0 +1,10 @@
+{
+  "status": "SUCCESS",
+  "dimensions": [
+    1024,
+    1024
+  ],
+  "similarity": 0.7325916631910261,
+  "calls": 1,
+  "tokens": 23
+}

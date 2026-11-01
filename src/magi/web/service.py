@@ -11,6 +11,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 
 from magi.council.generation import failure_details, timeout_diagnostics
 from magi.council.service import Candidate, Council, candidate_body, render
+from magi.embedding import SiliconFlowEmbeddingProvider
 from magi.harness.runtime import open_personal_session
 from magi.personal.approvals import DocumentApprovals
 from magi.personal.context import ContextService
@@ -383,6 +384,10 @@ class WebService:
                 snapshot["retrieval"] = MagiLocalRetrievalProvider(
                     self.settings.docs_root,
                     self.settings.business_db_path.with_name("retrieval.db"),
+                    embedding=SiliconFlowEmbeddingProvider()
+                    if self.settings.embedding_enabled
+                    else None,
+                    min_score=self.settings.embedding_min_score,
                 ).retrieve(RetrievalRequest(request.user_text))
                 snapshot["evidence_ids"] += [
                     item["evidence_ref"] for item in snapshot["retrieval"]["matches"]

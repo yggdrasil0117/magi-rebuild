@@ -1,0 +1,835 @@
+{
+  "mode": "real SiliconFlow BGE-M3; fixed synthetic corpus; no retries",
+  "min_score": 0.45,
+  "attempts": [
+    {
+      "case": "literal",
+      "query": "计划导出",
+      "expected_top": "guide.md",
+      "keyword": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "cbc027dd8fee1bafeb45c26dfd532ba429b75f1b5eba242b6295612fe53d0b3c",
+            "version_id": "480288543343c3e1c0552293b0a0b7704809af98edc28d48d5539c20b2b7b939",
+            "chunk_id": "66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3",
+            "evidence_ref": "document:66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3",
+            "path": "guide.md",
+            "line": 1,
+            "offset": 0,
+            "quote": "计划导出只生成文件，不代表执行完成。完成应逐项检查实际产物。",
+            "sha256": "938c02112f17da197dcee8ef9a005037efb6ec38c56a4b7bc300f516a88bfa81",
+            "score": 3,
+            "matched_terms": [
+              "计划",
+              "划导",
+              "导出"
+            ]
+          }
+        ],
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "embedding": {
+          "enabled": false,
+          "degraded": false
+        },
+        "query_terms": [
+          "计划",
+          "划导",
+          "导出"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 3,
+          "files_examined": 3,
+          "bytes_read": 260,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "vector": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "cbc027dd8fee1bafeb45c26dfd532ba429b75f1b5eba242b6295612fe53d0b3c",
+            "version_id": "480288543343c3e1c0552293b0a0b7704809af98edc28d48d5539c20b2b7b939",
+            "chunk_id": "66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3",
+            "evidence_ref": "document:66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3",
+            "path": "guide.md",
+            "line": 1,
+            "offset": 0,
+            "quote": "计划导出只生成文件，不代表执行完成。完成应逐项检查实际产物。",
+            "sha256": "938c02112f17da197dcee8ef9a005037efb6ec38c56a4b7bc300f516a88bfa81",
+            "score": 0.735685,
+            "matched_terms": [
+              "计划",
+              "划导",
+              "导出"
+            ],
+            "keyword_score": 3
+          }
+        ],
+        "method": "dense cosine BAAI/bge-m3",
+        "embedding": {
+          "enabled": true,
+          "degraded": false,
+          "cache_hits": 0,
+          "embedded_chunks": 3,
+          "pool_truncated": false,
+          "query_truncated": false,
+          "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1"
+        },
+        "query_terms": [
+          "计划",
+          "划导",
+          "导出"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 3,
+          "files_examined": 3,
+          "bytes_read": 260,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 1.5789999999979045
+    },
+    {
+      "case": "paraphrase",
+      "query": "输出清单算办妥了吗",
+      "expected_top": "guide.md",
+      "keyword": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "embedding": {
+          "enabled": false,
+          "degraded": false
+        },
+        "query_terms": [
+          "输出",
+          "出清",
+          "清单",
+          "单算",
+          "算办",
+          "办妥",
+          "妥了",
+          "了吗"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 3,
+          "files_examined": 3,
+          "bytes_read": 260,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "vector": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "cbc027dd8fee1bafeb45c26dfd532ba429b75f1b5eba242b6295612fe53d0b3c",
+            "version_id": "480288543343c3e1c0552293b0a0b7704809af98edc28d48d5539c20b2b7b939",
+            "chunk_id": "66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3",
+            "evidence_ref": "document:66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3",
+            "path": "guide.md",
+            "line": 1,
+            "offset": 0,
+            "quote": "计划导出只生成文件，不代表执行完成。完成应逐项检查实际产物。",
+            "sha256": "938c02112f17da197dcee8ef9a005037efb6ec38c56a4b7bc300f516a88bfa81",
+            "score": 0.656501,
+            "matched_terms": [],
+            "keyword_score": 0
+          },
+          {
+            "document_id": "f84d4a2541a942cdd3062000fd475e604772208af9a9d79604c6a18606658fe7",
+            "version_id": "7a59086665baeb52fa9b7e0efe6919075dbe6de7018eeadc7420fc1d03b3341f",
+            "chunk_id": "bc850f3958747ee11579b4835058e275a47259e33ba44fb241b793c67a3b3185",
+            "evidence_ref": "document:bc850f3958747ee11579b4835058e275a47259e33ba44fb241b793c67a3b3185",
+            "path": "rest.md",
+            "line": 1,
+            "offset": 0,
+            "quote": "休息安排：每完成一段工作，可以起身活动并补充饮水。",
+            "sha256": "4cdb0faae82206256433c5653fe995851388acf4ff0bda805037182a84e4e58d",
+            "score": 0.464009,
+            "matched_terms": [],
+            "keyword_score": 0
+          }
+        ],
+        "method": "dense cosine BAAI/bge-m3",
+        "embedding": {
+          "enabled": true,
+          "degraded": false,
+          "cache_hits": 3,
+          "embedded_chunks": 0,
+          "pool_truncated": false,
+          "query_truncated": false,
+          "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1"
+        },
+        "query_terms": [
+          "输出",
+          "出清",
+          "清单",
+          "单算",
+          "算办",
+          "办妥",
+          "妥了",
+          "了吗"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 3,
+          "files_examined": 3,
+          "bytes_read": 260,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 0.75
+    },
+    {
+      "case": "irrelevant",
+      "query": "量子引力的实验测量结果",
+      "expected_top": null,
+      "keyword": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "embedding": {
+          "enabled": false,
+          "degraded": false
+        },
+        "query_terms": [
+          "量子",
+          "子引",
+          "引力",
+          "力的",
+          "的实",
+          "实验",
+          "验测",
+          "测量",
+          "量结",
+          "结果"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 3,
+          "files_examined": 3,
+          "bytes_read": 260,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "vector": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "method": "dense cosine BAAI/bge-m3",
+        "embedding": {
+          "enabled": true,
+          "degraded": false,
+          "cache_hits": 3,
+          "embedded_chunks": 0,
+          "pool_truncated": false,
+          "query_truncated": false,
+          "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1"
+        },
+        "query_terms": [
+          "量子",
+          "子引",
+          "引力",
+          "力的",
+          "的实",
+          "实验",
+          "验测",
+          "测量",
+          "量结",
+          "结果"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 3,
+          "files_examined": 3,
+          "bytes_read": 260,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 0.7339999999967404
+    },
+    {
+      "case": "english",
+      "query": "SQLite restart recovery",
+      "expected_top": "database.md",
+      "keyword": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "bca710f45dc1c85fb71bd9646140d71be8621854218ad1179a8abf82e97ee15e",
+            "version_id": "f5e47b5fea031c796047b9714b1e61f17922cfcd0a181af416972ed293f55f46",
+            "chunk_id": "21601a347f5ef167fcdb09b471a9423073d55023dfdd90c6586de259ba9b0316",
+            "evidence_ref": "document:21601a347f5ef167fcdb09b471a9423073d55023dfdd90c6586de259ba9b0316",
+            "path": "database.md",
+            "line": 1,
+            "offset": 0,
+            "quote": "SQLite restart recovery restores committed transactions. Back up the database before migration.",
+            "sha256": "8325bd46d47893ac7cf413f166c1c646e6a79952e76c1b8906692d4f64558599",
+            "score": 3,
+            "matched_terms": [
+              "sqlite",
+              "restart",
+              "recovery"
+            ]
+          }
+        ],
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "embedding": {
+          "enabled": false,
+          "degraded": false
+        },
+        "query_terms": [
+          "sqlite",
+          "restart",
+          "recovery"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 3,
+          "files_examined": 3,
+          "bytes_read": 260,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "vector": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "bca710f45dc1c85fb71bd9646140d71be8621854218ad1179a8abf82e97ee15e",
+            "version_id": "f5e47b5fea031c796047b9714b1e61f17922cfcd0a181af416972ed293f55f46",
+            "chunk_id": "21601a347f5ef167fcdb09b471a9423073d55023dfdd90c6586de259ba9b0316",
+            "evidence_ref": "document:21601a347f5ef167fcdb09b471a9423073d55023dfdd90c6586de259ba9b0316",
+            "path": "database.md",
+            "line": 1,
+            "offset": 0,
+            "quote": "SQLite restart recovery restores committed transactions. Back up the database before migration.",
+            "sha256": "8325bd46d47893ac7cf413f166c1c646e6a79952e76c1b8906692d4f64558599",
+            "score": 0.753314,
+            "matched_terms": [
+              "sqlite",
+              "restart",
+              "recovery"
+            ],
+            "keyword_score": 3
+          }
+        ],
+        "method": "dense cosine BAAI/bge-m3",
+        "embedding": {
+          "enabled": true,
+          "degraded": false,
+          "cache_hits": 3,
+          "embedded_chunks": 0,
+          "pool_truncated": false,
+          "query_truncated": false,
+          "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1"
+        },
+        "query_terms": [
+          "sqlite",
+          "restart",
+          "recovery"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 3,
+          "files_examined": 3,
+          "bytes_read": 260,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 0.7970000000059372
+    }
+  ],
+  "embedding_calls": 7,
+  "embedding_known_tokens": 125,
+  "web": {
+    "status": "COMPLETED",
+    "result": {
+      "personas": [
+        {
+          "role": "MELCHIOR",
+          "status": "COMPLETED",
+          "diagnostics": {
+            "output_budget": 768,
+            "timeout_seconds": 60.0,
+            "snapshot_payload_chars": 3341,
+            "input_tokens": 2330,
+            "output_tokens": 147,
+            "total_tokens": 2477,
+            "finish_reason": "stop",
+            "output_chars": 274
+          },
+          "opinion": {
+            "view": "输出清单不等于办妥，资料明确指出生成文件不代表执行完成。",
+            "recommendation": "两步核对：一查文件是否生成，二逐项检查实际产物确认完成。",
+            "concerns": [
+              "仅生成文件易被误判为已完成",
+              "缺少逐项检查标准可能导致遗漏"
+            ],
+            "unknowns": [
+              "实际产物的具体验收标准未定义",
+              "当前清单包含哪些待核对项未知"
+            ],
+            "evidence_refs": [
+              "document:66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3"
+            ]
+          },
+          "seconds": 4.875
+        },
+        {
+          "role": "BALTHASAR",
+          "status": "COMPLETED",
+          "diagnostics": {
+            "output_budget": 768,
+            "timeout_seconds": 60.0,
+            "snapshot_payload_chars": 3341,
+            "input_tokens": 2331,
+            "output_tokens": 143,
+            "total_tokens": 2474,
+            "finish_reason": "stop",
+            "output_chars": 273
+          },
+          "opinion": {
+            "view": "输出清单不等于办妥，资料明确计划导出只生成文件不代表执行完成。",
+            "recommendation": "第一步核对文件是否生成，第二步逐项检查实际产物确认完成。",
+            "concerns": [
+              "仅看清单易误判任务已完成",
+              "忽略逐项检查会增加返工成本"
+            ],
+            "unknowns": [
+              "实际产物的验收标准未明确",
+              "当前任务具体包含哪些步骤未知"
+            ],
+            "evidence_refs": [
+              "document:66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3"
+            ]
+          },
+          "seconds": 5.031
+        },
+        {
+          "role": "CASPER",
+          "status": "COMPLETED",
+          "diagnostics": {
+            "output_budget": 768,
+            "timeout_seconds": 60.0,
+            "snapshot_payload_chars": 3341,
+            "input_tokens": 2327,
+            "output_tokens": 218,
+            "total_tokens": 2545,
+            "finish_reason": "stop",
+            "output_chars": 369
+          },
+          "opinion": {
+            "view": "输出清单不等于办妥，计划导出只生成文件不代表执行完成，需逐项检查实际产物。",
+            "recommendation": "第一步确认文件已生成；第二步逐项核对实际产物是否达标，两段工作间可起身休息。",
+            "concerns": [
+              "仅生成文件易被误认为任务已完成",
+              "缺少逐项检查标准可能导致遗漏"
+            ],
+            "unknowns": [
+              "具体要核对的产物清单内容未知",
+              "未明确每项产物的验收标准"
+            ],
+            "evidence_refs": [
+              "document:66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3",
+              "document:bc850f3958747ee11579b4835058e275a47259e33ba44fb241b793c67a3b3185"
+            ]
+          },
+          "seconds": 6.781
+        }
+      ],
+      "status": "COMPLETED",
+      "candidate": {
+        "title": "两步核对计划：区分文件生成与执行完成",
+        "steps": [
+          {
+            "action": "第一步：确认计划导出文件是否已生成",
+            "done_when": "文件存在且可读取，记录文件名与大小",
+            "minutes": null,
+            "kind": "核对"
+          },
+          {
+            "action": "第二步：逐项检查实际产物，不把文件生成等同于执行完成",
+            "done_when": "清单中每项均有实际产物并符合验收标准，或记录缺口",
+            "minutes": null,
+            "kind": "核对"
+          }
+        ],
+        "assumptions": [
+          "用户已有待核对的清单内容",
+          "实际产物可通过本地或系统方式验证"
+        ],
+        "revision_reason": "无旧计划；依据最新约束制定两步核对，引用资料强调文件生成不等于完成。",
+        "source_excerpts": [
+          {
+            "evidence_ref": "document:66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3",
+            "quote": "计划导出只生成文件，不代表执行完成。完成应逐项检查实际产物。"
+          },
+          {
+            "evidence_ref": "user:current",
+            "quote": "输出清单算办妥了吗？请根据资料制定两步核对计划，引用资料；不要把文件生成等同于执行完成。"
+          }
+        ],
+        "source_ids": [
+          "source:0",
+          "source:3"
+        ],
+        "unknowns": [
+          "实际产物的具体验收标准未定义",
+          "当前清单包含哪些待核对项未知"
+        ]
+      },
+      "synthesis_diagnostics": {
+        "output_budget": 1536,
+        "timeout_seconds": 60.0,
+        "snapshot_payload_chars": 5170,
+        "input_tokens": 3574,
+        "output_tokens": 271,
+        "total_tokens": 3845,
+        "finish_reason": "stop",
+        "output_chars": 653,
+        "minutes_by_kind": {},
+        "seconds": 7.25
+      },
+      "agreement": [
+        "输出清单不等于办妥，资料明确计划导出只生成文件不代表执行完成",
+        "两步核对：先确认文件已生成，再逐项检查实际产物",
+        "仅看文件生成易误判任务已完成，需逐项验收"
+      ],
+      "disagreements": [
+        "是否在两段工作间加入休息安排存在分歧",
+        "逐项检查的具体验收标准未统一"
+      ],
+      "unknowns": [
+        "实际产物的具体验收标准未定义",
+        "当前清单包含哪些待核对项未知",
+        "每项产物的达标条件不明确"
+      ],
+      "calls": 4,
+      "seconds": 23.953,
+      "snapshot": {
+        "run_id": "3265932a71794427beabdc926c278e18",
+        "logical_session_id": "web-5c5734daa349a39f648bdc62d72507551f481ad8728d39315a21473185e3",
+        "epoch": 0,
+        "question": "输出清单算办妥了吗？请根据资料制定两步核对计划，引用资料；不要把文件生成等同于执行完成。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [],
+        "old_plan": null,
+        "evidence_ids": [
+          "user:current",
+          "document:66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3",
+          "document:bc850f3958747ee11579b4835058e275a47259e33ba44fb241b793c67a3b3185",
+          "document:21601a347f5ef167fcdb09b471a9423073d55023dfdd90c6586de259ba9b0316"
+        ],
+        "retrieval": {
+          "status": "FOUND",
+          "matches": [
+            {
+              "document_id": "cbc027dd8fee1bafeb45c26dfd532ba429b75f1b5eba242b6295612fe53d0b3c",
+              "version_id": "480288543343c3e1c0552293b0a0b7704809af98edc28d48d5539c20b2b7b939",
+              "chunk_id": "66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3",
+              "evidence_ref": "document:66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3",
+              "path": "guide.md",
+              "line": 1,
+              "offset": 0,
+              "quote": "计划导出只生成文件，不代表执行完成。完成应逐项检查实际产物。",
+              "sha256": "938c02112f17da197dcee8ef9a005037efb6ec38c56a4b7bc300f516a88bfa81",
+              "score": 0.797953,
+              "matched_terms": [
+                "计划",
+                "文件",
+                "生成",
+                "执行",
+                "行完",
+                "完成"
+              ],
+              "keyword_score": 6
+            },
+            {
+              "document_id": "f84d4a2541a942cdd3062000fd475e604772208af9a9d79604c6a18606658fe7",
+              "version_id": "7a59086665baeb52fa9b7e0efe6919075dbe6de7018eeadc7420fc1d03b3341f",
+              "chunk_id": "bc850f3958747ee11579b4835058e275a47259e33ba44fb241b793c67a3b3185",
+              "evidence_ref": "document:bc850f3958747ee11579b4835058e275a47259e33ba44fb241b793c67a3b3185",
+              "path": "rest.md",
+              "line": 1,
+              "offset": 0,
+              "quote": "休息安排：每完成一段工作，可以起身活动并补充饮水。",
+              "sha256": "4cdb0faae82206256433c5653fe995851388acf4ff0bda805037182a84e4e58d",
+              "score": 0.606509,
+              "matched_terms": [
+                "完成"
+              ],
+              "keyword_score": 1
+            },
+            {
+              "document_id": "bca710f45dc1c85fb71bd9646140d71be8621854218ad1179a8abf82e97ee15e",
+              "version_id": "f5e47b5fea031c796047b9714b1e61f17922cfcd0a181af416972ed293f55f46",
+              "chunk_id": "21601a347f5ef167fcdb09b471a9423073d55023dfdd90c6586de259ba9b0316",
+              "evidence_ref": "document:21601a347f5ef167fcdb09b471a9423073d55023dfdd90c6586de259ba9b0316",
+              "path": "database.md",
+              "line": 1,
+              "offset": 0,
+              "quote": "SQLite restart recovery restores committed transactions. Back up the database before migration.",
+              "sha256": "8325bd46d47893ac7cf413f166c1c646e6a79952e76c1b8906692d4f64558599",
+              "score": 0.467758,
+              "matched_terms": [],
+              "keyword_score": 0
+            }
+          ],
+          "method": "dense cosine BAAI/bge-m3",
+          "embedding": {
+            "enabled": true,
+            "degraded": false,
+            "cache_hits": 3,
+            "embedded_chunks": 0,
+            "pool_truncated": false,
+            "query_truncated": false,
+            "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1"
+          },
+          "query_terms": [
+            "输出",
+            "出清",
+            "清单",
+            "单算",
+            "算办",
+            "办妥",
+            "妥了",
+            "了吗",
+            "请根",
+            "根据",
+            "据资",
+            "资料",
+            "料制",
+            "制定",
+            "定两",
+            "两步",
+            "步核",
+            "核对",
+            "对计",
+            "计划",
+            "引用",
+            "用资",
+            "不要",
+            "要把",
+            "把文",
+            "文件",
+            "件生",
+            "生成",
+            "成等",
+            "等同",
+            "同于",
+            "于执",
+            "执行",
+            "行完",
+            "完成"
+          ],
+          "complete": true,
+          "coverage": {
+            "path": ".",
+            "match_mode": "case-sensitive literal substring",
+            "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+            "complete": true,
+            "incomplete_reasons": [],
+            "skipped": {},
+            "entries_seen": 3,
+            "files_examined": 3,
+            "bytes_read": 260,
+            "limits": {
+              "entries": 200,
+              "files": 40,
+              "bytes": 262144,
+              "results": 8
+            },
+            "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+          },
+          "truncated": false,
+          "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+        }
+      },
+      "snapshot_hash": "fa30f4759720067b489687b71f4d834143f22b52fd34252b1b2e17ec97fbeaf8",
+      "model": "qwen3.8-max",
+      "provider": "qianwen"
+    },
+    "seconds": 28.17199999999866
+  },
+  "persistence": {
+    "saved_version": 1,
+    "old_body_unchanged": true,
+    "old_snapshot_unchanged": true,
+    "new_version_result": {
+      "status": "FOUND",
+      "matches": [
+        {
+          "document_id": "cbc027dd8fee1bafeb45c26dfd532ba429b75f1b5eba242b6295612fe53d0b3c",
+          "version_id": "b0492dcf47b1de08ffbe54f5b48453ebfb7e2e4bcbae7eeec78285e3a4d4b29c",
+          "chunk_id": "8212cb2e1d0ad0c9e24b493e092931ba682a731478a6ec628cfcf846fd4ccf6c",
+          "evidence_ref": "document:8212cb2e1d0ad0c9e24b493e092931ba682a731478a6ec628cfcf846fd4ccf6c",
+          "path": "guide.md",
+          "line": 1,
+          "offset": 0,
+          "quote": "计划导出新版：核对文件可打开，并逐项核对执行情况。",
+          "sha256": "83d51335018e66bf5927929c40686b0e8f7c0f78c423af2e93e96560dc9c8f74",
+          "score": 0.67686,
+          "matched_terms": [
+            "计划",
+            "划导",
+            "导出"
+          ],
+          "keyword_score": 3
+        }
+      ],
+      "method": "dense cosine BAAI/bge-m3",
+      "embedding": {
+        "enabled": true,
+        "degraded": false,
+        "cache_hits": 2,
+        "embedded_chunks": 1,
+        "pool_truncated": false,
+        "query_truncated": false,
+        "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1"
+      },
+      "query_terms": [
+        "计划",
+        "划导",
+        "导出"
+      ],
+      "complete": true,
+      "coverage": {
+        "path": ".",
+        "match_mode": "case-sensitive literal substring",
+        "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+        "complete": true,
+        "incomplete_reasons": [],
+        "skipped": {},
+        "entries_seen": 3,
+        "files_examined": 3,
+        "bytes_read": 245,
+        "limits": {
+          "entries": 200,
+          "files": 40,
+          "bytes": 262144,
+          "results": 8
+        },
+        "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+      },
+      "truncated": false,
+      "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+    },
+    "plan_body": "两步核对计划：区分文件生成与执行完成\n\n修订/决策理由：无旧计划；依据最新约束制定两步核对，引用资料强调文件生成不等于完成。\n1. [核对] 第一步：确认计划导出文件是否已生成\n   完成条件：文件存在且可读取，记录文件名与大小\n2. [核对] 第二步：逐项检查实际产物，不把文件生成等同于执行完成\n   完成条件：清单中每项均有实际产物并符合验收标准，或记录缺口\n\n原文依据（用户陈述、记忆或资料，不代表事实核实）：\n- [document:66f38fee02718fb4586dcf6d0788d8a2c1fe70681b4480751b3dfbb8707290a3] 计划导出只生成文件，不代表执行完成。完成应逐项检查实际产物。\n- [user:current] 输出清单算办妥了吗？请根据资料制定两步核对计划，引用资料；不要把文件生成等同于执行完成。\n资料来源：guide.md 第1行，版本 480288543343c3e1c0552293b0a0b7704809af98edc28d48d5539c20b2b7b939\n当时原文：计划导出只生成文件，不代表执行完成。完成应逐项检查实际产物。\n\n模型假设（待用户确认）：\n- 用户已有待核对的清单内容\n- 实际产物可通过本地或系统方式验证\n\n待确认事项：\n- 实际产物的具体验收标准未定义\n- 当前清单包含哪些待核对项未知\n\n请核对行动、假设和最新反馈；通过程序校验不代表建议正确。"
+  }
+}

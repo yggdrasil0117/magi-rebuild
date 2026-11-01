@@ -1,0 +1,21 @@
+........................................................................ [ 17%]
+........................................................................ [ 35%]
+........................................................................ [ 52%]
+........................................................................ [ 70%]
+........................................................................ [ 87%]
+..................................................                       [100%]
+============================== warnings summary ===============================
+.venv-harness\Lib\site-packages\starlette\testclient.py:51
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\starlette\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_terminal.py::test_real_http_client_auth_and_terminal_turn
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+tests/test_terminal.py::test_real_http_client_auth_and_terminal_turn
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+    from websockets.server import WebSocketServerProtocol
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+410 passed, 3 warnings in 37.79s

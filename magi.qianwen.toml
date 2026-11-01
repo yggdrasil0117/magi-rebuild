@@ -19,3 +19,8 @@ business_db = ".magi/personal.sqlite3"
 [limits]
 model_calls = 4
 tool_calls = 3
+
+# 明确启用云端向量：资料片段发送硅基流动，凭据仅从环境读取。
+[embedding]
+enabled = true
+min_score = 0.45

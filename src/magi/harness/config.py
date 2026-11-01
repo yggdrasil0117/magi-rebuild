@@ -27,8 +27,18 @@ class HarnessConfig:
     max_model_calls: int = 4
     max_tool_calls: int = 3
     api_key_env: str = "DASHSCOPE_API_KEY"
+    embedding_enabled: bool = False
+    embedding_min_score: float = 0.45
 
     def __post_init__(self) -> None:
+        if type(self.embedding_enabled) is not bool:
+            raise ValueError("embedding.enabled必须是布尔值")
+        if (
+            type(self.embedding_min_score) not in (int, float)
+            or not math.isfinite(self.embedding_min_score)
+            or not 0 <= self.embedding_min_score <= 1
+        ):
+            raise ValueError("embedding.min_score必须在0到1之间")
         if self.provider not in {"ollama", "qianwen"}:
             raise ValueError("不支持的 model.provider；可选 ollama、qianwen")
         if not isinstance(self.api_key_env, str) or not re.fullmatch(
@@ -126,6 +136,10 @@ def load_config(path: Path) -> HarnessConfig:
             "checkpoint_db": "db_path",
             "event_log": "events_path",
             "business_db": "business_db_path",
+        },
+        "embedding": {
+            "enabled": "embedding_enabled",
+            "min_score": "embedding_min_score",
         },
         "tools": {"root": "docs_root"},
         "limits": {

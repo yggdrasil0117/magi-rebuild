@@ -1,0 +1,158 @@
+{
+  "mode": "real Edge/HTTP/SQLite and SiliconFlow embedding; scripted generation and checkpoint",
+  "turns": 2,
+  "plans": 1,
+  "first_retrieval": {
+    "status": "FOUND",
+    "matches": [
+      {
+        "document_id": "56144a80f789362bbfe5ac357de6e67f6c6c854ca9a03feba547833356479d47",
+        "version_id": "1d4996652904dbe8c658d092e1e25ac9d094b050c76dcff637a085ff29d5d2da",
+        "chunk_id": "9ce05e3d40aee28132656198f2ea9e00f4c436b0928bc06385a12e23a1598f0c",
+        "evidence_ref": "document:9ce05e3d40aee28132656198f2ea9e00f4c436b0928bc06385a12e23a1598f0c",
+        "path": "guide.md",
+        "line": 2,
+        "offset": 0,
+        "quote": "计划导出只生成文件，不代表执行完成。",
+        "sha256": "feaedc5684cba70df107719d97c5934e1443ae142b9237bfc009b1d709fea4bf",
+        "score": 0.661499,
+        "matched_terms": [],
+        "keyword_score": 0
+      },
+      {
+        "document_id": "56144a80f789362bbfe5ac357de6e67f6c6c854ca9a03feba547833356479d47",
+        "version_id": "1d4996652904dbe8c658d092e1e25ac9d094b050c76dcff637a085ff29d5d2da",
+        "chunk_id": "e310f2948bf7020b38c7a82e15af6d20569dc45bc4b2bd583fbacd8659425621",
+        "evidence_ref": "document:e310f2948bf7020b38c7a82e15af6d20569dc45bc4b2bd583fbacd8659425621",
+        "path": "guide.md",
+        "line": 1,
+        "offset": 0,
+        "quote": "# 合成资料",
+        "sha256": "feaedc5684cba70df107719d97c5934e1443ae142b9237bfc009b1d709fea4bf",
+        "score": 0.481523,
+        "matched_terms": [],
+        "keyword_score": 0
+      }
+    ],
+    "method": "dense cosine BAAI/bge-m3",
+    "embedding": {
+      "enabled": true,
+      "degraded": false,
+      "cache_hits": 0,
+      "embedded_chunks": 2,
+      "pool_truncated": false,
+      "query_truncated": false,
+      "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1",
+      "calls": 2,
+      "known_tokens": 31
+    },
+    "query_terms": [
+      "输出",
+      "出清",
+      "清单",
+      "单算",
+      "算办",
+      "办妥",
+      "妥了",
+      "了吗"
+    ],
+    "complete": true,
+    "coverage": {
+      "path": ".",
+      "match_mode": "case-sensitive literal substring",
+      "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+      "complete": true,
+      "incomplete_reasons": [],
+      "skipped": {},
+      "entries_seen": 1,
+      "files_examined": 1,
+      "bytes_read": 72,
+      "limits": {
+        "entries": 200,
+        "files": 40,
+        "bytes": 262144,
+        "results": 8
+      },
+      "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+    },
+    "truncated": false,
+    "notice": "已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+  },
+  "second_retrieval": {
+    "status": "FOUND",
+    "matches": [
+      {
+        "document_id": "56144a80f789362bbfe5ac357de6e67f6c6c854ca9a03feba547833356479d47",
+        "version_id": "1d4996652904dbe8c658d092e1e25ac9d094b050c76dcff637a085ff29d5d2da",
+        "chunk_id": "9ce05e3d40aee28132656198f2ea9e00f4c436b0928bc06385a12e23a1598f0c",
+        "evidence_ref": "document:9ce05e3d40aee28132656198f2ea9e00f4c436b0928bc06385a12e23a1598f0c",
+        "path": "guide.md",
+        "line": 2,
+        "offset": 0,
+        "quote": "计划导出只生成文件，不代表执行完成。",
+        "sha256": "feaedc5684cba70df107719d97c5934e1443ae142b9237bfc009b1d709fea4bf",
+        "score": 3,
+        "matched_terms": [
+          "计划",
+          "划导",
+          "导出"
+        ]
+      }
+    ],
+    "method": "bounded keyword overlap (Chinese bigrams)",
+    "embedding": {
+      "enabled": true,
+      "degraded": true,
+      "error_code": "MISSING_API_KEY",
+      "calls": 0,
+      "known_tokens": 0
+    },
+    "query_terms": [
+      "计划",
+      "划导",
+      "导出",
+      "出之",
+      "之后",
+      "后如",
+      "如何",
+      "何核",
+      "核对"
+    ],
+    "complete": true,
+    "coverage": {
+      "path": ".",
+      "match_mode": "case-sensitive literal substring",
+      "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+      "complete": true,
+      "incomplete_reasons": [],
+      "skipped": {},
+      "entries_seen": 1,
+      "files_examined": 1,
+      "bytes_read": 72,
+      "limits": {
+        "entries": 200,
+        "files": 40,
+        "bytes": 262144,
+        "results": 8
+      },
+      "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+    },
+    "truncated": false,
+    "notice": "向量服务失败，已明确退回关键词检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+  },
+  "assertions": {
+    "vectorLabelCorrect": true,
+    "saved": true,
+    "restartHistoryRestored": true,
+    "fallbackVisible": true
+  },
+  "restart_pids": [
+    182080,
+    196364
+  ],
+  "console": "仅既有密码框不在form提示，未发现JS错误",
+  "screenshots": [
+    "029-embedding.png",
+    "029-embedding-fallback.png"
+  ]
+}

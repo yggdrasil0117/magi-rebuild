@@ -1,4 +1,4 @@
-"""本地资料版本、分块与关键词基线；不依赖外部服务和嵌入模型。"""
+"""本地资料版本与分块；支持独立关键词基线及用户显式启用的云端向量。"""
 
 import hashlib
 import re
@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Protocol
 
 from magi.agent.search import scan_documents
+from magi.embedding import EmbeddingError, vector_rank
 
 
 def digest(text):
@@ -49,8 +50,14 @@ def query_terms(query):
 
 
 class MagiLocalRetrievalProvider:
-    def __init__(self, root: Path, db_path: Path | None = None):
-        """root来自授权配置；独立SQLite保存不可变版本，不复用业务schema编号。"""
+    def __init__(
+        self, root: Path, db_path: Path | None = None, *, embedding=None, min_score=0.45
+    ):
+        """root来自授权配置；embedding可选且由程序配置注入，min_score为余弦阈值。
+
+        独立SQLite保存不可变版本，不复用业务schema编号。"""
+        self.embedding = embedding
+        self.min_score = min_score
         self.root = root
         self.db_path = db_path
 
@@ -67,6 +74,8 @@ class MagiLocalRetrievalProvider:
         ):
             raise ValueError("资料查询必须为1—8000字")
         terms = query_terms(request.query)
+        method = "bounded keyword overlap (Chinese bigrams)"
+        embedding_state = {"enabled": self.embedding is not None, "degraded": False}
         try:
             scan = scan_documents(self.root)
             if self.db_path:
@@ -100,7 +109,7 @@ class MagiLocalRetrievalProvider:
                                 (chunk_id, version_id, line, offset, quote),
                             )
                             hits = [term for term in terms if term in quote.lower()]
-                            if not hits:
+                            if not hits and self.embedding is None:
                                 continue
                             candidates.append(
                                 dict(
@@ -117,6 +126,36 @@ class MagiLocalRetrievalProvider:
                                     matched_terms=hits,
                                 )
                             )
+                    if self.embedding is not None:
+                        calls_before = getattr(self.embedding, "calls", 0)
+                        tokens_before = getattr(self.embedding, "tokens", 0)
+                        try:
+                            # 保存点只回滚向量缓存，不撤销本轮已读取的文档版本记录。
+                            db.execute("SAVEPOINT vector_cache")
+                            candidates, diagnostics = vector_rank(
+                                db,
+                                candidates,
+                                request.query,
+                                self.embedding,
+                                self.min_score,
+                            )
+                            db.execute("RELEASE vector_cache")
+                            embedding_state.update(
+                                diagnostics, provider=self.embedding.identity
+                            )
+                            method = "dense cosine BAAI/bge-m3"
+                        except EmbeddingError as exc:
+                            db.execute("ROLLBACK TO vector_cache")
+                            db.execute("RELEASE vector_cache")
+                            embedding_state.update(degraded=True, error_code=str(exc))
+                            candidates = [
+                                item for item in candidates if item["score"] > 0
+                            ]
+                        embedding_state.update(
+                            calls=getattr(self.embedding, "calls", 0) - calls_before,
+                            known_tokens=getattr(self.embedding, "tokens", 0)
+                            - tokens_before,
+                        )
                     candidates.sort(
                         key=lambda m: (-m["score"], m["path"], m["line"], m["offset"])
                     )
@@ -125,16 +164,30 @@ class MagiLocalRetrievalProvider:
             return dict(
                 status="FOUND" if candidates else "NO_RESULTS",
                 matches=candidates[:5],
-                method="bounded keyword overlap (Chinese bigrams)",
+                method=method,
+                embedding=embedding_state,
                 query_terms=terms,
-                complete=scan["complete"] and len(candidates) <= 5,
+                complete=scan["complete"]
+                and len(candidates) <= 5
+                and not embedding_state.get("pool_truncated", False)
+                and not embedding_state.get("query_truncated", False),
                 coverage={
                     k: v
                     for k, v in scan.items()
                     if k not in {"documents", "matches", "query"}
                 },
                 truncated=len(candidates) > 5,
-                notice="仅授权文本范围；最多五条160字片段。字词重合不证明资料支持结论；无结果不等于没有答案。",
+                notice=(
+                    "向量服务失败，已明确退回关键词检索。"
+                    if embedding_state["degraded"]
+                    else ""
+                )
+                + (
+                    "已使用云端BGE-M3语义相似度检索。"
+                    if method.startswith("dense")
+                    else ""
+                )
+                + "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。",
             )
         except (OSError, ValueError, sqlite3.Error):
             return dict(
