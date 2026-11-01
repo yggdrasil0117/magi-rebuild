@@ -103,3 +103,20 @@ def test_fts5_available():
             ).fetchone()[0]
             == 1
         )
+
+
+def test_documents_remain_selectable_with_long_context():
+    """长问题不能挤掉本轮资料的引用目录；编号绑定当前快照而非永久ID。"""
+    document = dict(evidence_ref="document:chunk", quote="导出不代表执行完成。")
+    snapshot = dict(
+        question="长" * 8000,
+        memories=[dict(key="偏好", value="记忆" * 2000)],
+        retrieval={"matches": [document]},
+        evidence_ids=["user:current", "memory:偏好", "document:chunk"],
+    )
+    options = source_options(snapshot)
+    assert len(options) == 24
+    selected = next(
+        item["id"] for item in options if item["evidence_ref"] == "document:chunk"
+    )
+    assert selected_excerpts([selected], snapshot) == [document]

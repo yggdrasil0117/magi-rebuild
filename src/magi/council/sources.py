@@ -7,13 +7,15 @@ def source_options(snapshot):
     目录有界且顺序确定；未进入目录的文字仍在快照中，但不能通过编号引用。
     不改写原文，不把历史助手意见或旧计划登记成当前用户陈述。
     """
-    sources = [("user:current", snapshot.get("question", ""))]
+    # 先给本轮最多五条资料分配目录席位，避免长问题/记忆占满24项后资料无法引用。
+    # 顺序只影响本轮source编号，不代表资料比用户要求更有权威。
+    sources = [
+        (m["evidence_ref"], m["quote"])
+        for m in snapshot.get("retrieval", {}).get("matches", [])[:5]
+    ]
+    sources += [("user:current", snapshot.get("question", ""))]
     sources += [
         ("memory:" + m["key"], m["value"]) for m in snapshot.get("memories", [])
-    ]
-    sources += [
-        (m["evidence_ref"], m["quote"])
-        for m in snapshot.get("retrieval", {}).get("matches", [])
     ]
     options = []
     for ref, text in sources:
