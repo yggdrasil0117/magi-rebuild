@@ -42,3 +42,20 @@ def test_authentication_failure_stops_remaining_cases(tmp_path, monkeypatch):
     assert report["stopped_reason"] == "AUTHENTICATION_FAILED"
     assert len(report["not_run_cases"]) == 3
     assert report["attempts"][0]["result"]["status"] == "FAILED"
+
+
+def test_complete_key_with_punctuation_is_preserved(tmp_path, monkeypatch):
+    """完整保留合成密钥的标点，不用sk前缀正则截断真实凭据。"""
+    spec = importlib.util.spec_from_file_location(
+        "rag_key_evaluation", Path("scripts/evaluate_rag_cloud.py")
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    path = tmp_path / "synthetic-key.txt"
+    path.write_text("  synthetic.part/part+part=  \n", encoding="utf-8-sig")
+    monkeypatch.delenv("MAGI_TEST_KEY", raising=False)
+    module.load_api_key(path, "MAGI_TEST_KEY")
+    import os
+
+    assert os.environ["MAGI_TEST_KEY"] == "synthetic.part/part+part="
+    monkeypatch.delenv("MAGI_TEST_KEY")

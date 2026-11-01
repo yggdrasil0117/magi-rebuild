@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 import tempfile
 import time
 from dataclasses import replace
@@ -142,12 +143,30 @@ def evaluate(settings, output):
     print(json.dumps(report["summary"], ensure_ascii=False), flush=True)
 
 
+def load_api_key(path, env_name):
+    """读取用户明确指定的单行完整凭据；只去首尾空白，保留内部标点。
+
+    path来自命令行授权路径，env_name来自模型配置；不输出内容或写入报告。
+    拒绝内部空白，避免把多行说明文件或多份密钥当成单一凭据。
+    """
+    value = path.read_text(encoding="utf-8-sig").strip()
+    if not value or any(character.isspace() for character in value):
+        raise ValueError("凭据文件必须是单行完整值；未输出内容")
+    os.environ[env_name] = value
+
+
 def main():
     """凭据只由已有模型适配器从环境读取；脚本不记录环境或异常正文。"""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--api-key-file", type=Path, help="用户授权的单行凭据文件，不复制到报告"
+    )
     args = parser.parse_args()
-    evaluate(load_config(Path("magi.qianwen.toml")), args.output)
+    settings = load_config(Path("magi.qianwen.toml"))
+    if args.api_key_file:
+        load_api_key(args.api_key_file, settings.api_key_env)
+    evaluate(settings, args.output)
 
 
 if __name__ == "__main__":
