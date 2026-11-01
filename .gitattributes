@@ -1,0 +1,2 @@
+# WSL 验证脚本在 Windows 检出后仍需使用 LF。
+scripts/fixtures/rag_reuse/*.sh text eol=lf

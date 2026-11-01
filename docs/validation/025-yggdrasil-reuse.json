@@ -1,0 +1,349 @@
+{
+  "audit": "025-yggdrasil-retrieval-reuse",
+  "source_revision": "ab50aadda13fb169b1f50f3743cdc08b80a9ab6e",
+  "source_review": {
+    "copied_sources_match": true,
+    "compared_file_count": 240,
+    "source_tree_sha256": "21d19e0ac5b2126186d6bc50ec72f0ba69519d1367d56df2e5338de17eb32e7b",
+    "file_sha256": {
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/RetrievalService.java": "f25852536b12d2a42b9d54ae735e418b0eb5121602198dc5fc7c8ad11c587b38",
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/RetrievalRepository.java": "2d48b56546c34c4ee5fa172ee893031b2b76ccf5645537e9fd2e276d339de7e5",
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/RetrievalController.java": "b59ba69699984c69baa64de4e2ab76808dde445ea55bfb7abbd40c331a263075",
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/RetrievalResult.java": "c665cc0d437fb35456eb51281ea9645efbaaceec1978c58a1c7b08fef46fcca1",
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/EvidencePackageService.java": "ddc82aaf626c5cb3faab996bca2a63a9113a1a98bd3b9d20c94472399d20dc0d",
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/EvidencePackageRepository.java": "1a77e968ee88787ae1ed2a992c49a7fa421efa2fabbef01d9222ab75da223a87",
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/EvidencePackage.java": "8bbbc46c3ff5bc39402e58f350a5e543b8e73cbe420b4dc0f50e617444cebeea",
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/EvidenceItem.java": "f8adebe31ddf53ef23a61742e35abe7f18a9adcc235261818072d9050e4473e3",
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/BgeHttpEmbeddingProvider.java": "d8224c9fdcb0df78ffcb2e146904a4e7722fc3aa8f75437c0513929537c09f6d",
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/BgeHttpReranker.java": "55cb4445d0728451fed74eb643c3332f4c033ae4e116680db794c4f56dc449b1",
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/FeatureHashEmbeddingProvider.java": "35a485601ec6760ba9d94c3369db51e9b76164155f77f7684eac265d1ce6a8f9",
+      "services/core-api/src/main/java/com/yggdrasil/knowledge/TenantContextResolver.java": "b4a8d81895903cdde8d03205e6b5f85af9bee5424575a080f328747c3ac1bd94"
+    }
+  },
+  "historical_review": {
+    "scope": "historical_saved_rankings_only_not_fresh_model_or_retrieval",
+    "dataset": {
+      "documents": 10,
+      "cases": 20,
+      "no_answer_cases": 1,
+      "cases_with_forbidden_documents": 0
+    },
+    "system": {
+      "embeddingProvider": "bge-m3-e1f456861c4ba62db1cf7fc31093d04e66b5040f-d1024",
+      "rerankerModel": "disabled",
+      "rerankerApplied": false
+    },
+    "recalculated": {
+      "caseCount": 20,
+      "recallAt5": 1.0,
+      "recallAt10": 1.0,
+      "recallAt20": 1.0,
+      "precisionAt5": 0.2,
+      "mrrAt10": 0.8043859649122806,
+      "ndcgAt10": 0.8531746645274898,
+      "emptyResultAccuracy": 0.0,
+      "crossBoundaryLeakCount": 0,
+      "latencyP50Ms": 226,
+      "latencyP95Ms": 345
+    },
+    "matches_saved_candidate_metrics": true,
+    "retrieval_gate_passed": false,
+    "gates": {
+      "recallAt10": true,
+      "mrrAt10": true,
+      "ndcgAt10": true,
+      "emptyResultAccuracy": false,
+      "crossBoundaryLeakCount": true,
+      "latencyP95Ms": true
+    },
+    "historical_answer_release": {
+      "passed": true,
+      "iterations": 2,
+      "embeddingProviders": [
+        "bge-m3-e1f456861c4ba62db1cf7fc31093d04e66b5040f-d1024"
+      ],
+      "rerankerModels": [
+        "bge-reranker-v2-m3-953dc6f6"
+      ],
+      "runs": [
+        {
+          "iteration": 1,
+          "status": "passed",
+          "caseCount": 16,
+          "answerCasesPassed": 12,
+          "rejectionCasesPassed": 4,
+          "backgroundProcessingSeconds": 5.84
+        },
+        {
+          "iteration": 2,
+          "status": "passed",
+          "caseCount": 16,
+          "answerCasesPassed": 12,
+          "rejectionCasesPassed": 4,
+          "backgroundProcessingSeconds": 4.02
+        }
+      ]
+    },
+    "file_sha256": {
+      "quality/evaluation/chinese-retrieval-v1.json": "b816b8c9c0dd1097aca328d6095372c5a8730f17bbd3f3e2216ff36178f71dc2",
+      "quality/results/20261003T174800-bge-cpu-safe/results.json": "3d976d18cca31822a2d83f58590a82bd49686ae1b9488eac4d1d5ee386034c43",
+      "quality/results/20261003T174800-bge-cpu-safe/report.json": "554410b1793b04901893e6725840ac62113f2e75ea058ca100f2bc70d93ae3a9",
+      "deploy/tests/retrieval-quality.py": "1d04b2d28181d0fa2433ed85a965768f094167aa3d0a2f5e47901a4f0255ee08",
+      "quality/results/20261004-rag-release-candidate-gpu/report.json": "2709284275b21a8c4415979bc2fde82932528a7ea81a366304ebc7b929f61383"
+    }
+  },
+  "fresh_tests": {
+    "scope": "isolated_java_tests_with_mocks_and_optional_real_postgresql_no_model",
+    "final_suites": [
+      {
+        "name": "com.yggdrasil.knowledge.DocumentProcessingServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.867,
+        "cases": [
+          "userCannotRegisterProcessingResult",
+          "rejectsClassificationAboveSourceCeiling",
+          "publishesTrustedResultAndChunksInOneServiceTransaction",
+          "processingResultRequiresMatchingActiveClaimBeforeRepositoryReads",
+          "rejectsChunkWhoseDigestDoesNotMatchText"
+        ],
+        "xml_sha256": "5632957ce889d66bd790dab969f01a37e830575e61a87a93e2060d90027dc825"
+      },
+      {
+        "name": "com.yggdrasil.knowledge.EmbeddingIndexServiceTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.093,
+        "cases": [
+          "rebuildIsTenantAuthorizedBoundedAndIdempotent",
+          "statusReportsCurrentProviderCoverage",
+          "rejectsUnboundedRebuildBeforeReadingChunks"
+        ],
+        "xml_sha256": "c7d402abf2353319df14131e0686f6fb6fbfb63d049568ce1a881495c8bc1089"
+      },
+      {
+        "name": "com.yggdrasil.knowledge.EvidencePackageServiceTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.179,
+        "cases": [
+          "clearanceDropBeforeFreezeRejectsMaterializedEvidence",
+          "freezesExactRetrievedTextIntoImmutablePackage",
+          "crossTenantOrAboveClearancePackageFailsClosed",
+          "alteredQuoteFailsPackageIntegrityVerification",
+          "currentClearanceControlsFrozenPackageRead",
+          "preservesExplicitSourceScopeEvenWhenRetrievalHasNoHits"
+        ],
+        "xml_sha256": "b0a38dd83114de2fab1e54d1437390142237cd125f350386d85a66cac1d7319c"
+      },
+      {
+        "name": "com.yggdrasil.knowledge.EvidenceRevocationIntegrationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 6.725,
+        "cases": [
+          "scopedFallbackCannotBypassCurrentClassification",
+          "frozenSourceAndVersionMustBelongToTheActualChunk",
+          "reclassificationFiltersBothCandidateSelectionAndLateMaterialization",
+          "sourcePauseAndRetirementInvalidateFrozenItemsWithoutDeletingThem",
+          "currentDocumentStateAndClassificationAreEnforced"
+        ],
+        "xml_sha256": "7d7f9d103a422c6faf68586b9f9dbf63772626f65469704975ef82447b50a978"
+      },
+      {
+        "name": "com.yggdrasil.knowledge.FeatureHashEmbeddingProviderTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.02,
+        "cases": [
+          "relatedChineseTextSharesMoreFeaturesThanUnrelatedText",
+          "producesStableNormalizedVectorsWithoutModelDependencies"
+        ],
+        "xml_sha256": "dd00d53c05aa7278233341c1700f848411e18f57fe621f99b040993291b500ec"
+      },
+      {
+        "name": "com.yggdrasil.knowledge.RagReuseAuditTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 3.596,
+        "cases": [
+          "frozenEvidenceIsNotARelevanceVerdictAndLosesScoringProvenance",
+          "embeddingFailurePreventsEvenLexicalRepositoryAccess"
+        ],
+        "xml_sha256": "5d237751dc6fad7942589f41e8ad48f796654fee2ac2c0b26559f2106d3186af"
+      },
+      {
+        "name": "com.yggdrasil.knowledge.RagReuseDatabaseAuditTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 1.024,
+        "cases": [
+          "sourceScopedSearchReturnsBothVersionsUnlessCallerChoosesAVersionPolicy"
+        ],
+        "xml_sha256": "f04198f9da6d84973645cd1178965e2b9f86b4a491b1db7ece11424da3778ee8"
+      },
+      {
+        "name": "com.yggdrasil.knowledge.RetrievalServiceTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.213,
+        "cases": [
+          "derivesBoundedChineseSubstringsForNaturalQuestions",
+          "keepsMeaningfulBigramsForParaphrasedChineseQuestions",
+          "keepsTwoCharacterChineseQueriesSearchable",
+          "revokedAccessStopsBeforeMaterialization",
+          "fallsBackToAuthorizedHybridRankingWhenRerankerIsUnavailable",
+          "rejectsARerankerCandidateOutsideTheAuthorizedSet",
+          "rechecksAuthorizationBeforeMaterializingText",
+          "forwardsAnExplicitSourceScopeToBothAuthorizationQueries",
+          "rejectsUnboundedQueryBeforeAuthorization",
+          "skipsRerankingWhenNoAuthorizedCandidatesExist",
+          "reranksOnlyMaterializedAuthorizedCandidates",
+          "sourceScopedFallbackIsReservedForDocumentOverviewIntent",
+          "boundsTheRerankLimitToTheAuthorizedCandidateCount",
+          "expandsColloquialQuestionsIntoDocumentVocabulary",
+          "prioritizesTheCurrentFollowUpInsteadOfEmbeddingThePreviousAnswer"
+        ],
+        "xml_sha256": "9002449b33c25835a9ed827a3f1f9d923529afdc1e96967ef979c21f07d2980d"
+      },
+      {
+        "name": "com.yggdrasil.knowledge.SourceAuthorizationServiceTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.007,
+        "cases": [
+          "workerPrincipalCannotUseCatalogRoles",
+          "activeRoleReturnsDatabaseClearance",
+          "inactiveOrMissingMembershipFailsClosed"
+        ],
+        "xml_sha256": "346a3cbe1d4023cc35856c759d5b79e82e5e00ee48f973e475a218ab1e7cd407"
+      },
+      {
+        "name": "com.yggdrasil.knowledge.TenantContextResolverTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.262,
+        "cases": [
+          "unknownLocalFixtureFailsClosed",
+          "oidcContextRejectsMissingOrUnknownPrincipalType",
+          "localProfileResolvesOnlyKnownFixture",
+          "oidcContextUsesOnlyVerifiedAuthenticationClaims",
+          "localWorkerFixtureCannotBeConfusedWithAUser"
+        ],
+        "xml_sha256": "0abee2079ce14ee2ebba04b371ffcbf788bd8620ed72ea8991aad1513aec032c"
+      },
+      {
+        "name": "com.yggdrasil.knowledge.TenantIsolationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.025,
+        "cases": [
+          "repositoryLookupAlwaysReceivesOrganizationAndWorkspaceScope",
+          "rejectsWorkspaceFromAnotherTenantBeforeQueryingStorage"
+        ],
+        "xml_sha256": "af5b3b2226a2b6f166b19c6de645af33bb7ecfbd2cea26e8517f079438c510d4"
+      }
+    ],
+    "final_totals": {
+      "tests": 49,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "attempts": [
+      {
+        "log": "maven-attempt-1.log",
+        "sha256": "9bfe3c4cfdcd3c6cee3893de855bbe9da96ea1f86fab0f418e487e685fd885ff",
+        "build_success": true,
+        "reported_totals": {
+          "tests": 41,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "database_connection_refused": false,
+        "container_missing": false,
+        "fixture_object_key_rejected": false
+      },
+      {
+        "log": "maven-attempt-2.log",
+        "sha256": "c209e8fcc055e5b70fade1143a8d84f309e5fbc53a56e26b34523a25c2eeedb5",
+        "build_success": false,
+        "reported_totals": {
+          "tests": 4,
+          "failures": 0,
+          "errors": 2,
+          "skipped": 0
+        },
+        "database_connection_refused": true,
+        "container_missing": false,
+        "fixture_object_key_rejected": false
+      },
+      {
+        "log": "maven-attempt-3.log",
+        "sha256": "6571d8881a7344e643305043e7578afef044486938ebc48aa63bd6260cf6812e",
+        "build_success": false,
+        "reported_totals": null,
+        "database_connection_refused": false,
+        "container_missing": true,
+        "fixture_object_key_rejected": false
+      },
+      {
+        "log": "maven-attempt-4.log",
+        "sha256": "cab97714a1a6b01299db5b16782356c545ef1d92f855bf361838e6c3b815c449",
+        "build_success": false,
+        "reported_totals": {
+          "tests": 8,
+          "failures": 0,
+          "errors": 1,
+          "skipped": 0
+        },
+        "database_connection_refused": false,
+        "container_missing": false,
+        "fixture_object_key_rejected": true
+      },
+      {
+        "log": "maven-attempt-5.log",
+        "sha256": "8c1477537f2dd78348208c8cad15dc0dd75f3ec45c005fd1b4d54df84b66c016",
+        "build_success": true,
+        "reported_totals": {
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "database_connection_refused": false,
+        "container_missing": false,
+        "fixture_object_key_rejected": false
+      }
+    ]
+  },
+  "not_performed": [
+    "fresh_bge_retrieval_quality",
+    "real_llm_generation",
+    "browser",
+    "magi_service_integration"
+  ]
+}
