@@ -1,0 +1,227 @@
+{
+  "mode": "offline; no retries; synthetic documents",
+  "attempts": [
+    {
+      "case": "原词",
+      "question": "计划导出",
+      "result": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "951a64e9df797ed346f427d5d739042af9eb1645670e887acd0109638b1c06ea",
+            "version_id": "6daae4893b14ee2d67ae8023add2f33841874c67b6e344a9e3e97c97009a32a4",
+            "chunk_id": "9435f2434e862ff149aa4dd53f105fcb66d5e5c2f61521bb1c4ec7f2a2a2630d",
+            "evidence_ref": "document:9435f2434e862ff149aa4dd53f105fcb66d5e5c2f61521bb1c4ec7f2a2a2630d",
+            "path": "guide.txt",
+            "line": 1,
+            "offset": 0,
+            "quote": "计划导出只生成文件，不代表执行完成。",
+            "sha256": "67962a689df77d5d7fa8060f1477e6d68c561db0bf549dc9381777522fc7a0e0",
+            "score": 3,
+            "matched_terms": [
+              "计划",
+              "划导",
+              "导出"
+            ]
+          }
+        ],
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "query_terms": [
+          "计划",
+          "划导",
+          "导出"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 1,
+          "files_examined": 1,
+          "bytes_read": 54,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 0.01928100000077393
+    },
+    {
+      "case": "同义改写",
+      "question": "输出清单算办妥了吗",
+      "result": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "query_terms": [
+          "输出",
+          "出清",
+          "清单",
+          "单算",
+          "算办",
+          "办妥",
+          "妥了",
+          "了吗"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 1,
+          "files_examined": 1,
+          "bytes_read": 54,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 0.005174000001716195
+    },
+    {
+      "case": "资料无答案",
+      "question": "量子引力",
+      "result": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "query_terms": [
+          "量子",
+          "子引",
+          "引力"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 1,
+          "files_examined": 1,
+          "bytes_read": 54,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 0.0050282000011065975
+    },
+    {
+      "case": "同文档新旧版本",
+      "passed": true
+    },
+    {
+      "case": "文件删除",
+      "result": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "query_terms": [
+          "计划",
+          "划导",
+          "导出"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 0,
+          "files_examined": 0,
+          "bytes_read": 0,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。字词重合不证明资料支持结论；无结果不等于没有答案。"
+      }
+    },
+    {
+      "case": "检索失败",
+      "result": {
+        "status": "FAILED",
+        "matches": [],
+        "complete": false,
+        "method": "bounded keywords",
+        "notice": "资料读取或索引失败，本轮没有可用资料证据；未使用旧缓存。"
+      }
+    },
+    {
+      "case": "伪造引用",
+      "rejected": true
+    },
+    {
+      "case": "索引重开",
+      "versions": 2,
+      "result": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "query_terms": [
+          "计划",
+          "划导",
+          "导出"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 0,
+          "files_examined": 0,
+          "bytes_read": 0,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "note": "仅索引重开，进程重启另见浏览器验收"
+    }
+  ],
+  "model_calls": 0,
+  "tokens": 0,
+  "semantic_review": "未执行真实模型引用支持与三人格内容复核"
+}

@@ -1,0 +1,20 @@
+{
+  "mode": "real Edge and HTTP/SQLite; scripted model and session",
+  "turns": 1,
+  "plans": 1,
+  "old_quote_retained": true,
+  "old_snapshot_retained": true,
+  "current_file_changed": true,
+  "restart_pids": [
+    104408,
+    106444,
+    128288
+  ],
+  "browser_assertions": {
+    "oldEvidenceVisible": true,
+    "savedVersionVisible": true
+  },
+  "console": "只有密码框不在form中的浏览器提示，未发现JS错误",
+  "screenshot": "027-rag-restarted.png",
+  "limitations": "模型与checkpoint为桩；真实模型内容质量未验收"
+}

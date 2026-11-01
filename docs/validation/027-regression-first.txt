@@ -1,0 +1,497 @@
+.......................................FFFFFF........................... [ 18%]
+........................................................................ [ 36%]
+........................................................................ [ 54%]
+........................................................................ [ 73%]
+........................................................................ [ 91%]
+..................................                                       [100%]
+================================== FAILURES ===================================
+_ test_explicit_allocations_survive_generation_and_render[blocks0-90-totals0] _
+
+tmp_path = WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-rag-final/test_explicit_allocations_surv0')
+blocks = [('work', '�Ķ�', 30, '����������'), ('rest', '��Ϣ', 10, 'ֹͣѧϰ'), ('work', '����', 50, '��¼�����������')]
+budget = 90, totals = [80, 10, 0, 0]
+
+    @pytest.mark.parametrize(
+        "blocks,budget,totals",
+        [
+            (
+                [
+                    ("work", "�Ķ�", 30, "����������"),
+                    ("rest", "��Ϣ", 10, "ֹͣѧϰ"),
+                    ("work", "����", 50, "��¼�����������"),
+                ],
+                90,
+                [80, 10, 0, 0],
+            ),
+            (
+                [
+                    ("work", "�����µ�", 10, "�����ύ"),
+                    ("rest", "��Ϣ", 45, "ֹͣ����"),
+                    ("buffer", "Ԥ��", 5, "����ŵ�������"),
+                ],
+                60,
+                [10, 45, 0, 5],
+            ),
+            (
+                [
+                    ("work", "ʵ��", 150, "��¼���"),
+                    ("work", "��ְ", 120, "�޸ļ���"),
+                    ("rest", "��Ϣ", 60, "ֹͣ����"),
+                    ("review", "����", 30, "д����һ��"),
+                ],
+                360,
+                [270, 60, 30, 0],
+            ),
+            (
+                [
+                    ("work", "ȷ������", 30, "ѡ���ص�"),
+                    ("work", "��ϰ", 150, "�޸Ľӿ�"),
+                    ("rest", "��Ϣ", 30, "ֹͣѧϰ"),
+                    ("review", "�ع�", 30, "���͵�����"),
+                ],
+                240,
+                [180, 30, 30, 0],
+            ),
+            (
+                [("work", "�����µ�", 10, "�����ύ"), ("rest", "��Ϣ", 50, "ֹͣ����")],
+                60,
+                [10, 50, 0, 0],
+            ),
+            # Unseen case: leave spare budget, with all four categories.
+            (
+                [
+                    ("work", "ԤԼά��", 7, "���ԤԼ��"),
+                    ("rest", "��Ϣ", 13, "ֹͣ����"),
+                    ("review", "��¼", 4, "��¼����"),
+                    ("buffer", "�ȴ�����", 6, "�������"),
+                ],
+                40,
+                [7, 13, 4, 6],
+            ),
+        ],
+    )
+    def test_explicit_allocations_survive_generation_and_render(
+        tmp_path, blocks, budget, totals
+    ):
+        result = run_candidate(tmp_path, candidate_for(blocks), time_budget_minutes=budget)
+        assert result["status"] == "COMPLETED" and result["calls"] == 4
+        actual = result["synthesis_diagnostics"]["minutes_by_kind"]
+        assert [actual.get(k, 0) for k in ("work", "rest", "review", "buffer")] == totals
+        body = candidate_body(Candidate(**result["candidate"]))
+        assert f"�ϼ� {sum(totals)} ����" in body
+>       assert "�û���������" in body and "ģ�ͼ���" in body and "��ȷ������" in body
+E       AssertionError: assert ('�û���������' in '��������\n\n�޶�/�������ɣ�������λ����Ϣ���ݻ���չ����\n1. [����] �Ķ���Ԥ�� 30 ���ӣ�\n   �������������������\n2. [��Ϣ] ��Ϣ��Ԥ�� 10 ���ӣ�\n   ���������ֹͣѧϰ\n3. [����] ���ԣ�Ԥ...�����ϣ���������ʵ��ʵ����\n- [user:current] ���ߵ���û����\n\nģ�ͼ��裨���û�ȷ�ϣ���\n- ��������������\n\n��ȷ�����\n- ���屨��λ��\n\n��˶��ж�����������·�����ͨ������У�鲻����������ȷ��')
+
+tests\test_council_consistency.py:135: AssertionError
+_ test_explicit_allocations_survive_generation_and_render[blocks1-60-totals1] _
+
+tmp_path = WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-rag-final/test_explicit_allocations_surv1')
+blocks = [('work', '�����µ�', 10, '�����ύ'), ('rest', '��Ϣ', 45, 'ֹͣ����'), ('buffer', 'Ԥ��', 5, '����ŵ�������')]
+budget = 60, totals = [10, 45, 0, 5]
+
+    @pytest.mark.parametrize(
+        "blocks,budget,totals",
+        [
+            (
+                [
+                    ("work", "�Ķ�", 30, "����������"),
+                    ("rest", "��Ϣ", 10, "ֹͣѧϰ"),
+                    ("work", "����", 50, "��¼�����������"),
+                ],
+                90,
+                [80, 10, 0, 0],
+            ),
+            (
+                [
+                    ("work", "�����µ�", 10, "�����ύ"),
+                    ("rest", "��Ϣ", 45, "ֹͣ����"),
+                    ("buffer", "Ԥ��", 5, "����ŵ�������"),
+                ],
+                60,
+                [10, 45, 0, 5],
+            ),
+            (
+                [
+                    ("work", "ʵ��", 150, "��¼���"),
+                    ("work", "��ְ", 120, "�޸ļ���"),
+                    ("rest", "��Ϣ", 60, "ֹͣ����"),
+                    ("review", "����", 30, "д����һ��"),
+                ],
+                360,
+                [270, 60, 30, 0],
+            ),
+            (
+                [
+                    ("work", "ȷ������", 30, "ѡ���ص�"),
+                    ("work", "��ϰ", 150, "�޸Ľӿ�"),
+                    ("rest", "��Ϣ", 30, "ֹͣѧϰ"),
+                    ("review", "�ع�", 30, "���͵�����"),
+                ],
+                240,
+                [180, 30, 30, 0],
+            ),
+            (
+                [("work", "�����µ�", 10, "�����ύ"), ("rest", "��Ϣ", 50, "ֹͣ����")],
+                60,
+                [10, 50, 0, 0],
+            ),
+            # Unseen case: leave spare budget, with all four categories.
+            (
+                [
+                    ("work", "ԤԼά��", 7, "���ԤԼ��"),
+                    ("rest", "��Ϣ", 13, "ֹͣ����"),
+                    ("review", "��¼", 4, "��¼����"),
+                    ("buffer", "�ȴ�����", 6, "�������"),
+                ],
+                40,
+                [7, 13, 4, 6],
+            ),
+        ],
+    )
+    def test_explicit_allocations_survive_generation_and_render(
+        tmp_path, blocks, budget, totals
+    ):
+        result = run_candidate(tmp_path, candidate_for(blocks), time_budget_minutes=budget)
+        assert result["status"] == "COMPLETED" and result["calls"] == 4
+        actual = result["synthesis_diagnostics"]["minutes_by_kind"]
+        assert [actual.get(k, 0) for k in ("work", "rest", "review", "buffer")] == totals
+        body = candidate_body(Candidate(**result["candidate"]))
+        assert f"�ϼ� {sum(totals)} ����" in body
+>       assert "�û���������" in body and "ģ�ͼ���" in body and "��ȷ������" in body
+E       AssertionError: assert ('�û���������' in '��������\n\n�޶�/�������ɣ�������λ����Ϣ���ݻ���չ����\n1. [����] �����µ���Ԥ�� 10 ���ӣ�\n   ��������������ύ\n2. [��Ϣ] ��Ϣ��Ԥ�� 45 ���ӣ�\n   ���������ֹͣ����\n3. [����] Ԥ����...�����ϣ���������ʵ��ʵ����\n- [user:current] ���ߵ���û����\n\nģ�ͼ��裨���û�ȷ�ϣ���\n- ��������������\n\n��ȷ�����\n- ���屨��λ��\n\n��˶��ж�����������·�����ͨ������У�鲻����������ȷ��')
+
+tests\test_council_consistency.py:135: AssertionError
+_ test_explicit_allocations_survive_generation_and_render[blocks2-360-totals2] _
+
+tmp_path = WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-rag-final/test_explicit_allocations_surv2')
+blocks = [('work', 'ʵ��', 150, '��¼���'), ('work', '��ְ', 120, '�޸ļ���'), ('rest', '��Ϣ', 60, 'ֹͣ����'), ('review', '����', 30, 'д����һ��')]
+budget = 360, totals = [270, 60, 30, 0]
+
+    @pytest.mark.parametrize(
+        "blocks,budget,totals",
+        [
+            (
+                [
+                    ("work", "�Ķ�", 30, "����������"),
+                    ("rest", "��Ϣ", 10, "ֹͣѧϰ"),
+                    ("work", "����", 50, "��¼�����������"),
+                ],
+                90,
+                [80, 10, 0, 0],
+            ),
+            (
+                [
+                    ("work", "�����µ�", 10, "�����ύ"),
+                    ("rest", "��Ϣ", 45, "ֹͣ����"),
+                    ("buffer", "Ԥ��", 5, "����ŵ�������"),
+                ],
+                60,
+                [10, 45, 0, 5],
+            ),
+            (
+                [
+                    ("work", "ʵ��", 150, "��¼���"),
+                    ("work", "��ְ", 120, "�޸ļ���"),
+                    ("rest", "��Ϣ", 60, "ֹͣ����"),
+                    ("review", "����", 30, "д����һ��"),
+                ],
+                360,
+                [270, 60, 30, 0],
+            ),
+            (
+                [
+                    ("work", "ȷ������", 30, "ѡ���ص�"),
+                    ("work", "��ϰ", 150, "�޸Ľӿ�"),
+                    ("rest", "��Ϣ", 30, "ֹͣѧϰ"),
+                    ("review", "�ع�", 30, "���͵�����"),
+                ],
+                240,
+                [180, 30, 30, 0],
+            ),
+            (
+                [("work", "�����µ�", 10, "�����ύ"), ("rest", "��Ϣ", 50, "ֹͣ����")],
+                60,
+                [10, 50, 0, 0],
+            ),
+            # Unseen case: leave spare budget, with all four categories.
+            (
+                [
+                    ("work", "ԤԼά��", 7, "���ԤԼ��"),
+                    ("rest", "��Ϣ", 13, "ֹͣ����"),
+                    ("review", "��¼", 4, "��¼����"),
+                    ("buffer", "�ȴ�����", 6, "�������"),
+                ],
+                40,
+                [7, 13, 4, 6],
+            ),
+        ],
+    )
+    def test_explicit_allocations_survive_generation_and_render(
+        tmp_path, blocks, budget, totals
+    ):
+        result = run_candidate(tmp_path, candidate_for(blocks), time_budget_minutes=budget)
+        assert result["status"] == "COMPLETED" and result["calls"] == 4
+        actual = result["synthesis_diagnostics"]["minutes_by_kind"]
+        assert [actual.get(k, 0) for k in ("work", "rest", "review", "buffer")] == totals
+        body = candidate_body(Candidate(**result["candidate"]))
+        assert f"�ϼ� {sum(totals)} ����" in body
+>       assert "�û���������" in body and "ģ�ͼ���" in body and "��ȷ������" in body
+E       AssertionError: assert ('�û���������' in '��������\n\n�޶�/�������ɣ�������λ����Ϣ���ݻ���չ����\n1. [����] ʵ�飨Ԥ�� 150 ���ӣ�\n   �����������¼���\n2. [����] ��ְ��Ԥ�� 120 ���ӣ�\n   ����������޸ļ���\n3. [��Ϣ] ��Ϣ��...�����ϣ���������ʵ��ʵ����\n- [user:current] ���ߵ���û����\n\nģ�ͼ��裨���û�ȷ�ϣ���\n- ��������������\n\n��ȷ�����\n- ���屨��λ��\n\n��˶��ж�����������·�����ͨ������У�鲻����������ȷ��')
+
+tests\test_council_consistency.py:135: AssertionError
+_ test_explicit_allocations_survive_generation_and_render[blocks3-240-totals3] _
+
+tmp_path = WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-rag-final/test_explicit_allocations_surv3')
+blocks = [('work', 'ȷ������', 30, 'ѡ���ص�'), ('work', '��ϰ', 150, '�޸Ľӿ�'), ('rest', '��Ϣ', 30, 'ֹͣѧϰ'), ('review', '�ع�', 30, '���͵�����')]
+budget = 240, totals = [180, 30, 30, 0]
+
+    @pytest.mark.parametrize(
+        "blocks,budget,totals",
+        [
+            (
+                [
+                    ("work", "�Ķ�", 30, "����������"),
+                    ("rest", "��Ϣ", 10, "ֹͣѧϰ"),
+                    ("work", "����", 50, "��¼�����������"),
+                ],
+                90,
+                [80, 10, 0, 0],
+            ),
+            (
+                [
+                    ("work", "�����µ�", 10, "�����ύ"),
+                    ("rest", "��Ϣ", 45, "ֹͣ����"),
+                    ("buffer", "Ԥ��", 5, "����ŵ�������"),
+                ],
+                60,
+                [10, 45, 0, 5],
+            ),
+            (
+                [
+                    ("work", "ʵ��", 150, "��¼���"),
+                    ("work", "��ְ", 120, "�޸ļ���"),
+                    ("rest", "��Ϣ", 60, "ֹͣ����"),
+                    ("review", "����", 30, "д����һ��"),
+                ],
+                360,
+                [270, 60, 30, 0],
+            ),
+            (
+                [
+                    ("work", "ȷ������", 30, "ѡ���ص�"),
+                    ("work", "��ϰ", 150, "�޸Ľӿ�"),
+                    ("rest", "��Ϣ", 30, "ֹͣѧϰ"),
+                    ("review", "�ع�", 30, "���͵�����"),
+                ],
+                240,
+                [180, 30, 30, 0],
+            ),
+            (
+                [("work", "�����µ�", 10, "�����ύ"), ("rest", "��Ϣ", 50, "ֹͣ����")],
+                60,
+                [10, 50, 0, 0],
+            ),
+            # Unseen case: leave spare budget, with all four categories.
+            (
+                [
+                    ("work", "ԤԼά��", 7, "���ԤԼ��"),
+                    ("rest", "��Ϣ", 13, "ֹͣ����"),
+                    ("review", "��¼", 4, "��¼����"),
+                    ("buffer", "�ȴ�����", 6, "�������"),
+                ],
+                40,
+                [7, 13, 4, 6],
+            ),
+        ],
+    )
+    def test_explicit_allocations_survive_generation_and_render(
+        tmp_path, blocks, budget, totals
+    ):
+        result = run_candidate(tmp_path, candidate_for(blocks), time_budget_minutes=budget)
+        assert result["status"] == "COMPLETED" and result["calls"] == 4
+        actual = result["synthesis_diagnostics"]["minutes_by_kind"]
+        assert [actual.get(k, 0) for k in ("work", "rest", "review", "buffer")] == totals
+        body = candidate_body(Candidate(**result["candidate"]))
+        assert f"�ϼ� {sum(totals)} ����" in body
+>       assert "�û���������" in body and "ģ�ͼ���" in body and "��ȷ������" in body
+E       AssertionError: assert ('�û���������' in '��������\n\n�޶�/�������ɣ�������λ����Ϣ���ݻ���չ����\n1. [����] ȷ�����Σ�Ԥ�� 30 ���ӣ�\n   ���������ѡ���ص�\n2. [����] ��ϰ��Ԥ�� 150 ���ӣ�\n   ����������޸Ľӿ�\n3. [��Ϣ] ��Ϣ...�����ϣ���������ʵ��ʵ����\n- [user:current] ���ߵ���û����\n\nģ�ͼ��裨���û�ȷ�ϣ���\n- ��������������\n\n��ȷ�����\n- ���屨��λ��\n\n��˶��ж�����������·�����ͨ������У�鲻����������ȷ��')
+
+tests\test_council_consistency.py:135: AssertionError
+_ test_explicit_allocations_survive_generation_and_render[blocks4-60-totals4] _
+
+tmp_path = WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-rag-final/test_explicit_allocations_surv4')
+blocks = [('work', '�����µ�', 10, '�����ύ'), ('rest', '��Ϣ', 50, 'ֹͣ����')], budget = 60
+totals = [10, 50, 0, 0]
+
+    @pytest.mark.parametrize(
+        "blocks,budget,totals",
+        [
+            (
+                [
+                    ("work", "�Ķ�", 30, "����������"),
+                    ("rest", "��Ϣ", 10, "ֹͣѧϰ"),
+                    ("work", "����", 50, "��¼�����������"),
+                ],
+                90,
+                [80, 10, 0, 0],
+            ),
+            (
+                [
+                    ("work", "�����µ�", 10, "�����ύ"),
+                    ("rest", "��Ϣ", 45, "ֹͣ����"),
+                    ("buffer", "Ԥ��", 5, "����ŵ�������"),
+                ],
+                60,
+                [10, 45, 0, 5],
+            ),
+            (
+                [
+                    ("work", "ʵ��", 150, "��¼���"),
+                    ("work", "��ְ", 120, "�޸ļ���"),
+                    ("rest", "��Ϣ", 60, "ֹͣ����"),
+                    ("review", "����", 30, "д����һ��"),
+                ],
+                360,
+                [270, 60, 30, 0],
+            ),
+            (
+                [
+                    ("work", "ȷ������", 30, "ѡ���ص�"),
+                    ("work", "��ϰ", 150, "�޸Ľӿ�"),
+                    ("rest", "��Ϣ", 30, "ֹͣѧϰ"),
+                    ("review", "�ع�", 30, "���͵�����"),
+                ],
+                240,
+                [180, 30, 30, 0],
+            ),
+            (
+                [("work", "�����µ�", 10, "�����ύ"), ("rest", "��Ϣ", 50, "ֹͣ����")],
+                60,
+                [10, 50, 0, 0],
+            ),
+            # Unseen case: leave spare budget, with all four categories.
+            (
+                [
+                    ("work", "ԤԼά��", 7, "���ԤԼ��"),
+                    ("rest", "��Ϣ", 13, "ֹͣ����"),
+                    ("review", "��¼", 4, "��¼����"),
+                    ("buffer", "�ȴ�����", 6, "�������"),
+                ],
+                40,
+                [7, 13, 4, 6],
+            ),
+        ],
+    )
+    def test_explicit_allocations_survive_generation_and_render(
+        tmp_path, blocks, budget, totals
+    ):
+        result = run_candidate(tmp_path, candidate_for(blocks), time_budget_minutes=budget)
+        assert result["status"] == "COMPLETED" and result["calls"] == 4
+        actual = result["synthesis_diagnostics"]["minutes_by_kind"]
+        assert [actual.get(k, 0) for k in ("work", "rest", "review", "buffer")] == totals
+        body = candidate_body(Candidate(**result["candidate"]))
+        assert f"�ϼ� {sum(totals)} ����" in body
+>       assert "�û���������" in body and "ģ�ͼ���" in body and "��ȷ������" in body
+E       AssertionError: assert ('�û���������' in '��������\n\n�޶�/�������ɣ�������λ����Ϣ���ݻ���չ����\n1. [����] �����µ���Ԥ�� 10 ���ӣ�\n   ��������������ύ\n2. [��Ϣ] ��Ϣ��Ԥ�� 50 ���ӣ�\n   ���������ֹͣ����\n\nʱ����䣨�������...�����ϣ���������ʵ��ʵ����\n- [user:current] ���ߵ���û����\n\nģ�ͼ��裨���û�ȷ�ϣ���\n- ��������������\n\n��ȷ�����\n- ���屨��λ��\n\n��˶��ж�����������·�����ͨ������У�鲻����������ȷ��')
+
+tests\test_council_consistency.py:135: AssertionError
+_ test_explicit_allocations_survive_generation_and_render[blocks5-40-totals5] _
+
+tmp_path = WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-rag-final/test_explicit_allocations_surv5')
+blocks = [('work', 'ԤԼά��', 7, '���ԤԼ��'), ('rest', '��Ϣ', 13, 'ֹͣ����'), ('review', '��¼', 4, '��¼����'), ('buffer', '�ȴ�����', 6, '�������')]
+budget = 40, totals = [7, 13, 4, 6]
+
+    @pytest.mark.parametrize(
+        "blocks,budget,totals",
+        [
+            (
+                [
+                    ("work", "�Ķ�", 30, "����������"),
+                    ("rest", "��Ϣ", 10, "ֹͣѧϰ"),
+                    ("work", "����", 50, "��¼�����������"),
+                ],
+                90,
+                [80, 10, 0, 0],
+            ),
+            (
+                [
+                    ("work", "�����µ�", 10, "�����ύ"),
+                    ("rest", "��Ϣ", 45, "ֹͣ����"),
+                    ("buffer", "Ԥ��", 5, "����ŵ�������"),
+                ],
+                60,
+                [10, 45, 0, 5],
+            ),
+            (
+                [
+                    ("work", "ʵ��", 150, "��¼���"),
+                    ("work", "��ְ", 120, "�޸ļ���"),
+                    ("rest", "��Ϣ", 60, "ֹͣ����"),
+                    ("review", "����", 30, "д����һ��"),
+                ],
+                360,
+                [270, 60, 30, 0],
+            ),
+            (
+                [
+                    ("work", "ȷ������", 30, "ѡ���ص�"),
+                    ("work", "��ϰ", 150, "�޸Ľӿ�"),
+                    ("rest", "��Ϣ", 30, "ֹͣѧϰ"),
+                    ("review", "�ع�", 30, "���͵�����"),
+                ],
+                240,
+                [180, 30, 30, 0],
+            ),
+            (
+                [("work", "�����µ�", 10, "�����ύ"), ("rest", "��Ϣ", 50, "ֹͣ����")],
+                60,
+                [10, 50, 0, 0],
+            ),
+            # Unseen case: leave spare budget, with all four categories.
+            (
+                [
+                    ("work", "ԤԼά��", 7, "���ԤԼ��"),
+                    ("rest", "��Ϣ", 13, "ֹͣ����"),
+                    ("review", "��¼", 4, "��¼����"),
+                    ("buffer", "�ȴ�����", 6, "�������"),
+                ],
+                40,
+                [7, 13, 4, 6],
+            ),
+        ],
+    )
+    def test_explicit_allocations_survive_generation_and_render(
+        tmp_path, blocks, budget, totals
+    ):
+        result = run_candidate(tmp_path, candidate_for(blocks), time_budget_minutes=budget)
+        assert result["status"] == "COMPLETED" and result["calls"] == 4
+        actual = result["synthesis_diagnostics"]["minutes_by_kind"]
+        assert [actual.get(k, 0) for k in ("work", "rest", "review", "buffer")] == totals
+        body = candidate_body(Candidate(**result["candidate"]))
+        assert f"�ϼ� {sum(totals)} ����" in body
+>       assert "�û���������" in body and "ģ�ͼ���" in body and "��ȷ������" in body
+E       AssertionError: assert ('�û���������' in '��������\n\n�޶�/�������ɣ�������λ����Ϣ���ݻ���չ����\n1. [����] ԤԼά�ޣ�Ԥ�� 7 ���ӣ�\n   ������������ԤԼ��\n2. [��Ϣ] ��Ϣ��Ԥ�� 13 ���ӣ�\n   ���������ֹͣ����\n3. [����] ��¼��...�����ϣ���������ʵ��ʵ����\n- [user:current] ���ߵ���û����\n\nģ�ͼ��裨���û�ȷ�ϣ���\n- ��������������\n\n��ȷ�����\n- ���屨��λ��\n\n��˶��ж�����������·�����ͨ������У�鲻����������ȷ��')
+
+tests\test_council_consistency.py:135: AssertionError
+============================== warnings summary ===============================
+.venv-harness\Lib\site-packages\starlette\testclient.py:51
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\starlette\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_terminal.py::test_real_http_client_auth_and_terminal_turn
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+tests/test_terminal.py::test_real_http_client_auth_and_terminal_turn
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+    from websockets.server import WebSocketServerProtocol
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_council_consistency.py::test_explicit_allocations_survive_generation_and_render[blocks0-90-totals0]
+FAILED tests/test_council_consistency.py::test_explicit_allocations_survive_generation_and_render[blocks1-60-totals1]
+FAILED tests/test_council_consistency.py::test_explicit_allocations_survive_generation_and_render[blocks2-360-totals2]
+FAILED tests/test_council_consistency.py::test_explicit_allocations_survive_generation_and_render[blocks3-240-totals3]
+FAILED tests/test_council_consistency.py::test_explicit_allocations_survive_generation_and_render[blocks4-60-totals4]
+FAILED tests/test_council_consistency.py::test_explicit_allocations_survive_generation_and_render[blocks5-40-totals5]
+6 failed, 388 passed, 3 warnings in 34.89s

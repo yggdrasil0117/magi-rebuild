@@ -58,6 +58,26 @@ function show(turn) {
     .split('\n\n候选 ID：')[0].replace(/\n调用 \d+\/4 · 耗时 [^\n]+/g, '');
   pre.textContent = '你：' + turn.user_text + '\n\n' + answer;
   article.append(pre);
+  // 来源是后端冻结的本轮原文；DOM使用textContent，不执行资料中的HTML。
+  const retrieval = turn.retrieval || turn.result?.snapshot?.retrieval;
+  if (retrieval) {
+    const evidence = document.createElement('details'), label = document.createElement('summary');
+    label.textContent = '本轮参考资料 · ' + ({FOUND: '找到相关字词', NO_RESULTS: '未找到匹配', FAILED: '检索失败'}[retrieval.status] || retrieval.status);
+    evidence.append(label);
+    const notice = document.createElement('p');
+    notice.textContent = retrieval.notice + (retrieval.complete ? ' 本次扫描与返回未超限。' : ' 本次覆盖或返回不完整。');
+    evidence.append(notice);
+    for (const item of retrieval.matches) {
+      const source = document.createElement('pre');
+      source.textContent = item.path + ' · 第' + item.line + '行 · 版本 ' + item.version_id.slice(0, 12) + '\n' + item.quote;
+      const ids = document.createElement('details'), title = document.createElement('summary'), values = document.createElement('pre');
+      title.textContent = '查看资料标识';
+      values.textContent = '文档：' + item.document_id + '\n版本：' + item.version_id + '\n分块：' + item.chunk_id;
+      ids.append(title, values);
+      evidence.append(source, ids);
+    }
+    article.append(evidence);
+  }
   // 按真实数据库产物显示入口；回答中出现“已生成”不构成工具执行证据。
   for (const document of turn.documents || []) {
     const button = window.document.createElement('button');

@@ -77,6 +77,12 @@ def check_content(candidate, snapshot):
     sources = {"user:current": snapshot["question"]}
     for memory in snapshot.get("memories", []):
         sources["memory:" + memory["key"]] = memory["value"]
+    sources.update(
+        {
+            m["evidence_ref"]: m["quote"]
+            for m in snapshot.get("retrieval", {}).get("matches", [])
+        }
+    )
     for item in candidate.source_excerpts:
         if (
             item.evidence_ref not in snapshot["evidence_ids"]
@@ -107,7 +113,7 @@ ROLES = {
 }
 
 
-def candidate_body(candidate):
+def candidate_body(candidate, snapshot=None):
     """将候选转成展示和确认保存共用的正文；不修改数据库。
 
     旧标签保留中文显示，自定义标签直接展示；缺少估时不猜测补全。
@@ -134,9 +140,21 @@ def candidate_body(candidate):
         lines += ["", "部分步骤未估时，未核对总用时。"]
     lines += [
         "",
-        "用户陈述依据（原文摘录，不代表外部核实）：",
+        (
+            "原文依据（用户陈述、记忆或资料，不代表事实核实）："
+            if snapshot and snapshot.get("retrieval", {}).get("matches")
+            else "用户陈述依据（原文摘录，不代表外部核实）："
+        ),
         *[f"- [{s.evidence_ref}] {s.quote}" for s in candidate.source_excerpts],
     ]
+    if snapshot:
+        selected = {item.evidence_ref for item in candidate.source_excerpts}
+        for item in snapshot.get("retrieval", {}).get("matches", []):
+            if item["evidence_ref"] in selected:
+                lines += [
+                    f"资料来源：{item['path']} 第{item['line']}行，版本 {item['version_id']}",
+                    "当时原文：" + item["quote"],
+                ]
     lines += [
         "",
         "模型假设（待用户确认）：",
@@ -319,6 +337,12 @@ class Council:
                 )
                 if time.monotonic() > deadline:
                     raise CouncilDeadlineExceeded("total budget exhausted")
+                # 接入资料的回合只接受目录选择，防止脚本/模型绕过生成schema手写引用。
+                if (
+                    snapshot.get("retrieval", {}).get("matches")
+                    and synthesis.candidate.source_excerpts
+                ):
+                    raise ValueError("mixed source formats")
                 if synthesis.candidate.source_ids:
                     if synthesis.candidate.source_excerpts:
                         raise ValueError("mixed source formats")
@@ -372,6 +396,18 @@ class Council:
 def render(result):
     """把审议结果和失败原因转成聊天回复；COMPLETED 只表示流程校验完成。"""
     lines = ["MAGI 三人格审议 · " + result["status"]]
+    retrieval = result.get("snapshot", {}).get("retrieval")
+    if retrieval:
+        lines += [
+            "资料检索：" + retrieval["status"],
+            retrieval["notice"],
+            "覆盖完整：" + ("是" if retrieval["complete"] else "否"),
+        ]
+        for material in retrieval["matches"]:
+            lines += [
+                f"来源：{material['path']} 第{material['line']}行 · 版本 {material['version_id'][:12]}",
+                material["quote"],
+            ]
     for item in result["personas"]:
         lines += [f"\n{item['role']} · {item['status']} · {item['seconds']}s"]
         if opinion := item.get("opinion"):
@@ -397,7 +433,7 @@ def render(result):
     if result["candidate"]:
         lines += [
             "\n待确认候选（尚未保存）",
-            candidate_body(Candidate(**result["candidate"])),
+            candidate_body(Candidate(**result["candidate"]), result.get("snapshot")),
         ]
     else:
         lines.append("综合未完成；没有可保存候选。")

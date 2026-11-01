@@ -689,3 +689,63 @@ def test_invalid_http_input_has_useful_code_without_echoing_private_values(env):
     assert not service.history("study")
     session.ask.assert_not_called()
     assert not calls
+
+
+def test_rag_confirmed_plan_preserves_evidence_after_restart(env):
+    """真实业务库确认后重建服务，旧计划正文和回合证据不随文件变化。"""
+    from magi.council.sources import source_options
+
+    settings, service, session, calls = env
+    source = settings.docs_root / "source.txt"
+    source.write_text("计划导出只生成文件，不代表执行完成。", encoding="utf-8")
+
+    def invoke(system, payload, schema, budget, timeout):
+        data = json.loads(payload)
+        if schema is Opinion:
+            return json.dumps(
+                dict(
+                    OPINION,
+                    evidence_refs=[data["retrieval"]["matches"][0]["evidence_ref"]],
+                ),
+                ensure_ascii=False,
+            )
+        options = source_options(data["snapshot"])
+        chosen = next(
+            item["id"]
+            for item in options
+            if item["evidence_ref"].startswith("document:")
+        )
+        synthesis = json.loads(json.dumps(SYNTHESIS))
+        synthesis["candidate"].pop("source_excerpts")
+        synthesis["candidate"]["source_ids"] = [chosen]
+        return json.dumps(synthesis, ensure_ascii=False)
+
+    service.council = Council(settings, invoke)
+    turn = service.turn(
+        TurnInput(
+            chat_id="study",
+            message_id="urag",
+            reply_message_id="arag",
+            user_text="计划导出之后如何确认完成？",
+        ),
+        "council",
+    )
+    assert turn["status"] == "COMPLETED"
+    assert not service.plans.list_current()
+    receipt = confirm(service, turn)
+    saved = service.plans.get(receipt["object_id"], receipt["result_version"])
+    assert "source.txt" in saved.body and "不代表执行完成" in saved.body
+    old_version = turn["result"]["snapshot"]["retrieval"]["matches"][0]["version_id"]
+    source.write_text("计划导出现在是新版说明。", encoding="utf-8")
+    restarted = WebService(
+        settings,
+        "owner",
+        council=service.council,
+        session_factory=service.session_factory,
+    )
+    restored = restarted.get_turn(turn["id"])
+    assert (
+        restored["result"]["snapshot"]["retrieval"]["matches"][0]["version_id"]
+        == old_version
+    )
+    assert restarted.plans.get(receipt["object_id"], 1).body == saved.body

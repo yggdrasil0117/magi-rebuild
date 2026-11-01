@@ -21,6 +21,7 @@ from magi.personal.models import PersonalError
 from magi.personal.plans import PlanService
 from magi.personal.store import PersonalStore
 from magi.personal.suggestions import MemorySuggestions
+from magi.retrieval import MagiLocalRetrievalProvider, RetrievalRequest
 from magi.web.document_tools import build_document_tool
 
 
@@ -226,7 +227,7 @@ class WebService:
             turns = [
                 dict(r)
                 for r in db.execute(
-                    "SELECT id,message,user_text,text,status,proposal_id,reply FROM web_turns WHERE owner=? AND chat=? ORDER BY created_at,id",
+                    "SELECT id,message,user_text,text,status,proposal_id,reply,result_json FROM web_turns WHERE owner=? AND chat=? ORDER BY created_at,id",
                     (self.owner, chat),
                 )
             ]
@@ -238,6 +239,9 @@ class WebService:
                 item = dict(row)
                 by_turn.setdefault(item.pop("source_turn_id"), []).append(item)
             for turn in turns:
+                # 历史只附冻结资料，不把全部内部诊断强制展示给普通用户。
+                stored = json.loads(turn.pop("result_json") or "null") or {}
+                turn["retrieval"] = stored.get("snapshot", {}).get("retrieval")
                 turn["documents"] = by_turn.get(turn["id"], [])
             return turns
 
@@ -375,6 +379,14 @@ class WebService:
                     "evidence_ids": ["user:current"]
                     + ["memory:" + m["key"] for m in memories],
                 }
+                # 读取一次并随web_turn持久化；确认计划保留对该回合的来源引用。
+                snapshot["retrieval"] = MagiLocalRetrievalProvider(
+                    self.settings.docs_root,
+                    self.settings.business_db_path.with_name("retrieval.db"),
+                ).retrieve(RetrievalRequest(request.user_text))
+                snapshot["evidence_ids"] += [
+                    item["evidence_ref"] for item in snapshot["retrieval"]["matches"]
+                ]
                 if old:
                     snapshot["old_plan"]["created_at"] = old.created_at.isoformat()
 
@@ -403,7 +415,7 @@ class WebService:
                     proposal = {
                         "id": uuid4().hex,
                         "title": candidate.title,
-                        "body": candidate_body(candidate),
+                        "body": candidate_body(candidate, snapshot),
                         "target_id": request.target_plan_id,
                         "expected_version": request.expected_version,
                     }

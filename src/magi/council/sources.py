@@ -11,6 +11,10 @@ def source_options(snapshot):
     sources += [
         ("memory:" + m["key"], m["value"]) for m in snapshot.get("memories", [])
     ]
+    sources += [
+        (m["evidence_ref"], m["quote"])
+        for m in snapshot.get("retrieval", {}).get("matches", [])
+    ]
     options = []
     for ref, text in sources:
         if ref not in snapshot.get("evidence_ids", []):

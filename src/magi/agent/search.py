@@ -21,7 +21,19 @@ def search_files(root: Path, query: str, path: str = ".") -> dict:
     未检索的文件必须通过计数与complete标志暴露，避免将局部无结果说成全局不存在。
     根目录来自配置，调用方不能传绝对路径或扩大预算。
     """
-    if not isinstance(query, str) or not query.strip() or len(query) > 80:
+    return _scan_files(root, query, path)
+
+
+def scan_documents(root: Path) -> dict:
+    """供本地RAG复用相同授权、类型和读取预算，返回完整读取的文本版本。"""
+    return _scan_files(root, "", ".", documents=True)
+
+
+def _scan_files(root: Path, query: str, path: str, *, documents=False) -> dict:
+    """共享扫描安全边界；documents只由程序开启，未向模型工具开放。"""
+    if not documents and (
+        not isinstance(query, str) or not query.strip() or len(query) > 80
+    ):
         raise ValueError("query必须是1—80字的非空查询词")
     if any(character in query for character in "\r\n\x00"):
         raise ValueError("query不能包含换行或空字符")
@@ -48,6 +60,7 @@ def search_files(root: Path, query: str, path: str = ".") -> dict:
             raise ValueError("检索目录不能经过链接")
 
     matches, reasons, skipped = [], set(), {}
+    collected = []
     queue = deque([target])
     entries_seen = files_examined = bytes_read = 0
 
@@ -65,6 +78,7 @@ def search_files(root: Path, query: str, path: str = ".") -> dict:
             "match_mode": "case-sensitive literal substring",
             "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
             "matches": matches,
+            **({"documents": collected} if documents else {}),
             "complete": not reasons,
             "incomplete_reasons": sorted(reasons),
             "skipped": skipped,
@@ -143,6 +157,15 @@ def search_files(root: Path, query: str, path: str = ".") -> dict:
                     skip("binary_file", incomplete=True)
                     continue
                 digest = hashlib.sha256(raw).hexdigest()
+                if documents:
+                    collected.append(
+                        {
+                            "path": child.relative_to(root).as_posix(),
+                            "text": text,
+                            "sha256": digest,
+                        }
+                    )
+                    continue
                 for number, line in enumerate(text.splitlines(), 1):
                     offset = line.find(query)
                     if offset < 0:

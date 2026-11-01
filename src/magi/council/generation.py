@@ -107,6 +107,7 @@ def model_snapshot(snapshot):
     result = {
         key: snapshot.get(key)
         for key in (
+            "retrieval",
             "question",
             "time_budget_minutes",
             "memories",
