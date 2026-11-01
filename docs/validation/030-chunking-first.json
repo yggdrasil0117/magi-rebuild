@@ -1,0 +1,1053 @@
+{
+  "mode": "synthetic corpus; real embeddings; no retries; legacy segmentation reproduced",
+  "attempts": [
+    {
+      "segmentation": "legacy",
+      "query": "SQLiteRestart",
+      "keyword": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 0,
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "embedding": {
+          "enabled": false,
+          "degraded": false
+        },
+        "query_terms": [
+          "sqliterestart"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "vector": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "evidence_ref": "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "path": "repeat.txt",
+            "line": 1,
+            "offset": 0,
+            "quote": "SQLite重复提示：先核对版本。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 0.631778,
+            "matched_terms": [],
+            "keyword_score": 0
+          },
+          {
+            "document_id": "20c6f5f6557d6ae27ab7d1be6265f2b65c60e4f5be12017c329c2e6d7baaf728",
+            "version_id": "40982a3d2d817a41ccdde4d5bd918aeb79bb3fcd626faf036a118b951983b9e2",
+            "chunk_id": "d262f91726f00541c6d0ab7b159ac1fe549f7a01f95b62375951178f0a6930b0",
+            "evidence_ref": "document:d262f91726f00541c6d0ab7b159ac1fe549f7a01f95b62375951178f0a6930b0",
+            "path": "boundary.txt",
+            "line": 1,
+            "offset": 160,
+            "quote": "teRestart恢复已提交事务；重启不代表未确认计划已经保存。乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙",
+            "sha256": "3db617e3b59d8ebd5c21cb57fc970cf5db3920462eb906b2ce2f2d15aec8e8b4",
+            "score": 0.60723,
+            "matched_terms": [],
+            "keyword_score": 0
+          },
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "evidence_ref": "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "path": "repeat.txt",
+            "line": 8,
+            "offset": 0,
+            "quote": "SQLite补充提示：先备份再迁移。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 0.581586,
+            "matched_terms": [],
+            "keyword_score": 0
+          }
+        ],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 6,
+        "method": "dense cosine BAAI/bge-m3",
+        "embedding": {
+          "enabled": true,
+          "degraded": false,
+          "cache_hits": 0,
+          "embedded_chunks": 11,
+          "pool_truncated": false,
+          "query_truncated": false,
+          "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1",
+          "calls": 2,
+          "known_tokens": 418
+        },
+        "query_terms": [
+          "sqliterestart"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 1.7030000000013388
+    },
+    {
+      "segmentation": "legacy",
+      "query": "SQLite",
+      "keyword": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "evidence_ref": "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "path": "repeat.txt",
+            "line": 1,
+            "offset": 0,
+            "quote": "SQLite重复提示：先核对版本。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 1,
+            "matched_terms": [
+              "sqlite"
+            ]
+          },
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "evidence_ref": "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "path": "repeat.txt",
+            "line": 8,
+            "offset": 0,
+            "quote": "SQLite补充提示：先备份再迁移。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 1,
+            "matched_terms": [
+              "sqlite"
+            ]
+          }
+        ],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 6,
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "embedding": {
+          "enabled": false,
+          "degraded": false
+        },
+        "query_terms": [
+          "sqlite"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "vector": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "evidence_ref": "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "path": "repeat.txt",
+            "line": 1,
+            "offset": 0,
+            "quote": "SQLite重复提示：先核对版本。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 0.625659,
+            "matched_terms": [
+              "sqlite"
+            ],
+            "keyword_score": 1
+          },
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "evidence_ref": "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "path": "repeat.txt",
+            "line": 8,
+            "offset": 0,
+            "quote": "SQLite补充提示：先备份再迁移。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 0.610846,
+            "matched_terms": [
+              "sqlite"
+            ],
+            "keyword_score": 1
+          }
+        ],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 6,
+        "method": "dense cosine BAAI/bge-m3",
+        "embedding": {
+          "enabled": true,
+          "degraded": false,
+          "cache_hits": 11,
+          "embedded_chunks": 0,
+          "pool_truncated": false,
+          "query_truncated": false,
+          "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1",
+          "calls": 1,
+          "known_tokens": 4
+        },
+        "query_terms": [
+          "sqlite"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 0.7189999999973224
+    },
+    {
+      "segmentation": "legacy",
+      "query": "量子引力实验",
+      "keyword": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 0,
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "embedding": {
+          "enabled": false,
+          "degraded": false
+        },
+        "query_terms": [
+          "量子",
+          "子引",
+          "引力",
+          "力实",
+          "实验"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "vector": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 0,
+        "method": "dense cosine BAAI/bge-m3",
+        "embedding": {
+          "enabled": true,
+          "degraded": false,
+          "cache_hits": 11,
+          "embedded_chunks": 0,
+          "pool_truncated": false,
+          "query_truncated": false,
+          "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1",
+          "calls": 1,
+          "known_tokens": 8
+        },
+        "query_terms": [
+          "量子",
+          "子引",
+          "引力",
+          "力实",
+          "实验"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 0.75
+    },
+    {
+      "segmentation": "overlap",
+      "query": "SQLiteRestart",
+      "keyword": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "20c6f5f6557d6ae27ab7d1be6265f2b65c60e4f5be12017c329c2e6d7baaf728",
+            "version_id": "40982a3d2d817a41ccdde4d5bd918aeb79bb3fcd626faf036a118b951983b9e2",
+            "chunk_id": "3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+            "evidence_ref": "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+            "path": "boundary.txt",
+            "line": 1,
+            "offset": 128,
+            "quote": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙",
+            "sha256": "3db617e3b59d8ebd5c21cb57fc970cf5db3920462eb906b2ce2f2d15aec8e8b4",
+            "score": 1,
+            "matched_terms": [
+              "sqliterestart"
+            ]
+          }
+        ],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 0,
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "embedding": {
+          "enabled": false,
+          "degraded": false
+        },
+        "query_terms": [
+          "sqliterestart"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "vector": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "20c6f5f6557d6ae27ab7d1be6265f2b65c60e4f5be12017c329c2e6d7baaf728",
+            "version_id": "40982a3d2d817a41ccdde4d5bd918aeb79bb3fcd626faf036a118b951983b9e2",
+            "chunk_id": "3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+            "evidence_ref": "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+            "path": "boundary.txt",
+            "line": 1,
+            "offset": 128,
+            "quote": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙",
+            "sha256": "3db617e3b59d8ebd5c21cb57fc970cf5db3920462eb906b2ce2f2d15aec8e8b4",
+            "score": 0.673074,
+            "matched_terms": [
+              "sqliterestart"
+            ],
+            "keyword_score": 1
+          },
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "evidence_ref": "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "path": "repeat.txt",
+            "line": 1,
+            "offset": 0,
+            "quote": "SQLite重复提示：先核对版本。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 0.631838,
+            "matched_terms": [],
+            "keyword_score": 0
+          },
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "evidence_ref": "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "path": "repeat.txt",
+            "line": 8,
+            "offset": 0,
+            "quote": "SQLite补充提示：先备份再迁移。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 0.581155,
+            "matched_terms": [],
+            "keyword_score": 0
+          }
+        ],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 6,
+        "method": "dense cosine BAAI/bge-m3",
+        "embedding": {
+          "enabled": true,
+          "degraded": false,
+          "cache_hits": 0,
+          "embedded_chunks": 11,
+          "pool_truncated": false,
+          "query_truncated": false,
+          "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1",
+          "calls": 2,
+          "known_tokens": 480
+        },
+        "query_terms": [
+          "sqliterestart"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 1.764999999999418
+    },
+    {
+      "segmentation": "overlap",
+      "query": "SQLite",
+      "keyword": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "20c6f5f6557d6ae27ab7d1be6265f2b65c60e4f5be12017c329c2e6d7baaf728",
+            "version_id": "40982a3d2d817a41ccdde4d5bd918aeb79bb3fcd626faf036a118b951983b9e2",
+            "chunk_id": "3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+            "evidence_ref": "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+            "path": "boundary.txt",
+            "line": 1,
+            "offset": 128,
+            "quote": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙",
+            "sha256": "3db617e3b59d8ebd5c21cb57fc970cf5db3920462eb906b2ce2f2d15aec8e8b4",
+            "score": 1,
+            "matched_terms": [
+              "sqlite"
+            ]
+          },
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "evidence_ref": "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "path": "repeat.txt",
+            "line": 1,
+            "offset": 0,
+            "quote": "SQLite重复提示：先核对版本。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 1,
+            "matched_terms": [
+              "sqlite"
+            ]
+          },
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "evidence_ref": "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "path": "repeat.txt",
+            "line": 8,
+            "offset": 0,
+            "quote": "SQLite补充提示：先备份再迁移。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 1,
+            "matched_terms": [
+              "sqlite"
+            ]
+          }
+        ],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 6,
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "embedding": {
+          "enabled": false,
+          "degraded": false
+        },
+        "query_terms": [
+          "sqlite"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "vector": {
+        "status": "FOUND",
+        "matches": [
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "evidence_ref": "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "path": "repeat.txt",
+            "line": 1,
+            "offset": 0,
+            "quote": "SQLite重复提示：先核对版本。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 0.625861,
+            "matched_terms": [
+              "sqlite"
+            ],
+            "keyword_score": 1
+          },
+          {
+            "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+            "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+            "chunk_id": "ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "evidence_ref": "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+            "path": "repeat.txt",
+            "line": 8,
+            "offset": 0,
+            "quote": "SQLite补充提示：先备份再迁移。",
+            "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+            "score": 0.609915,
+            "matched_terms": [
+              "sqlite"
+            ],
+            "keyword_score": 1
+          },
+          {
+            "document_id": "20c6f5f6557d6ae27ab7d1be6265f2b65c60e4f5be12017c329c2e6d7baaf728",
+            "version_id": "40982a3d2d817a41ccdde4d5bd918aeb79bb3fcd626faf036a118b951983b9e2",
+            "chunk_id": "3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+            "evidence_ref": "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+            "path": "boundary.txt",
+            "line": 1,
+            "offset": 128,
+            "quote": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙",
+            "sha256": "3db617e3b59d8ebd5c21cb57fc970cf5db3920462eb906b2ce2f2d15aec8e8b4",
+            "score": 0.549443,
+            "matched_terms": [
+              "sqlite"
+            ],
+            "keyword_score": 1
+          }
+        ],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 6,
+        "method": "dense cosine BAAI/bge-m3",
+        "embedding": {
+          "enabled": true,
+          "degraded": false,
+          "cache_hits": 11,
+          "embedded_chunks": 0,
+          "pool_truncated": false,
+          "query_truncated": false,
+          "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1",
+          "calls": 1,
+          "known_tokens": 4
+        },
+        "query_terms": [
+          "sqlite"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 0.7660000000032596
+    },
+    {
+      "segmentation": "overlap",
+      "query": "量子引力实验",
+      "keyword": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 0,
+        "method": "bounded keyword overlap (Chinese bigrams)",
+        "embedding": {
+          "enabled": false,
+          "degraded": false
+        },
+        "query_terms": [
+          "量子",
+          "子引",
+          "引力",
+          "力实",
+          "实验"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "vector": {
+        "status": "NO_RESULTS",
+        "matches": [],
+        "chunk_policy": "line160-overlap32-v2",
+        "deduplicated": 0,
+        "method": "dense cosine BAAI/bge-m3",
+        "embedding": {
+          "enabled": true,
+          "degraded": false,
+          "cache_hits": 11,
+          "embedded_chunks": 0,
+          "pool_truncated": false,
+          "query_truncated": false,
+          "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1",
+          "calls": 1,
+          "known_tokens": 8
+        },
+        "query_terms": [
+          "量子",
+          "子引",
+          "引力",
+          "力实",
+          "实验"
+        ],
+        "complete": true,
+        "coverage": {
+          "path": ".",
+          "match_mode": "case-sensitive literal substring",
+          "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+          "complete": true,
+          "incomplete_reasons": [],
+          "skipped": {},
+          "entries_seen": 2,
+          "files_examined": 2,
+          "bytes_read": 1269,
+          "limits": {
+            "entries": 200,
+            "files": 40,
+            "bytes": 262144,
+            "results": 8
+          },
+          "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+        },
+        "truncated": false,
+        "notice": "已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+      },
+      "seconds": 0.7189999999973224
+    }
+  ],
+  "embedding_calls": 8,
+  "embedding_known_tokens": 922,
+  "generation_snapshot": {
+    "question": "SQLiteRestart重启时恢复什么？是否表示未确认计划已保存？请依据本轮资料引用原文并给出核对步骤。",
+    "time_budget_minutes": null,
+    "memories": [],
+    "history": [],
+    "old_plan": null,
+    "retrieval": {
+      "status": "FOUND",
+      "matches": [
+        {
+          "document_id": "20c6f5f6557d6ae27ab7d1be6265f2b65c60e4f5be12017c329c2e6d7baaf728",
+          "version_id": "40982a3d2d817a41ccdde4d5bd918aeb79bb3fcd626faf036a118b951983b9e2",
+          "chunk_id": "3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+          "evidence_ref": "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+          "path": "boundary.txt",
+          "line": 1,
+          "offset": 128,
+          "quote": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙",
+          "sha256": "3db617e3b59d8ebd5c21cb57fc970cf5db3920462eb906b2ce2f2d15aec8e8b4",
+          "score": 0.673074,
+          "matched_terms": [
+            "sqliterestart"
+          ],
+          "keyword_score": 1
+        },
+        {
+          "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+          "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+          "chunk_id": "756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+          "evidence_ref": "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+          "path": "repeat.txt",
+          "line": 1,
+          "offset": 0,
+          "quote": "SQLite重复提示：先核对版本。",
+          "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+          "score": 0.631838,
+          "matched_terms": [],
+          "keyword_score": 0
+        },
+        {
+          "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+          "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+          "chunk_id": "ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+          "evidence_ref": "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+          "path": "repeat.txt",
+          "line": 8,
+          "offset": 0,
+          "quote": "SQLite补充提示：先备份再迁移。",
+          "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+          "score": 0.581155,
+          "matched_terms": [],
+          "keyword_score": 0
+        }
+      ],
+      "chunk_policy": "line160-overlap32-v2",
+      "deduplicated": 6,
+      "method": "dense cosine BAAI/bge-m3",
+      "embedding": {
+        "enabled": true,
+        "degraded": false,
+        "cache_hits": 0,
+        "embedded_chunks": 11,
+        "pool_truncated": false,
+        "query_truncated": false,
+        "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1",
+        "calls": 2,
+        "known_tokens": 480
+      },
+      "query_terms": [
+        "sqliterestart"
+      ],
+      "complete": true,
+      "coverage": {
+        "path": ".",
+        "match_mode": "case-sensitive literal substring",
+        "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+        "complete": true,
+        "incomplete_reasons": [],
+        "skipped": {},
+        "entries_seen": 2,
+        "files_examined": 2,
+        "bytes_read": 1269,
+        "limits": {
+          "entries": 200,
+          "files": 40,
+          "bytes": 262144,
+          "results": 8
+        },
+        "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+      },
+      "truncated": false,
+      "notice": "已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+    },
+    "evidence_ids": [
+      "user:current",
+      "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+      "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+      "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1"
+    ]
+  },
+  "generation": {
+    "personas": [
+      {
+        "role": "MELCHIOR",
+        "status": "COMPLETED",
+        "diagnostics": {
+          "output_budget": 768,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 3152,
+          "input_tokens": 2316,
+          "output_tokens": 214,
+          "total_tokens": 2530,
+          "finish_reason": "stop",
+          "output_chars": 405
+        },
+        "opinion": {
+          "view": "原文指出SQLiteRestart恢复已提交事务，且重启不代表未确认计划已经保存。",
+          "recommendation": "核对步骤：1.打开boundary.txt定位该句；2.比对版本ID确认未被篡改；3.结合repeat.txt提示先备份再迁移。",
+          "concerns": [
+            "资料仅为测试片段，缺乏官方文档支撑",
+            "未说明未确认计划的具体处理机制"
+          ],
+          "unknowns": [
+            "未确认计划的定义与范围不明",
+            "实际生产环境恢复行为是否一致未知"
+          ],
+          "evidence_refs": [
+            "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+            "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1"
+          ]
+        },
+        "seconds": 7.547
+      },
+      {
+        "role": "BALTHASAR",
+        "status": "COMPLETED",
+        "diagnostics": {
+          "output_budget": 768,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 3152,
+          "input_tokens": 2317,
+          "output_tokens": 271,
+          "total_tokens": 2588,
+          "finish_reason": "stop",
+          "output_chars": 458
+        },
+        "opinion": {
+          "view": "原文指出SQLiteRestart恢复已提交事务，且重启不代表未确认计划已经保存。",
+          "recommendation": "先核对版本并备份再迁移，按原文逐字比对确认恢复范围与保存状态。",
+          "concerns": [
+            "重启后未确认计划可能丢失，增加返工负担",
+            "迁移前未备份可能导致不可逆数据损失"
+          ],
+          "unknowns": [
+            "未确认计划的具体定义与范围不清",
+            "当前SQLite版本是否影响恢复行为未知"
+          ],
+          "evidence_refs": [
+            "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+            "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1"
+          ]
+        },
+        "seconds": 7.844
+      },
+      {
+        "role": "CASPER",
+        "status": "COMPLETED",
+        "diagnostics": {
+          "output_budget": 768,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 3152,
+          "input_tokens": 2313,
+          "output_tokens": 274,
+          "total_tokens": 2587,
+          "finish_reason": "stop",
+          "output_chars": 460
+        },
+        "opinion": {
+          "view": "原文指出SQLiteRestart恢复已提交事务，且重启不代表未确认计划已经保存。",
+          "recommendation": "先核对版本再操作，执行前务必先备份再迁移，避免数据丢失的机会成本。",
+          "concerns": [
+            "重启后未确认的计划可能丢失，需评估重做成本。",
+            "若未先备份直接迁移，失败代价极高。"
+          ],
+          "unknowns": [
+            "未确认计划的具体范围与数量未知。",
+            "当前SQLite版本号尚未核实。"
+          ],
+          "evidence_refs": [
+            "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+            "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+            "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1"
+          ]
+        },
+        "seconds": 8.031
+      }
+    ],
+    "status": "COMPLETED",
+    "candidate": {
+      "title": "SQLiteRestart恢复内容与核对步骤",
+      "steps": [
+        {
+          "action": "打开boundary.txt定位原文并逐字比对引用内容",
+          "done_when": "确认原文包含'SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存'",
+          "minutes": null,
+          "kind": "核对"
+        },
+        {
+          "action": "比对文件version_id与sha256确认未被篡改",
+          "done_when": "记录version_id与sha256并与检索结果一致",
+          "minutes": null,
+          "kind": "核对"
+        },
+        {
+          "action": "按repeat.txt提示先核对版本、先备份再迁移",
+          "done_when": "完成版本核对与备份动作并记录结果",
+          "minutes": null,
+          "kind": "操作"
+        }
+      ],
+      "assumptions": [
+        "检索到的boundary.txt片段为当前有效资料。",
+        "repeat.txt中的提示适用于本次核对流程。"
+      ],
+      "revision_reason": "无旧计划；依据最新约束整合三方共识，仅保留可核对步骤，不将模型意见当事实。",
+      "source_excerpts": [
+        {
+          "evidence_ref": "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+          "quote": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙"
+        },
+        {
+          "evidence_ref": "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+          "quote": "SQLite重复提示：先核对版本。"
+        },
+        {
+          "evidence_ref": "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+          "quote": "SQLite补充提示：先备份再迁移。"
+        }
+      ],
+      "source_ids": [
+        "source:0",
+        "source:1",
+        "source:2"
+      ],
+      "unknowns": [
+        "“未确认计划”的定义与范围需进一步确认。",
+        "当前SQLite版本号待核实。"
+      ]
+    },
+    "synthesis_diagnostics": {
+      "output_budget": 1536,
+      "timeout_seconds": 60.0,
+      "snapshot_payload_chars": 5392,
+      "input_tokens": 3926,
+      "output_tokens": 299,
+      "total_tokens": 4225,
+      "finish_reason": "stop",
+      "output_chars": 772,
+      "minutes_by_kind": {},
+      "seconds": 9.266
+    },
+    "agreement": [
+      "三方均依据原文认定：SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。",
+      "三方均建议操作前先核对版本并备份再迁移。"
+    ],
+    "disagreements": [],
+    "unknowns": [
+      "“未确认计划”的具体定义与范围不明。",
+      "当前SQLite版本号尚未核实，是否影响恢复行为未知。",
+      "实际生产环境恢复行为是否与测试片段一致未知。"
+    ],
+    "calls": 4,
+    "seconds": 32.688
+  }
+}

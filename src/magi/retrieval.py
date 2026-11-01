@@ -29,13 +29,39 @@ class RetrievalProvider(Protocol):
         ...
 
 
+CHUNK_POLICY = "line160-overlap32-v2"
+
+
 def chunks(text):
-    """按原始行切为最多160字窗口；返回行号、行内起点与未经改写的原文。"""
+    """每行160字窗口、相邻重叠32字；原文及位置不改写，不产生已被覆盖的短尾块。"""
     for number, line in enumerate(text.splitlines(), 1):
-        for offset in range(0, len(line), 160):
+        for offset in range(0, len(line), 128):
             quote = line[offset : offset + 160]
             if quote.strip():
                 yield number, offset, quote
+            if offset + 160 >= len(line):
+                break
+
+
+def distinct_matches(candidates, limit=5):
+    """按已有排名保留同版本内不重复/不包含的原文，跨文档相同文字仍各保留来源。
+
+    candidates已按检索分数排序。返回有界候选及去重计数；不合并原文或生成新证据。
+    """
+    unique = []
+    removed = 0
+    for item in candidates:
+        if any(
+            item["version_id"] == chosen["version_id"]
+            and item["quote"] in chosen["quote"]
+            for chosen in unique
+        ):
+            removed += 1
+        else:
+            unique.append(item)
+            if len(unique) > limit:
+                return unique[:limit], removed, True
+    return unique, removed, False
 
 
 def query_terms(query):
@@ -103,7 +129,9 @@ class MagiLocalRetrievalProvider:
                             (version_id, document_id, document["sha256"]),
                         )
                         for line, offset, quote in chunks(document["text"]):
-                            chunk_id = digest(f"{version_id}:{line}:{offset}")
+                            chunk_id = digest(
+                                f"{CHUNK_POLICY}:{version_id}:{line}:{offset}"
+                            )
                             db.execute(
                                 "INSERT OR IGNORE INTO chunks VALUES (?,?,?,?,?)",
                                 (chunk_id, version_id, line, offset, quote),
@@ -161,14 +189,17 @@ class MagiLocalRetrievalProvider:
                     )
             finally:
                 db.close()
+            matches, deduplicated, truncated = distinct_matches(candidates)
             return dict(
                 status="FOUND" if candidates else "NO_RESULTS",
-                matches=candidates[:5],
+                matches=matches,
+                chunk_policy=CHUNK_POLICY,
+                deduplicated=deduplicated,
                 method=method,
                 embedding=embedding_state,
                 query_terms=terms,
                 complete=scan["complete"]
-                and len(candidates) <= 5
+                and not truncated
                 and not embedding_state.get("pool_truncated", False)
                 and not embedding_state.get("query_truncated", False),
                 coverage={
@@ -176,7 +207,7 @@ class MagiLocalRetrievalProvider:
                     for k, v in scan.items()
                     if k not in {"documents", "matches", "query"}
                 },
-                truncated=len(candidates) > 5,
+                truncated=truncated,
                 notice=(
                     "向量服务失败，已明确退回关键词检索。"
                     if embedding_state["degraded"]
