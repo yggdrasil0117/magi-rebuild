@@ -20,7 +20,7 @@ setup = (HarnessConfig(docs_root=WindowsPath('C:/Users/yggdrasil/Documents/ChatG
 >       assert service.documents.get(old["id"]) == old
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests\test_document_calling.py:161: 
+tests\test_document_calling.py:161:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 src\magi\personal\documents.py:64: in get
     with self.store.connect() as db:
@@ -290,7 +290,7 @@ env = (HarnessConfig(docs_root=WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT
 >       with reopened.connect() as db:
              ^^^^^^^^^^^^^^^^^^
 
-tests\test_memory_suggestions.py:280: 
+tests\test_memory_suggestions.py:280:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 src\magi\personal\store.py:31: in connect
     self._migrate(connection)
@@ -562,7 +562,7 @@ setup = (HarnessConfig(docs_root=WindowsPath('C:/Users/yggdrasil/Documents/ChatG
 >       assert service.plans.get(plan_id).body == "ʵ�ֽӿڣ������������Ӧ����Լ����"
                ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests\test_task_documents.py:195: 
+tests\test_task_documents.py:195:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 src\magi\personal\plans.py:319: in get
     with self.store.connect() as connection:
@@ -826,7 +826,7 @@ setup = (HarnessConfig(docs_root=WindowsPath('C:/Users/yggdrasil/Documents/ChatG
 >       assert service.document_view(saved["id"])["content"] == saved["content"]
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests\test_web_document_approvals.py:211: 
+tests\test_web_document_approvals.py:211:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 src\magi\web\service.py:73: in document_view
     **self.documents.get(document_id),
