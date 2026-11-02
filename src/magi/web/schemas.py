@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
@@ -85,3 +87,14 @@ class DocumentConfirm(Request):
         if not value:
             raise ValueError("explicit confirmation required")
         return value
+
+
+class ExecutionRecord(Request):
+    """用户明确保存执行观察，revision用于并发检查，不是计划版本。"""
+
+    request_id: str = Field(min_length=1, max_length=120)
+    version: int = Field(ge=1, strict=True)
+    expected_revision: int = Field(ge=0, strict=True)
+    status: Literal["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "COMPLETED"]
+    note: str = Field(min_length=1, max_length=2000)
+    confirmed: bool = Field(strict=True)

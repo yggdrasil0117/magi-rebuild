@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
 
 
 class ClosingConnection(sqlite3.Connection):
@@ -243,6 +243,31 @@ class PersonalStore:
                     error_code TEXT
                 );
                 UPDATE schema_meta SET version=7;
+                COMMIT;
+                """
+            )
+        if version < 8:
+            # 执行记录是用户对某个不可变计划版本的观察，不修改计划正文或完成事实。
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE plan_execution_events (
+                    event_id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    request_id TEXT NOT NULL,
+                    request_digest TEXT NOT NULL,
+                    plan_id TEXT NOT NULL,
+                    plan_version INTEGER NOT NULL,
+                    revision INTEGER NOT NULL CHECK(revision > 0),
+                    status TEXT NOT NULL CHECK(status IN ('NOT_STARTED','IN_PROGRESS','BLOCKED','COMPLETED')),
+                    note TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(plan_id,plan_version) REFERENCES plan_revisions(plan_id,version),
+                    UNIQUE(owner,request_id),
+                    UNIQUE(owner,plan_id,plan_version,revision)
+                );
+                CREATE INDEX execution_history ON plan_execution_events(owner,plan_id,plan_version,revision DESC);
+                UPDATE schema_meta SET version=8;
                 COMMIT;
                 """
             )

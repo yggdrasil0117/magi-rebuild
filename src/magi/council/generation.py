@@ -119,7 +119,7 @@ def model_snapshot(snapshot):
     if result["old_plan"]:
         result["old_plan"] = {
             key: result["old_plan"][key]
-            for key in ("title", "body", "version")
+            for key in ("title", "body", "version", "execution")
             if key in result["old_plan"]
         }
     return result

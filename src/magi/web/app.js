@@ -159,7 +159,7 @@ async function loadPlans() {
     $('planList').replaceChildren();
     for (const plan of plans) {
       const item = document.createElement('li'), button = document.createElement('button');
-      button.textContent = plan.title + ' · v' + plan.version + (plan.needs_review ? ' · 需复核' : '');
+      button.textContent = plan.title + ' · v' + plan.version + (plan.needs_review ? ' · 需复核' : '') + ' · ' + executionLabel(plan.execution_status);
       button.onclick = () => selectPlan(plan.id);
       item.append(button);
       $('planList').append(item);
@@ -182,7 +182,9 @@ function fillVersions(id, versions, selected) {
 
 // version为空时读最新版；指定版本时读不可变历史，并防止迟到响应覆盖新选择。
 async function selectPlan(id, version = null) {
+  if (executionPending) { $('planStatus').textContent = '请先重试或放弃未确认结果的执行记录。'; return; }
   const ticket = ++viewTicket;
+  $('executionPanel').hidden = true;
   taskDocument = null;
   documentRequest = null;
   $('documentPanel').hidden = true;
@@ -202,6 +204,8 @@ async function selectPlan(id, version = null) {
     $('planTitle').textContent = plan.title;
     $('planMeta').textContent = '计划 ' + plan.id + ' · 正在查看 v' + plan.version + ' · 读取时最新版 v' + versions[0].version;
     $('planBody').textContent = plan.body;
+    $('executionNote').value = '';
+    $('executionMessage').textContent = '';
     $('planWarning').hidden = !plan.needs_review;
     fillVersions('viewVersion', versions, plan.version);
     fillVersions('fromVersion', versions, versions[Math.min(1, versions.length - 1)].version);
@@ -209,10 +213,95 @@ async function selectPlan(id, version = null) {
     $('compare').disabled = versions.length < 2;
     $('planDetail').hidden = false;
     $('planStatus').textContent = versions.length < 2 ? '目前只有一个版本，修订并确认后即可对比。' : '共 ' + versions.length + ' 个已保存版本';
+    await loadExecution(plan.id, plan.version, ticket);
     const documents = await api(base + '/documents?version=' + plan.version);
     if (ticket === viewTicket && documents.length) showTaskDocument(documents[0]);
   } catch (e) { if (ticket === viewTicket) $('planStatus').textContent = e.message; }
 }
+
+let executionRevision = 0, executionPending = null, executionBusy = false;
+
+function executionLabel(status) {
+  return {NOT_STARTED: '未开始', IN_PROGRESS: '进行中', BLOCKED: '遇到阻塞', COMPLETED: '已完成（用户记录）'}[status] || '未开始';
+}
+
+// 独立读取当前计划版本的状态，不从模型回复或工作单文件推断任务完成。
+async function loadExecution(id, version, ticket) {
+  const result = await api('/v1/plans/' + encodeURIComponent(id) + '/execution?version=' + version);
+  if (ticket !== viewTicket) return;
+  executionRevision = result.revision;
+  $('executionState').value = result.status;
+  $('executionMeta').textContent = '此版本 v' + version + '：' + executionLabel(result.status) + '。' + result.provenance;
+  $('executionHistory').replaceChildren();
+  for (const event of result.events) {
+    const line = document.createElement('pre');
+    line.textContent = new Date(event.created_at).toLocaleString() + ' · ' + executionLabel(event.status) + '\n' + event.note;
+    $('executionHistory').append(line);
+  }
+  if (!result.events.length) $('executionHistory').textContent = '此版本尚无执行记录。';
+  if (result.history_truncated) {
+    const notice = document.createElement('p');
+    notice.textContent = '这里只显示最近50条，更早记录仍保留在数据库中。';
+    $('executionHistory').append(notice);
+  }
+  $('executionPanel').hidden = false;
+}
+
+function lockExecutionForm() {
+  $('executionState').disabled = !!executionPending;
+  $('executionNote').disabled = !!executionPending;
+  $('saveExecution').disabled = executionBusy;
+  $('saveExecution').textContent = executionPending ? '重试原执行记录' : '确认记录执行情况';
+  $('cancelExecutionRetry').hidden = !executionPending || executionBusy;
+}
+
+// 断线不换请求ID、不改正文；丢失响应后重试只恢复同一条回执。
+async function saveExecution() {
+  if (!selectedPlan || executionBusy) return;
+  if (!executionPending) {
+    const note = $('executionNote').value.trim();
+    if (!note) { $('executionMessage').textContent = '请填写实际进展或结果说明。'; return; }
+    executionPending = {plan_id: selectedPlan, body: {request_id: crypto.randomUUID(), version: selectedVersion, expected_revision: executionRevision, status: $('executionState').value, note, confirmed: true}};
+  }
+  executionBusy = true;
+  lockExecutionForm();
+  const ticket = viewTicket, pendingRecord = executionPending;
+  let committed = false;
+  try {
+    await api('/v1/plans/' + encodeURIComponent(pendingRecord.plan_id) + '/execution', pendingRecord.body);
+    committed = true;
+    executionPending = null;
+    if (ticket === viewTicket) {
+      $('executionNote').value = '';
+      await loadExecution(pendingRecord.plan_id, pendingRecord.body.version, ticket);
+      if (ticket !== viewTicket) return;
+      $('executionMessage').textContent = '执行记录已保存；计划正文和版本未修改。';
+      await loadPlans();
+    }
+  } catch (e) {
+    if (ticket === viewTicket) {
+      if (committed) {
+        $('executionMessage').textContent = '执行记录已确认保存，但页面刷新失败；请重新打开此版本核对，不要重复提交同一进展。';
+      } else if (e.message.startsWith('VERSION_CONFLICT')) {
+        executionPending = null;
+        try {
+          await loadExecution(pendingRecord.plan_id, pendingRecord.body.version, ticket);
+          if (ticket !== viewTicket) return;
+          $('executionMessage').textContent = '其他请求已更新执行记录。已刷新，请核对状态与原说明后再确认。';
+        } catch (_) { $('executionMessage').textContent = '执行记录有冲突，刷新失败；请重新打开此版本核对后再提交。'; }
+      } else $('executionMessage').textContent = e.message + '；可重试原记录，或放弃重试后刷新核对。';
+    }
+  } finally { executionBusy = false; lockExecutionForm(); }
+}
+
+$('saveExecution').onclick = saveExecution;
+$('cancelExecutionRetry').onclick = async () => {
+  if (executionBusy) return;
+  executionPending = null;
+  lockExecutionForm();
+  if (selectedPlan) await loadExecution(selectedPlan, selectedVersion, viewTicket);
+  $('executionMessage').textContent = '已放弃重试；此前请求可能已保存，请核对历史，放弃不撤销记录。';
+};
 
 let taskDocument = null, documentRequest = null, documentBusy = false;
 
@@ -325,6 +414,7 @@ async function compareVersions() {
 
 // 只准备修订目标，不发起生成或保存；后端仍负责检查提交时的版本冲突。
 async function beginFeedback() {
+  if (executionPending || executionBusy) { $('status').textContent = '请先核对未确认结果的执行记录，再准备修订。'; return; }
   if (!selectedPlan) return;
   if (pending || sending) { $('status').textContent = '请先处理当前消息的重试，或放弃重试后再选择修订目标。'; return; }
   const id = selectedPlan, ticket = viewTicket;
@@ -336,7 +426,7 @@ async function beginFeedback() {
     $('target').value = latest.id;
     $('version').value = latest.version;
     $('budget').value = '';
-    $('revisionNote').textContent = '正在修订「' + latest.title + '」v' + latest.version + '。填写执行反馈后发送；生成新候选后仍需你确认保存。';
+    $('revisionNote').textContent = '正在修订「' + latest.title + '」v' + latest.version + '。填写执行反馈后发送；该版本最近3条执行记录会一并提供给模型，新候选仍需你确认保存。';
     $('revisionNote').hidden = false;
     $('exitRevision').hidden = false;
     $('status').textContent = latest.needs_review ? '个人背景已变化，请在反馈中核对当前约束。' : '修订目标已选择，尚未发送消息或修改计划。';

@@ -1,5 +1,6 @@
 import hmac
 import os
+import sqlite3
 from contextlib import asynccontextmanager
 from dataclasses import asdict
 from difflib import unified_diff
@@ -17,6 +18,7 @@ from magi.web.schemas import (
     Confirmation,
     DocumentConfirm,
     DocumentPreview,
+    ExecutionRecord,
     MemoryCreate,
     MemorySuggestionConfirm,
     MemoryUpdate,
@@ -181,7 +183,11 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
 
     @app.get("/v1/plans", dependencies=guarded)
     def plans():
-        return [asdict(p) for p in service.plans.list_current()]
+        statuses = service.executions.current_statuses()
+        return [
+            asdict(p) | {"execution_status": statuses.get(p.id, "NOT_STARTED")}
+            for p in service.plans.list_current()
+        ]
 
     @app.post("/v1/plans/{plan_id}/documents", dependencies=guarded)
     def preview_document(plan_id: str, body: DocumentPreview):
@@ -218,6 +224,28 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
         return service.document_action(
             "reject", document_id, body.payload_hash, body.interrupt_id
         )
+
+    @app.get("/v1/plans/{plan_id}/execution", dependencies=guarded)
+    def execution(plan_id: str, version: int = Query(ge=1)):
+        return service.executions.view(plan_id, version)
+
+    @app.post("/v1/plans/{plan_id}/execution", dependencies=guarded)
+    def record_execution(plan_id: str, body: ExecutionRecord):
+        # 生成期间不穿插写执行状态；忙时明确拒绝，避免HTTP线程长时间等待。
+        if not service.gate.acquire(blocking=False):
+            raise WebError("BUSY", "正在生成或保存，请稍后重试执行记录", 429)
+        try:
+            return service.executions.record(
+                plan_id, body.version, **body.model_dump(exclude={"version"})
+            )
+        except sqlite3.Error:
+            raise WebError(
+                "EXECUTION_STORAGE_FAILURE",
+                "记录保存未确认，请核对历史或用原请求重试",
+                503,
+            ) from None
+        finally:
+            service.gate.release()
 
     @app.get("/v1/plans/{plan_id}", dependencies=guarded)
     def plan(plan_id: str, version: int | None = None):

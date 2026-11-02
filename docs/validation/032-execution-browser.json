@@ -1,0 +1,77 @@
+{
+  "mode": "real Edge/HTTP/SQLite; scripted generation and checkpoint",
+  "plan_revisions": 2,
+  "events": [
+    {
+      "event_id": "5ec124b9773d41c99531e7f7d675ed71",
+      "request_id": "f3f00ecf-ec9a-47e5-82eb-aaccc2960008",
+      "plan_version": 1,
+      "revision": 1,
+      "status": "IN_PROGRESS",
+      "note": "已核对接口返回，正在记录调用链。"
+    },
+    {
+      "event_id": "1026b51ab73b4986b69a43a3d72d7ae2",
+      "request_id": "ada56413-c203-46d9-ae21-e64985ec6008",
+      "plan_version": 1,
+      "revision": 2,
+      "status": "BLOCKED",
+      "note": "接口超时，缺少测试账号，需要先记录缺口。"
+    },
+    {
+      "event_id": "64b258ed97394019bce227303a092e3a",
+      "request_id": "057c33a7-c37d-4415-adbe-a8c84e0d3a5c",
+      "plan_version": 1,
+      "revision": 3,
+      "status": "COMPLETED",
+      "note": "旧版核对已结束，仍有后续改进项；这是用户记录。"
+    }
+  ],
+  "event_count": 3,
+  "unique_request_count": 3,
+  "frozen_execution": {
+    "plan_id": "a7cb193069ac4c4d99ab7766210699bf",
+    "plan_version": 1,
+    "status": "COMPLETED",
+    "revision": 3,
+    "events": [
+      {
+        "event_id": "64b258ed97394019bce227303a092e3a",
+        "revision": 3,
+        "status": "COMPLETED",
+        "note": "旧版核对已结束，仍有后续改进项；这是用户记录。",
+        "created_at": "2026-11-02T12:55:53.670102+00:00"
+      },
+      {
+        "event_id": "1026b51ab73b4986b69a43a3d72d7ae2",
+        "revision": 2,
+        "status": "BLOCKED",
+        "note": "接口超时，缺少测试账号，需要先记录缺口。",
+        "created_at": "2026-11-02T12:54:24.558882+00:00"
+      },
+      {
+        "event_id": "5ec124b9773d41c99531e7f7d675ed71",
+        "revision": 1,
+        "status": "IN_PROGRESS",
+        "note": "已核对接口返回，正在记录调用链。",
+        "created_at": "2026-11-02T12:54:24.455592+00:00"
+      }
+    ],
+    "history_truncated": false,
+    "provenance": "用户自报执行记录，非程序自动核验",
+    "notes_truncated": false
+  },
+  "assertions": {
+    "response_loss_retry_no_duplicate": true,
+    "old_version_completed": true,
+    "new_version_no_execution": true,
+    "revision_received_execution": true,
+    "actual_restart_restored": true
+  },
+  "restart_pids": [
+    142124,
+    146316
+  ],
+  "fault_injection": "首次route.abort出现已处理异常；后续使用fetch返回层模拟已提交后丢响应，保留首次记录",
+  "console": "首次故障注入出现一次HTTP429资源错误，另有既有密码框提示；未观察到最终流程新增应用脚本错误"
+}

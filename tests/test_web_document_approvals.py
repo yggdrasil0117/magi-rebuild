@@ -206,8 +206,9 @@ def test_schema6_upgrade_preserves_existing_preview(setup):
     _, service, plan_id = setup
     saved = service.documents.preview(plan_id, 1, "legacy")
     with service.store.transaction() as db:
+        db.execute("DROP TABLE plan_execution_events")
         db.execute("DROP TABLE document_approvals")
         db.execute("UPDATE schema_meta SET version=6")
     assert service.document_view(saved["id"])["content"] == saved["content"]
     with service.store.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 7
+        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 8

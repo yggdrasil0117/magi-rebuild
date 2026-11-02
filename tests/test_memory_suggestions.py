@@ -271,6 +271,7 @@ def test_schema3_migration_preserves_confirmed_memory(env):
         key="保留", value="不能丢失", scope="global", request_id="old"
     )
     with service.store.transaction() as db:
+        db.execute("DROP TABLE plan_execution_events")
         db.execute("DROP TABLE document_approvals")
         db.execute("DROP TABLE task_documents")
         db.execute("DROP TABLE memory_suggestions")
@@ -278,7 +279,7 @@ def test_schema3_migration_preserves_confirmed_memory(env):
         db.execute("UPDATE schema_meta SET version=3")
     reopened = PersonalStore(settings.business_db_path)
     with reopened.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 7
+        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 8
         assert (
             db.execute(
                 "SELECT value FROM memories WHERE id=?", (created.object_id,)

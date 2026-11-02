@@ -1,0 +1,1103 @@
+........................................................................ [ 17%]
+................................F....................................... [ 34%]
+........................................................................ [ 52%]
+...............F.......................F................................ [ 69%]
+..............................................................F......... [ 86%]
+......................F...............................                   [100%]
+================================== FAILURES ===================================
+________________ test_schema5_upgrade_preserves_manual_preview ________________
+
+setup = (HarnessConfig(docs_root=WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-execution-032-first/test...edding_min_score=0.45), <magi.web.service.WebService object at 0x00000239965F4560>, '948efb91b29d4ebaa697d6345c58f960')
+
+    def test_schema5_upgrade_preserves_manual_preview(setup):
+        _, service, plan_id = setup
+        old = service.documents.preview(plan_id, 1, "manual")
+        with service.store.transaction() as db:
+            db.execute("DROP TABLE document_approvals")
+            db.execute("DROP INDEX task_documents_turn")
+            db.execute("ALTER TABLE task_documents DROP COLUMN source_turn_id")
+            db.execute("UPDATE schema_meta SET version=5")
+>       assert service.documents.get(old["id"]) == old
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_document_calling.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\magi\personal\documents.py:64: in get
+    with self.store.connect() as db:
+         ^^^^^^^^^^^^^^^^^^^^
+src\magi\personal\store.py:31: in connect
+    self._migrate(connection)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+connection = <magi.personal.store.ClosingConnection object at 0x000002399628C250>
+
+    @staticmethod
+    def _migrate(connection: sqlite3.Connection) -> None:
+        connection.execute(
+            "CREATE TABLE IF NOT EXISTS schema_meta (version INTEGER NOT NULL)"
+        )
+        row = connection.execute("SELECT version FROM schema_meta").fetchone()
+        if row is None:
+            connection.execute("INSERT INTO schema_meta VALUES (0)")
+            version = 0
+        else:
+            version = row[0]
+        if version > SCHEMA_VERSION:
+            raise RuntimeError("business database schema is newer than this program")
+        if version < 1:
+            connection.executescript(
+                """
+                CREATE TABLE app_state (
+                    singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                    context_epoch INTEGER NOT NULL CHECK (context_epoch >= 0)
+                );
+                INSERT INTO app_state VALUES (1, 0);
+                CREATE TABLE memories (
+                    id TEXT PRIMARY KEY,
+                    key TEXT NOT NULL,
+                    scope TEXT NOT NULL,
+                    value TEXT,
+                    status TEXT NOT NULL CHECK (status IN ('ACTIVE', 'DELETED')),
+                    version INTEGER NOT NULL CHECK (version >= 1),
+                    source TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    deleted_at TEXT
+                );
+                CREATE UNIQUE INDEX one_active_memory_per_key_scope
+                    ON memories(key, scope) WHERE status = 'ACTIVE';
+                CREATE TABLE memory_changes (
+                    operation_id TEXT PRIMARY KEY,
+                    memory_id TEXT NOT NULL REFERENCES memories(id),
+                    action TEXT NOT NULL,
+                    old_version INTEGER,
+                    new_version INTEGER NOT NULL,
+                    created_at TEXT NOT NULL,
+                    source TEXT NOT NULL
+                );
+                CREATE TABLE operations (
+                    operation_id TEXT PRIMARY KEY,
+                    request_id TEXT NOT NULL UNIQUE,
+                    action TEXT NOT NULL,
+                    target_id TEXT,
+                    request_digest TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK (status IN ('SUCCEEDED', 'FAILED')),
+                    result_id TEXT,
+                    result_version INTEGER,
+                    error_code TEXT,
+                    created_at TEXT NOT NULL
+                );
+                CREATE TABLE conversation_bindings (
+                    logical_session_id TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    thread_id TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(logical_session_id, epoch)
+                );
+                UPDATE schema_meta SET version = 1;
+                """
+            )
+            version = 1
+        if version < 2:
+            # Plan bodies are immutable revisions. The plans row only points to
+            # the current revision, so an update never destroys the old text.
+            connection.executescript(
+                """
+                CREATE TABLE plans (
+                    id TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    current_version INTEGER NOT NULL CHECK (current_version >= 1),
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+                CREATE TABLE plan_revisions (
+                    plan_id TEXT NOT NULL REFERENCES plans(id),
+                    version INTEGER NOT NULL CHECK (version >= 1),
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL,
+                    sources_json TEXT NOT NULL,
+                    source TEXT NOT NULL,
+                    source_epoch INTEGER NOT NULL CHECK (source_epoch >= 0),
+                    operation_id TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(plan_id, version)
+                );
+                UPDATE schema_meta SET version = 2;
+                """
+            )
+        if version < 3:
+            connection.executescript(
+                """
+                CREATE TABLE IF NOT EXISTS web_turns (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    reply TEXT NOT NULL,
+                    digest TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    mode TEXT NOT NULL,
+                    user_text TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    text TEXT NOT NULL DEFAULT '',
+                    result_json TEXT,
+                    proposal_id TEXT,
+                    synced INTEGER NOT NULL DEFAULT 0,
+                    created_at TEXT NOT NULL,
+                    UNIQUE(owner,chat,message),
+                    UNIQUE(owner,chat,reply)
+                );
+                CREATE TABLE IF NOT EXISTS plan_proposals (
+                    id TEXT PRIMARY KEY,
+                    turn_id TEXT NOT NULL UNIQUE REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    reply TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    target_id TEXT,
+                    expected_version INTEGER,
+                    created_at TEXT NOT NULL
+                );
+                UPDATE schema_meta SET version=3;
+                """
+            )
+        if version < 4:
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE memory_suggestion_runs (
+                    turn_id TEXT PRIMARY KEY REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    diagnostics_json TEXT NOT NULL DEFAULT '{}'
+                );
+                CREATE TABLE memory_suggestions (
+                    id TEXT PRIMARY KEY,
+                    turn_id TEXT NOT NULL UNIQUE REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    key TEXT NOT NULL,
+                    value TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    sources_json TEXT NOT NULL,
+                    fingerprint TEXT NOT NULL,
+                    target_id TEXT,
+                    expected_version INTEGER,
+                    old_value TEXT,
+                    status TEXT NOT NULL CHECK(status IN ('PENDING','DISMISSED','CONFIRMED')),
+                    confirmed_value TEXT
+                );
+                CREATE INDEX memory_suggestions_owner ON memory_suggestions(owner,chat,status);
+                UPDATE schema_meta SET version=4;
+                COMMIT;
+                """
+            )
+        if version < 5:
+            # ���߲�������ڼƻ��汾��Ԥ��Ҳ��־û����������������������ݡ�
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE task_documents (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    request_id TEXT NOT NULL,
+                    plan_id TEXT NOT NULL REFERENCES plans(id),
+                    version INTEGER NOT NULL,
+                    content TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK(status IN ('PREVIEW','CREATED')),
+                    UNIQUE(owner,request_id)
+                );
+                UPDATE schema_meta SET version=5;
+                COMMIT;
+                """
+            )
+        if version < 6:
+            # ��Դ�ִ��ɷ���˰󶨣�����ģ�����ֻ�ͻ����Ա�֤�����ߵ��á�
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                ALTER TABLE task_documents ADD COLUMN source_turn_id TEXT REFERENCES web_turns(id);
+                CREATE INDEX task_documents_turn ON task_documents(owner,source_turn_id);
+                UPDATE schema_meta SET version=6;
+                COMMIT;
+                """
+            )
+        if version < 7:
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE document_approvals (
+                    document_id TEXT PRIMARY KEY REFERENCES task_documents(id),
+                    owner TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    interrupt_id TEXT,
+                    decision TEXT CHECK(decision IN ('approve','reject')),
+                    error_code TEXT
+                );
+                UPDATE schema_meta SET version=7;
+                COMMIT;
+                """
+            )
+        if version < 8:
+            # ִ�м�¼���û���ĳ�����ɱ�ƻ��汾�Ĺ۲죬���޸ļƻ����Ļ������ʵ��
+>           connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE plan_execution_events (
+                    event_id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    request_id TEXT NOT NULL,
+                    request_digest TEXT NOT NULL,
+                    plan_id TEXT NOT NULL,
+                    plan_version INTEGER NOT NULL,
+                    revision INTEGER NOT NULL CHECK(revision > 0),
+                    status TEXT NOT NULL CHECK(status IN ('NOT_STARTED','IN_PROGRESS','BLOCKED','COMPLETED')),
+                    note TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(plan_id,plan_version) REFERENCES plan_revisions(plan_id,version),
+                    UNIQUE(owner,request_id),
+                    UNIQUE(owner,plan_id,plan_version,revision)
+                );
+                CREATE INDEX execution_history ON plan_execution_events(owner,plan_id,plan_version,revision DESC);
+                UPDATE schema_meta SET version=8;
+                COMMIT;
+                """
+            )
+E           sqlite3.OperationalError: table plan_execution_events already exists
+
+src\magi\personal\store.py:251: OperationalError
+______________ test_schema3_migration_preserves_confirmed_memory ______________
+
+env = (HarnessConfig(docs_root=WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-execution-032-first/test...rvice.WebService object at 0x0000023996771DC0>, <tests.test_memory_suggestions.Extractor object at 0x00000239967716D0>)
+
+    def test_schema3_migration_preserves_confirmed_memory(env):
+        settings, service, _ = env
+        created = service.memories.add(
+            key="����", value="���ܶ�ʧ", scope="global", request_id="old"
+        )
+        with service.store.transaction() as db:
+            db.execute("DROP TABLE document_approvals")
+            db.execute("DROP TABLE task_documents")
+            db.execute("DROP TABLE memory_suggestions")
+            db.execute("DROP TABLE memory_suggestion_runs")
+            db.execute("UPDATE schema_meta SET version=3")
+        reopened = PersonalStore(settings.business_db_path)
+>       with reopened.connect() as db:
+             ^^^^^^^^^^^^^^^^^^
+
+tests\test_memory_suggestions.py:280: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\magi\personal\store.py:31: in connect
+    self._migrate(connection)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+connection = <magi.personal.store.ClosingConnection object at 0x000002399628D450>
+
+    @staticmethod
+    def _migrate(connection: sqlite3.Connection) -> None:
+        connection.execute(
+            "CREATE TABLE IF NOT EXISTS schema_meta (version INTEGER NOT NULL)"
+        )
+        row = connection.execute("SELECT version FROM schema_meta").fetchone()
+        if row is None:
+            connection.execute("INSERT INTO schema_meta VALUES (0)")
+            version = 0
+        else:
+            version = row[0]
+        if version > SCHEMA_VERSION:
+            raise RuntimeError("business database schema is newer than this program")
+        if version < 1:
+            connection.executescript(
+                """
+                CREATE TABLE app_state (
+                    singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                    context_epoch INTEGER NOT NULL CHECK (context_epoch >= 0)
+                );
+                INSERT INTO app_state VALUES (1, 0);
+                CREATE TABLE memories (
+                    id TEXT PRIMARY KEY,
+                    key TEXT NOT NULL,
+                    scope TEXT NOT NULL,
+                    value TEXT,
+                    status TEXT NOT NULL CHECK (status IN ('ACTIVE', 'DELETED')),
+                    version INTEGER NOT NULL CHECK (version >= 1),
+                    source TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    deleted_at TEXT
+                );
+                CREATE UNIQUE INDEX one_active_memory_per_key_scope
+                    ON memories(key, scope) WHERE status = 'ACTIVE';
+                CREATE TABLE memory_changes (
+                    operation_id TEXT PRIMARY KEY,
+                    memory_id TEXT NOT NULL REFERENCES memories(id),
+                    action TEXT NOT NULL,
+                    old_version INTEGER,
+                    new_version INTEGER NOT NULL,
+                    created_at TEXT NOT NULL,
+                    source TEXT NOT NULL
+                );
+                CREATE TABLE operations (
+                    operation_id TEXT PRIMARY KEY,
+                    request_id TEXT NOT NULL UNIQUE,
+                    action TEXT NOT NULL,
+                    target_id TEXT,
+                    request_digest TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK (status IN ('SUCCEEDED', 'FAILED')),
+                    result_id TEXT,
+                    result_version INTEGER,
+                    error_code TEXT,
+                    created_at TEXT NOT NULL
+                );
+                CREATE TABLE conversation_bindings (
+                    logical_session_id TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    thread_id TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(logical_session_id, epoch)
+                );
+                UPDATE schema_meta SET version = 1;
+                """
+            )
+            version = 1
+        if version < 2:
+            # Plan bodies are immutable revisions. The plans row only points to
+            # the current revision, so an update never destroys the old text.
+            connection.executescript(
+                """
+                CREATE TABLE plans (
+                    id TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    current_version INTEGER NOT NULL CHECK (current_version >= 1),
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+                CREATE TABLE plan_revisions (
+                    plan_id TEXT NOT NULL REFERENCES plans(id),
+                    version INTEGER NOT NULL CHECK (version >= 1),
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL,
+                    sources_json TEXT NOT NULL,
+                    source TEXT NOT NULL,
+                    source_epoch INTEGER NOT NULL CHECK (source_epoch >= 0),
+                    operation_id TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(plan_id, version)
+                );
+                UPDATE schema_meta SET version = 2;
+                """
+            )
+        if version < 3:
+            connection.executescript(
+                """
+                CREATE TABLE IF NOT EXISTS web_turns (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    reply TEXT NOT NULL,
+                    digest TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    mode TEXT NOT NULL,
+                    user_text TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    text TEXT NOT NULL DEFAULT '',
+                    result_json TEXT,
+                    proposal_id TEXT,
+                    synced INTEGER NOT NULL DEFAULT 0,
+                    created_at TEXT NOT NULL,
+                    UNIQUE(owner,chat,message),
+                    UNIQUE(owner,chat,reply)
+                );
+                CREATE TABLE IF NOT EXISTS plan_proposals (
+                    id TEXT PRIMARY KEY,
+                    turn_id TEXT NOT NULL UNIQUE REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    reply TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    target_id TEXT,
+                    expected_version INTEGER,
+                    created_at TEXT NOT NULL
+                );
+                UPDATE schema_meta SET version=3;
+                """
+            )
+        if version < 4:
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE memory_suggestion_runs (
+                    turn_id TEXT PRIMARY KEY REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    diagnostics_json TEXT NOT NULL DEFAULT '{}'
+                );
+                CREATE TABLE memory_suggestions (
+                    id TEXT PRIMARY KEY,
+                    turn_id TEXT NOT NULL UNIQUE REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    key TEXT NOT NULL,
+                    value TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    sources_json TEXT NOT NULL,
+                    fingerprint TEXT NOT NULL,
+                    target_id TEXT,
+                    expected_version INTEGER,
+                    old_value TEXT,
+                    status TEXT NOT NULL CHECK(status IN ('PENDING','DISMISSED','CONFIRMED')),
+                    confirmed_value TEXT
+                );
+                CREATE INDEX memory_suggestions_owner ON memory_suggestions(owner,chat,status);
+                UPDATE schema_meta SET version=4;
+                COMMIT;
+                """
+            )
+        if version < 5:
+            # ���߲�������ڼƻ��汾��Ԥ��Ҳ��־û����������������������ݡ�
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE task_documents (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    request_id TEXT NOT NULL,
+                    plan_id TEXT NOT NULL REFERENCES plans(id),
+                    version INTEGER NOT NULL,
+                    content TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK(status IN ('PREVIEW','CREATED')),
+                    UNIQUE(owner,request_id)
+                );
+                UPDATE schema_meta SET version=5;
+                COMMIT;
+                """
+            )
+        if version < 6:
+            # ��Դ�ִ��ɷ���˰󶨣�����ģ�����ֻ�ͻ����Ա�֤�����ߵ��á�
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                ALTER TABLE task_documents ADD COLUMN source_turn_id TEXT REFERENCES web_turns(id);
+                CREATE INDEX task_documents_turn ON task_documents(owner,source_turn_id);
+                UPDATE schema_meta SET version=6;
+                COMMIT;
+                """
+            )
+        if version < 7:
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE document_approvals (
+                    document_id TEXT PRIMARY KEY REFERENCES task_documents(id),
+                    owner TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    interrupt_id TEXT,
+                    decision TEXT CHECK(decision IN ('approve','reject')),
+                    error_code TEXT
+                );
+                UPDATE schema_meta SET version=7;
+                COMMIT;
+                """
+            )
+        if version < 8:
+            # ִ�м�¼���û���ĳ�����ɱ�ƻ��汾�Ĺ۲죬���޸ļƻ����Ļ������ʵ��
+>           connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE plan_execution_events (
+                    event_id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    request_id TEXT NOT NULL,
+                    request_digest TEXT NOT NULL,
+                    plan_id TEXT NOT NULL,
+                    plan_version INTEGER NOT NULL,
+                    revision INTEGER NOT NULL CHECK(revision > 0),
+                    status TEXT NOT NULL CHECK(status IN ('NOT_STARTED','IN_PROGRESS','BLOCKED','COMPLETED')),
+                    note TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(plan_id,plan_version) REFERENCES plan_revisions(plan_id,version),
+                    UNIQUE(owner,request_id),
+                    UNIQUE(owner,plan_id,plan_version,revision)
+                );
+                CREATE INDEX execution_history ON plan_execution_events(owner,plan_id,plan_version,revision DESC);
+                UPDATE schema_meta SET version=8;
+                COMMIT;
+                """
+            )
+E           sqlite3.OperationalError: table plan_execution_events already exists
+
+src\magi\personal\store.py:251: OperationalError
+_______________ test_schema_version_is_preserved_across_reopen ________________
+
+tmp_path = WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-execution-032-first/test_schema_version_is_preserv0')
+
+    def test_schema_version_is_preserved_across_reopen(tmp_path):
+        store = PersonalStore(tmp_path / "personal.sqlite3")
+        with store.connect() as connection:
+>           assert connection.execute("SELECT version FROM schema_meta").fetchone()[0] == 7
+E           assert 8 == 7
+
+tests\test_personal_memory.py:107: AssertionError
+_____________________ test_schema4_upgrade_preserves_plan _____________________
+
+setup = (HarnessConfig(docs_root=WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-execution-032-first/test...edding_min_score=0.45), <magi.web.service.WebService object at 0x0000023996433B60>, '9f29e3f3cac14fbfa185e9cc1d84a15d')
+
+    def test_schema4_upgrade_preserves_plan(setup):
+        _, service, plan_id = setup
+        with service.store.transaction() as db:
+            db.execute("DROP TABLE document_approvals")
+            db.execute("DROP TABLE task_documents")
+            db.execute("UPDATE schema_meta SET version=4")
+>       assert service.plans.get(plan_id).body == "ʵ�ֽӿڣ������������Ӧ����Լ����"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_task_documents.py:195: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\magi\personal\plans.py:319: in get
+    with self.store.connect() as connection:
+         ^^^^^^^^^^^^^^^^^^^^
+src\magi\personal\store.py:31: in connect
+    self._migrate(connection)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+connection = <magi.personal.store.ClosingConnection object at 0x0000023996227D50>
+
+    @staticmethod
+    def _migrate(connection: sqlite3.Connection) -> None:
+        connection.execute(
+            "CREATE TABLE IF NOT EXISTS schema_meta (version INTEGER NOT NULL)"
+        )
+        row = connection.execute("SELECT version FROM schema_meta").fetchone()
+        if row is None:
+            connection.execute("INSERT INTO schema_meta VALUES (0)")
+            version = 0
+        else:
+            version = row[0]
+        if version > SCHEMA_VERSION:
+            raise RuntimeError("business database schema is newer than this program")
+        if version < 1:
+            connection.executescript(
+                """
+                CREATE TABLE app_state (
+                    singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                    context_epoch INTEGER NOT NULL CHECK (context_epoch >= 0)
+                );
+                INSERT INTO app_state VALUES (1, 0);
+                CREATE TABLE memories (
+                    id TEXT PRIMARY KEY,
+                    key TEXT NOT NULL,
+                    scope TEXT NOT NULL,
+                    value TEXT,
+                    status TEXT NOT NULL CHECK (status IN ('ACTIVE', 'DELETED')),
+                    version INTEGER NOT NULL CHECK (version >= 1),
+                    source TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    deleted_at TEXT
+                );
+                CREATE UNIQUE INDEX one_active_memory_per_key_scope
+                    ON memories(key, scope) WHERE status = 'ACTIVE';
+                CREATE TABLE memory_changes (
+                    operation_id TEXT PRIMARY KEY,
+                    memory_id TEXT NOT NULL REFERENCES memories(id),
+                    action TEXT NOT NULL,
+                    old_version INTEGER,
+                    new_version INTEGER NOT NULL,
+                    created_at TEXT NOT NULL,
+                    source TEXT NOT NULL
+                );
+                CREATE TABLE operations (
+                    operation_id TEXT PRIMARY KEY,
+                    request_id TEXT NOT NULL UNIQUE,
+                    action TEXT NOT NULL,
+                    target_id TEXT,
+                    request_digest TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK (status IN ('SUCCEEDED', 'FAILED')),
+                    result_id TEXT,
+                    result_version INTEGER,
+                    error_code TEXT,
+                    created_at TEXT NOT NULL
+                );
+                CREATE TABLE conversation_bindings (
+                    logical_session_id TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    thread_id TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(logical_session_id, epoch)
+                );
+                UPDATE schema_meta SET version = 1;
+                """
+            )
+            version = 1
+        if version < 2:
+            # Plan bodies are immutable revisions. The plans row only points to
+            # the current revision, so an update never destroys the old text.
+            connection.executescript(
+                """
+                CREATE TABLE plans (
+                    id TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    current_version INTEGER NOT NULL CHECK (current_version >= 1),
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+                CREATE TABLE plan_revisions (
+                    plan_id TEXT NOT NULL REFERENCES plans(id),
+                    version INTEGER NOT NULL CHECK (version >= 1),
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL,
+                    sources_json TEXT NOT NULL,
+                    source TEXT NOT NULL,
+                    source_epoch INTEGER NOT NULL CHECK (source_epoch >= 0),
+                    operation_id TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(plan_id, version)
+                );
+                UPDATE schema_meta SET version = 2;
+                """
+            )
+        if version < 3:
+            connection.executescript(
+                """
+                CREATE TABLE IF NOT EXISTS web_turns (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    reply TEXT NOT NULL,
+                    digest TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    mode TEXT NOT NULL,
+                    user_text TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    text TEXT NOT NULL DEFAULT '',
+                    result_json TEXT,
+                    proposal_id TEXT,
+                    synced INTEGER NOT NULL DEFAULT 0,
+                    created_at TEXT NOT NULL,
+                    UNIQUE(owner,chat,message),
+                    UNIQUE(owner,chat,reply)
+                );
+                CREATE TABLE IF NOT EXISTS plan_proposals (
+                    id TEXT PRIMARY KEY,
+                    turn_id TEXT NOT NULL UNIQUE REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    reply TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    target_id TEXT,
+                    expected_version INTEGER,
+                    created_at TEXT NOT NULL
+                );
+                UPDATE schema_meta SET version=3;
+                """
+            )
+        if version < 4:
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE memory_suggestion_runs (
+                    turn_id TEXT PRIMARY KEY REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    diagnostics_json TEXT NOT NULL DEFAULT '{}'
+                );
+                CREATE TABLE memory_suggestions (
+                    id TEXT PRIMARY KEY,
+                    turn_id TEXT NOT NULL UNIQUE REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    key TEXT NOT NULL,
+                    value TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    sources_json TEXT NOT NULL,
+                    fingerprint TEXT NOT NULL,
+                    target_id TEXT,
+                    expected_version INTEGER,
+                    old_value TEXT,
+                    status TEXT NOT NULL CHECK(status IN ('PENDING','DISMISSED','CONFIRMED')),
+                    confirmed_value TEXT
+                );
+                CREATE INDEX memory_suggestions_owner ON memory_suggestions(owner,chat,status);
+                UPDATE schema_meta SET version=4;
+                COMMIT;
+                """
+            )
+        if version < 5:
+            # ���߲�������ڼƻ��汾��Ԥ��Ҳ��־û����������������������ݡ�
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE task_documents (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    request_id TEXT NOT NULL,
+                    plan_id TEXT NOT NULL REFERENCES plans(id),
+                    version INTEGER NOT NULL,
+                    content TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK(status IN ('PREVIEW','CREATED')),
+                    UNIQUE(owner,request_id)
+                );
+                UPDATE schema_meta SET version=5;
+                COMMIT;
+                """
+            )
+        if version < 6:
+            # ��Դ�ִ��ɷ���˰󶨣�����ģ�����ֻ�ͻ����Ա�֤�����ߵ��á�
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                ALTER TABLE task_documents ADD COLUMN source_turn_id TEXT REFERENCES web_turns(id);
+                CREATE INDEX task_documents_turn ON task_documents(owner,source_turn_id);
+                UPDATE schema_meta SET version=6;
+                COMMIT;
+                """
+            )
+        if version < 7:
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE document_approvals (
+                    document_id TEXT PRIMARY KEY REFERENCES task_documents(id),
+                    owner TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    interrupt_id TEXT,
+                    decision TEXT CHECK(decision IN ('approve','reject')),
+                    error_code TEXT
+                );
+                UPDATE schema_meta SET version=7;
+                COMMIT;
+                """
+            )
+        if version < 8:
+            # ִ�м�¼���û���ĳ�����ɱ�ƻ��汾�Ĺ۲죬���޸ļƻ����Ļ������ʵ��
+>           connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE plan_execution_events (
+                    event_id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    request_id TEXT NOT NULL,
+                    request_digest TEXT NOT NULL,
+                    plan_id TEXT NOT NULL,
+                    plan_version INTEGER NOT NULL,
+                    revision INTEGER NOT NULL CHECK(revision > 0),
+                    status TEXT NOT NULL CHECK(status IN ('NOT_STARTED','IN_PROGRESS','BLOCKED','COMPLETED')),
+                    note TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(plan_id,plan_version) REFERENCES plan_revisions(plan_id,version),
+                    UNIQUE(owner,request_id),
+                    UNIQUE(owner,plan_id,plan_version,revision)
+                );
+                CREATE INDEX execution_history ON plan_execution_events(owner,plan_id,plan_version,revision DESC);
+                UPDATE schema_meta SET version=8;
+                COMMIT;
+                """
+            )
+E           sqlite3.OperationalError: table plan_execution_events already exists
+
+src\magi\personal\store.py:251: OperationalError
+_______________ test_schema6_upgrade_preserves_existing_preview _______________
+
+setup = (HarnessConfig(docs_root=WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-execution-032-first/test...edding_min_score=0.45), <magi.web.service.WebService object at 0x000002399636CD10>, '1046144a62b64d21a777485e98267698')
+
+    def test_schema6_upgrade_preserves_existing_preview(setup):
+        _, service, plan_id = setup
+        saved = service.documents.preview(plan_id, 1, "legacy")
+        with service.store.transaction() as db:
+            db.execute("DROP TABLE document_approvals")
+            db.execute("UPDATE schema_meta SET version=6")
+>       assert service.document_view(saved["id"])["content"] == saved["content"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_web_document_approvals.py:211: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\magi\web\service.py:73: in document_view
+    **self.documents.get(document_id),
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\magi\personal\documents.py:64: in get
+    with self.store.connect() as db:
+         ^^^^^^^^^^^^^^^^^^^^
+src\magi\personal\store.py:31: in connect
+    self._migrate(connection)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+connection = <magi.personal.store.ClosingConnection object at 0x0000023996579F50>
+
+    @staticmethod
+    def _migrate(connection: sqlite3.Connection) -> None:
+        connection.execute(
+            "CREATE TABLE IF NOT EXISTS schema_meta (version INTEGER NOT NULL)"
+        )
+        row = connection.execute("SELECT version FROM schema_meta").fetchone()
+        if row is None:
+            connection.execute("INSERT INTO schema_meta VALUES (0)")
+            version = 0
+        else:
+            version = row[0]
+        if version > SCHEMA_VERSION:
+            raise RuntimeError("business database schema is newer than this program")
+        if version < 1:
+            connection.executescript(
+                """
+                CREATE TABLE app_state (
+                    singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                    context_epoch INTEGER NOT NULL CHECK (context_epoch >= 0)
+                );
+                INSERT INTO app_state VALUES (1, 0);
+                CREATE TABLE memories (
+                    id TEXT PRIMARY KEY,
+                    key TEXT NOT NULL,
+                    scope TEXT NOT NULL,
+                    value TEXT,
+                    status TEXT NOT NULL CHECK (status IN ('ACTIVE', 'DELETED')),
+                    version INTEGER NOT NULL CHECK (version >= 1),
+                    source TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    deleted_at TEXT
+                );
+                CREATE UNIQUE INDEX one_active_memory_per_key_scope
+                    ON memories(key, scope) WHERE status = 'ACTIVE';
+                CREATE TABLE memory_changes (
+                    operation_id TEXT PRIMARY KEY,
+                    memory_id TEXT NOT NULL REFERENCES memories(id),
+                    action TEXT NOT NULL,
+                    old_version INTEGER,
+                    new_version INTEGER NOT NULL,
+                    created_at TEXT NOT NULL,
+                    source TEXT NOT NULL
+                );
+                CREATE TABLE operations (
+                    operation_id TEXT PRIMARY KEY,
+                    request_id TEXT NOT NULL UNIQUE,
+                    action TEXT NOT NULL,
+                    target_id TEXT,
+                    request_digest TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK (status IN ('SUCCEEDED', 'FAILED')),
+                    result_id TEXT,
+                    result_version INTEGER,
+                    error_code TEXT,
+                    created_at TEXT NOT NULL
+                );
+                CREATE TABLE conversation_bindings (
+                    logical_session_id TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    thread_id TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(logical_session_id, epoch)
+                );
+                UPDATE schema_meta SET version = 1;
+                """
+            )
+            version = 1
+        if version < 2:
+            # Plan bodies are immutable revisions. The plans row only points to
+            # the current revision, so an update never destroys the old text.
+            connection.executescript(
+                """
+                CREATE TABLE plans (
+                    id TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    current_version INTEGER NOT NULL CHECK (current_version >= 1),
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+                CREATE TABLE plan_revisions (
+                    plan_id TEXT NOT NULL REFERENCES plans(id),
+                    version INTEGER NOT NULL CHECK (version >= 1),
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL,
+                    sources_json TEXT NOT NULL,
+                    source TEXT NOT NULL,
+                    source_epoch INTEGER NOT NULL CHECK (source_epoch >= 0),
+                    operation_id TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(plan_id, version)
+                );
+                UPDATE schema_meta SET version = 2;
+                """
+            )
+        if version < 3:
+            connection.executescript(
+                """
+                CREATE TABLE IF NOT EXISTS web_turns (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    reply TEXT NOT NULL,
+                    digest TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    mode TEXT NOT NULL,
+                    user_text TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    text TEXT NOT NULL DEFAULT '',
+                    result_json TEXT,
+                    proposal_id TEXT,
+                    synced INTEGER NOT NULL DEFAULT 0,
+                    created_at TEXT NOT NULL,
+                    UNIQUE(owner,chat,message),
+                    UNIQUE(owner,chat,reply)
+                );
+                CREATE TABLE IF NOT EXISTS plan_proposals (
+                    id TEXT PRIMARY KEY,
+                    turn_id TEXT NOT NULL UNIQUE REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    reply TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    target_id TEXT,
+                    expected_version INTEGER,
+                    created_at TEXT NOT NULL
+                );
+                UPDATE schema_meta SET version=3;
+                """
+            )
+        if version < 4:
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE memory_suggestion_runs (
+                    turn_id TEXT PRIMARY KEY REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    diagnostics_json TEXT NOT NULL DEFAULT '{}'
+                );
+                CREATE TABLE memory_suggestions (
+                    id TEXT PRIMARY KEY,
+                    turn_id TEXT NOT NULL UNIQUE REFERENCES web_turns(id),
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    key TEXT NOT NULL,
+                    value TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    sources_json TEXT NOT NULL,
+                    fingerprint TEXT NOT NULL,
+                    target_id TEXT,
+                    expected_version INTEGER,
+                    old_value TEXT,
+                    status TEXT NOT NULL CHECK(status IN ('PENDING','DISMISSED','CONFIRMED')),
+                    confirmed_value TEXT
+                );
+                CREATE INDEX memory_suggestions_owner ON memory_suggestions(owner,chat,status);
+                UPDATE schema_meta SET version=4;
+                COMMIT;
+                """
+            )
+        if version < 5:
+            # ���߲�������ڼƻ��汾��Ԥ��Ҳ��־û����������������������ݡ�
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE task_documents (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    request_id TEXT NOT NULL,
+                    plan_id TEXT NOT NULL REFERENCES plans(id),
+                    version INTEGER NOT NULL,
+                    content TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK(status IN ('PREVIEW','CREATED')),
+                    UNIQUE(owner,request_id)
+                );
+                UPDATE schema_meta SET version=5;
+                COMMIT;
+                """
+            )
+        if version < 6:
+            # ��Դ�ִ��ɷ���˰󶨣�����ģ�����ֻ�ͻ����Ա�֤�����ߵ��á�
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                ALTER TABLE task_documents ADD COLUMN source_turn_id TEXT REFERENCES web_turns(id);
+                CREATE INDEX task_documents_turn ON task_documents(owner,source_turn_id);
+                UPDATE schema_meta SET version=6;
+                COMMIT;
+                """
+            )
+        if version < 7:
+            connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE document_approvals (
+                    document_id TEXT PRIMARY KEY REFERENCES task_documents(id),
+                    owner TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    interrupt_id TEXT,
+                    decision TEXT CHECK(decision IN ('approve','reject')),
+                    error_code TEXT
+                );
+                UPDATE schema_meta SET version=7;
+                COMMIT;
+                """
+            )
+        if version < 8:
+            # ִ�м�¼���û���ĳ�����ɱ�ƻ��汾�Ĺ۲죬���޸ļƻ����Ļ������ʵ��
+>           connection.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE plan_execution_events (
+                    event_id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    request_id TEXT NOT NULL,
+                    request_digest TEXT NOT NULL,
+                    plan_id TEXT NOT NULL,
+                    plan_version INTEGER NOT NULL,
+                    revision INTEGER NOT NULL CHECK(revision > 0),
+                    status TEXT NOT NULL CHECK(status IN ('NOT_STARTED','IN_PROGRESS','BLOCKED','COMPLETED')),
+                    note TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(plan_id,plan_version) REFERENCES plan_revisions(plan_id,version),
+                    UNIQUE(owner,request_id),
+                    UNIQUE(owner,plan_id,plan_version,revision)
+                );
+                CREATE INDEX execution_history ON plan_execution_events(owner,plan_id,plan_version,revision DESC);
+                UPDATE schema_meta SET version=8;
+                COMMIT;
+                """
+            )
+E           sqlite3.OperationalError: table plan_execution_events already exists
+
+src\magi\personal\store.py:251: OperationalError
+============================== warnings summary ===============================
+.venv-harness\Lib\site-packages\starlette\testclient.py:51
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\starlette\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_terminal.py::test_real_http_client_auth_and_terminal_turn
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+tests/test_terminal.py::test_real_http_client_auth_and_terminal_turn
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+    from websockets.server import WebSocketServerProtocol
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_document_calling.py::test_schema5_upgrade_preserves_manual_preview
+FAILED tests/test_memory_suggestions.py::test_schema3_migration_preserves_confirmed_memory
+FAILED tests/test_personal_memory.py::test_schema_version_is_preserved_across_reopen
+FAILED tests/test_task_documents.py::test_schema4_upgrade_preserves_plan - sq...
+FAILED tests/test_web_document_approvals.py::test_schema6_upgrade_preserves_existing_preview
+5 failed, 409 passed, 3 warnings in 33.50s

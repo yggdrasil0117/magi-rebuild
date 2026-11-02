@@ -154,6 +154,7 @@ def test_schema5_upgrade_preserves_manual_preview(setup):
     _, service, plan_id = setup
     old = service.documents.preview(plan_id, 1, "manual")
     with service.store.transaction() as db:
+        db.execute("DROP TABLE plan_execution_events")
         db.execute("DROP TABLE document_approvals")
         db.execute("DROP INDEX task_documents_turn")
         db.execute("ALTER TABLE task_documents DROP COLUMN source_turn_id")
@@ -161,4 +162,4 @@ def test_schema5_upgrade_preserves_manual_preview(setup):
     assert service.documents.get(old["id"]) == old
     assert old["source_turn_id"] is None
     with service.store.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 7
+        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 8

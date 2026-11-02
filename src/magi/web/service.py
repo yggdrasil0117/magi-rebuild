@@ -16,6 +16,7 @@ from magi.harness.runtime import open_personal_session
 from magi.personal.approvals import DocumentApprovals
 from magi.personal.context import ContextService
 from magi.personal.documents import TaskDocuments
+from magi.personal.executions import PlanExecutions
 from magi.personal.extraction import MemoryExtractor
 from magi.personal.memory import MemoryService
 from magi.personal.models import PersonalError
@@ -54,6 +55,7 @@ class WebService:
         self.settings, self.owner = settings, owner
         self.store = PersonalStore(settings.business_db_path)
         self.plans = PlanService(self.store)
+        self.executions = PlanExecutions(self.store, owner)
         self.memories = MemoryService(self.store)
         self.context = ContextService(self.store)
         self.gate = Lock()
@@ -394,6 +396,9 @@ class WebService:
                 ]
                 if old:
                     snapshot["old_plan"]["created_at"] = old.created_at.isoformat()
+                    snapshot["old_plan"]["execution"] = self.executions.context(
+                        old.id, old.version
+                    )
 
                 def progress(state):
                     state = {
@@ -515,6 +520,24 @@ class WebService:
             )
             if p["payload_hash"] != confirmation.payload_hash:
                 raise WebError("PAYLOAD_MISMATCH", "候选摘要不匹配")
+            if p["target_id"] and not p["saved"]:
+                # 生成后用户可能又记录了新进展；不能把旧执行上下文静默当成当前依据。
+                # 已保存请求必须仍可幂等重放，不因后续进展变化撤销真实提交回执。
+                frozen = self.get_turn(p["turn_id"])["result"] or {}
+                execution = ((frozen.get("snapshot") or {}).get("old_plan") or {}).get(
+                    "execution"
+                )
+                if (
+                    execution is not None
+                    and self.executions.view(p["target_id"], p["expected_version"])[
+                        "revision"
+                    ]
+                    != execution["revision"]
+                ):
+                    raise WebError(
+                        "VERSION_CONFLICT",
+                        "执行记录已变化，请基于最新进展重新生成修订后确认",
+                    )
             params = dict(
                 title=p["title"],
                 body=p["body"],
