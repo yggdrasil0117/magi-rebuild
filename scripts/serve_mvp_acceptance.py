@@ -17,6 +17,9 @@ def main():
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--port", type=int, default=8883)
     parser.add_argument("--config", type=Path, default=Path("magi.qianwen.toml"))
+    parser.add_argument(
+        "--docs-root", type=Path, help="验收用合成资料目录，避免读取个人资料"
+    )
     args = parser.parse_args()
     settings = load_config(args.config)
     if settings.provider != "qianwen":
@@ -30,6 +33,7 @@ def main():
         business_db_path=root / "business.db",
         db_path=root / "checkpoint.db",
         events_path=root / "events.jsonl",
+        docs_root=args.docs_root.resolve() if args.docs_root else settings.docs_root,
     )
     app = create_app(
         settings, token=os.environ.get("MAGI_API_TOKEN", ""), owner="mvp-acceptance"

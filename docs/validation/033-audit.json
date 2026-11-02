@@ -1,0 +1,48 @@
+{
+  "attempt_summary": {
+    "a": {
+      "status": "FAILED",
+      "http_attempts": 1,
+      "generation_calls": 3,
+      "checks": 1
+    },
+    "b": {
+      "status": "FAILED",
+      "http_attempts": 11,
+      "generation_calls": 4,
+      "checks": 6
+    },
+    "c": {
+      "status": "FAILED",
+      "http_attempts": 11,
+      "generation_calls": 4,
+      "checks": 6
+    },
+    "d": {
+      "status": "PASSED",
+      "http_attempts": 20,
+      "generation_calls": 8,
+      "checks": 15
+    }
+  },
+  "database_counts": {
+    "plans": 1,
+    "plan_revisions": 2,
+    "operations": 2,
+    "plan_execution_events": 1,
+    "web_turns": 2
+  },
+  "source_sha256": {
+    "src\\magi\\web\\service.py": "8aaec1485eac32d4da555d2c9c2ce366674846b75728144cb95fb064629e6f47",
+    "tests\\test_council_checkpoint.py": "824b7a534fee1a5a8b8f89aee41861607bfba5fc1390af7dde9f3480b56eb31b"
+  },
+  "versions": {
+    "deepagents": "0.7.32",
+    "langgraph": "1.2.18",
+    "langgraph-checkpoint-sqlite": "3.1.2",
+    "fastapi": "0.121.0",
+    "uvicorn": "0.38.0",
+    "httpx": "0.28.1",
+    "langchain-openai": "1.7.3"
+  }
+}

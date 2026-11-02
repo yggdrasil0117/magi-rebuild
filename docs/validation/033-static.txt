@@ -1,0 +1,19 @@
+COMMAND: .venv-harness/Scripts/ruff.exe check src/magi/web/service.py tests/test_council_checkpoint.py tests/test_web_mvp.py scripts/accept_current_mvp.py scripts/serve_mvp_acceptance.py
+EXIT: 0
+All checks passed!
+
+COMMAND: .venv-harness/Scripts/ruff.exe format --check src/magi/web/service.py tests/test_council_checkpoint.py tests/test_web_mvp.py scripts/accept_current_mvp.py scripts/serve_mvp_acceptance.py
+EXIT: 0
+5 files already formatted
+
+COMMAND: node --check src/magi/web/app.js
+EXIT: 0
+
+COMMAND: node --check src/magi/web/memory.js
+EXIT: 0
+
+COMMAND: git diff --check
+EXIT: 0
+warning: in the working copy of 'scripts/serve_mvp_acceptance.py', LF will be replaced by CRLF the next time Git touches it
+
+Credential scan: exact full credentials and initial truncated credential absent from scoped artifacts. Values omitted.

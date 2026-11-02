@@ -1,0 +1,270 @@
+{
+  "scope": "real HTTP/Qianwen/BGE-M3/SQLite/process restart; synthetic data; no browser; no generation retries",
+  "attempts": [
+    {
+      "method": "POST",
+      "path": "/v1/deliberations",
+      "request": {
+        "chat_id": "acceptance",
+        "message_id": "u1",
+        "reply_message_id": "a1",
+        "user_text": "登录接口核对：请根据核对指南安排查看错误日志、使用测试账号复现，并记录核对结果或缺口。只有60分钟。",
+        "time_budget_minutes": 60
+      },
+      "status": 200,
+      "response": {
+        "id": "858db42fac924262aad87ae11055743f",
+        "owner": "mvp-acceptance",
+        "chat": "acceptance",
+        "message": "u1",
+        "reply": "a1",
+        "digest": "594636b43163796822be6b9321721d081f25798c0efbd01e97a42d9e499779cd",
+        "epoch": 0,
+        "mode": "council",
+        "user_text": "登录接口核对：请根据核对指南安排查看错误日志、使用测试账号复现，并记录核对结果或缺口。只有60分钟。",
+        "status": "FAILED",
+        "text": "MAGI 三人格审议 · FAILED\n资料检索：FOUND\n已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。\n覆盖完整：是\n来源：核对指南.md 第1行 · 版本 302536ec0162\n登录接口核对：先查看现有错误日志，再使用测试账号复现。\n来源：核对指南.md 第2行 · 版本 302536ec0162\n没有测试账号时，只整理现有日志和待验证问题，不声称已经定位根因。\n来源：核对指南.md 第3行 · 版本 302536ec0162\n工作单导出不代表任务完成；最终记录核对结果或证据缺口。\n\nMELCHIOR · FAILED · 1.688s\n未完成：模型平台鉴权失败，请检查密钥与接入地址（AUTHENTICATION_FAILED）\n\nBALTHASAR · FAILED · 11.469s\n未完成：模型请求或整体审议超时：单次请求，连接（TIMEOUT）\n\nCASPER · FAILED · 1.453s\n未完成：模型平台鉴权失败，请检查密钥与接入地址（AUTHENTICATION_FAILED）\n综合未完成；没有可保存候选。\n本轮不会自动重跑。可缩小任务后新发消息；连接失败时先检查模型服务。\n\n调用 3/4 · 耗时 14.625s",
+        "proposal_id": null,
+        "synced": 0,
+        "created_at": "2026-11-02T13:56:23.655690+00:00",
+        "result": {
+          "personas": [
+            {
+              "role": "MELCHIOR",
+              "status": "FAILED",
+              "diagnostics": {
+                "grounding_policy": "goal-evidence-v1",
+                "output_budget": 768,
+                "timeout_seconds": 60.0,
+                "snapshot_payload_chars": 3512
+              },
+              "error": "OpenAIAuthenticationError",
+              "error_code": "AUTHENTICATION_FAILED",
+              "validation_errors": [],
+              "seconds": 1.688
+            },
+            {
+              "role": "BALTHASAR",
+              "status": "FAILED",
+              "diagnostics": {
+                "grounding_policy": "goal-evidence-v1",
+                "output_budget": 768,
+                "timeout_seconds": 60.0,
+                "snapshot_payload_chars": 3512,
+                "timeout_scope": "request",
+                "timeout_phase": "connect"
+              },
+              "error": "OpenAITimeoutError",
+              "error_code": "TIMEOUT",
+              "validation_errors": [],
+              "seconds": 11.469
+            },
+            {
+              "role": "CASPER",
+              "status": "FAILED",
+              "diagnostics": {
+                "grounding_policy": "goal-evidence-v1",
+                "output_budget": 768,
+                "timeout_seconds": 60.0,
+                "snapshot_payload_chars": 3512
+              },
+              "error": "OpenAIAuthenticationError",
+              "error_code": "AUTHENTICATION_FAILED",
+              "validation_errors": [],
+              "seconds": 1.453
+            }
+          ],
+          "status": "FAILED",
+          "candidate": null,
+          "calls": 3,
+          "seconds": 14.625,
+          "snapshot": {
+            "run_id": "858db42fac924262aad87ae11055743f",
+            "logical_session_id": "web-fe97852cd416a378c4a7a85fb1dfa593714f1f09595a797082db9048aa64",
+            "epoch": 0,
+            "question": "登录接口核对：请根据核对指南安排查看错误日志、使用测试账号复现，并记录核对结果或缺口。只有60分钟。",
+            "time_budget_minutes": 60,
+            "memories": [],
+            "history": [],
+            "old_plan": null,
+            "evidence_ids": [
+              "user:current",
+              "document:1058a236ff903c8fbd3579409ef58857ab19fc4e8edef016f0a362dd6397c7cf",
+              "document:ddfa26572ed3e4195cb61ffcd502398949f9a0ee8fecbdf0eedabf3999e8726c",
+              "document:1f38072ec0527b2cf088c1e201d192799ecca6639df1b6d6789ada495616b0a7"
+            ],
+            "retrieval": {
+              "status": "FOUND",
+              "matches": [
+                {
+                  "document_id": "b5e7d21fa208b8c98dee6d7287a7886b1593d92a60c30943c7d347b5a6f9cfc7",
+                  "version_id": "302536ec01626f27af505b6c6586b572b511368289bd5f99719b71f137b85d4f",
+                  "chunk_id": "1058a236ff903c8fbd3579409ef58857ab19fc4e8edef016f0a362dd6397c7cf",
+                  "evidence_ref": "document:1058a236ff903c8fbd3579409ef58857ab19fc4e8edef016f0a362dd6397c7cf",
+                  "path": "核对指南.md",
+                  "line": 1,
+                  "offset": 0,
+                  "quote": "登录接口核对：先查看现有错误日志，再使用测试账号复现。",
+                  "sha256": "41d6c96cadd2d5305c69134fbb318f0e71a7926a6c1dc391ee494234a81da3c1",
+                  "score": 0.875873,
+                  "matched_terms": [
+                    "登录",
+                    "录接",
+                    "接口",
+                    "口核",
+                    "核对",
+                    "查看",
+                    "错误",
+                    "误日",
+                    "日志",
+                    "使用",
+                    "用测",
+                    "测试",
+                    "试账",
+                    "账号",
+                    "号复",
+                    "复现"
+                  ],
+                  "keyword_score": 16
+                },
+                {
+                  "document_id": "b5e7d21fa208b8c98dee6d7287a7886b1593d92a60c30943c7d347b5a6f9cfc7",
+                  "version_id": "302536ec01626f27af505b6c6586b572b511368289bd5f99719b71f137b85d4f",
+                  "chunk_id": "ddfa26572ed3e4195cb61ffcd502398949f9a0ee8fecbdf0eedabf3999e8726c",
+                  "evidence_ref": "document:ddfa26572ed3e4195cb61ffcd502398949f9a0ee8fecbdf0eedabf3999e8726c",
+                  "path": "核对指南.md",
+                  "line": 2,
+                  "offset": 0,
+                  "quote": "没有测试账号时，只整理现有日志和待验证问题，不声称已经定位根因。",
+                  "sha256": "41d6c96cadd2d5305c69134fbb318f0e71a7926a6c1dc391ee494234a81da3c1",
+                  "score": 0.608345,
+                  "matched_terms": [
+                    "日志",
+                    "测试",
+                    "试账",
+                    "账号"
+                  ],
+                  "keyword_score": 4
+                },
+                {
+                  "document_id": "b5e7d21fa208b8c98dee6d7287a7886b1593d92a60c30943c7d347b5a6f9cfc7",
+                  "version_id": "302536ec01626f27af505b6c6586b572b511368289bd5f99719b71f137b85d4f",
+                  "chunk_id": "1f38072ec0527b2cf088c1e201d192799ecca6639df1b6d6789ada495616b0a7",
+                  "evidence_ref": "document:1f38072ec0527b2cf088c1e201d192799ecca6639df1b6d6789ada495616b0a7",
+                  "path": "核对指南.md",
+                  "line": 3,
+                  "offset": 0,
+                  "quote": "工作单导出不代表任务完成；最终记录核对结果或证据缺口。",
+                  "sha256": "41d6c96cadd2d5305c69134fbb318f0e71a7926a6c1dc391ee494234a81da3c1",
+                  "score": 0.536499,
+                  "matched_terms": [
+                    "核对",
+                    "记录",
+                    "录核",
+                    "对结",
+                    "结果",
+                    "果或",
+                    "缺口"
+                  ],
+                  "keyword_score": 7
+                }
+              ],
+              "chunk_policy": "line160-overlap32-v2",
+              "deduplicated": 0,
+              "method": "dense cosine BAAI/bge-m3",
+              "embedding": {
+                "enabled": true,
+                "degraded": false,
+                "cache_hits": 0,
+                "embedded_chunks": 3,
+                "pool_truncated": false,
+                "query_truncated": false,
+                "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1",
+                "calls": 2,
+                "known_tokens": 110
+              },
+              "query_terms": [
+                "登录",
+                "录接",
+                "接口",
+                "口核",
+                "核对",
+                "请根",
+                "根据",
+                "据核",
+                "对指",
+                "指南",
+                "南安",
+                "安排",
+                "排查",
+                "查看",
+                "看错",
+                "错误",
+                "误日",
+                "日志",
+                "使用",
+                "用测",
+                "测试",
+                "试账",
+                "账号",
+                "号复",
+                "复现",
+                "并记",
+                "记录",
+                "录核",
+                "对结",
+                "结果",
+                "果或",
+                "或缺",
+                "缺口",
+                "只有",
+                "60",
+                "分钟"
+              ],
+              "complete": true,
+              "coverage": {
+                "path": ".",
+                "match_mode": "case-sensitive literal substring",
+                "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+                "complete": true,
+                "incomplete_reasons": [],
+                "skipped": {},
+                "entries_seen": 1,
+                "files_examined": 1,
+                "bytes_read": 264,
+                "limits": {
+                  "entries": 200,
+                  "files": 40,
+                  "bytes": 262144,
+                  "results": 8
+                },
+                "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+              },
+              "truncated": false,
+              "notice": "已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+            }
+          },
+          "snapshot_hash": "6575602cbd1c7f7921fdcd98e0cb31eae8d1ca9b665d026727ebfa018d4a68e9",
+          "model": "qwen3.8-max",
+          "provider": "qianwen"
+        },
+        "run_id": "858db42fac924262aad87ae11055743f",
+        "documents": []
+      }
+    }
+  ],
+  "checks": {
+    "generation_1": false
+  },
+  "pids": [
+    184888
+  ],
+  "source_sha256": {
+    "C:\\Users\\yggdrasil\\Documents\\ChatGPT\\magi重构版\\scripts\\accept_current_mvp.py": "99bfe27323137488d9bf8f54c5e4730d655944237b0b22d5f21b498b2bbbe31c",
+    "scripts\\serve_mvp_acceptance.py": "5b4c888d82d2adb60f0c61454894a35bdfd0b5f3e6a701a161c1d699840845b8"
+  },
+  "status": "FAILED",
+  "failure": {
+    "type": "AssertionError"
+  }
+}

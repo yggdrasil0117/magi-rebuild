@@ -126,7 +126,7 @@ def test_full_create_restart_feedback_versions(env):
     assert update["result_version"] == 2
     assert restarted.plans.get(old.id, 1).body == old.body
     assert "缩减" in restarted.plans.get(old.id, 2).body
-    assert session.agent.update_state.call_count == 2
+    assert session.agent.update_state.call_count == 4
 
 
 def test_same_id_changed_input_rejected(env):

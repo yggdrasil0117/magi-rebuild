@@ -8,6 +8,7 @@ from threading import Lock
 from uuid import uuid4
 
 from langchain_core.messages import AIMessage, HumanMessage
+from langgraph.graph import END
 
 from magi.council.generation import failure_details, timeout_diagnostics
 from magi.council.service import Candidate, Council, candidate_body, render
@@ -249,6 +250,11 @@ class WebService:
             return turns
 
     def _sync(self, turn):
+        """将已完成审议续接到有效聊天历史，不运行日常模型。
+
+        turn来自持久业务轮次；同epoch才写入，稳定消息ID允许中断后重写。
+        写消息与结束图调度均成功才标记synced，避免恢复时漏修checkpoint。
+        """
         binding = self.context.resolve_binding(self.logical_id(turn["chat"]))
         # Do not resurrect a completed old-epoch result in the new context.
         if binding.epoch == turn["epoch"]:
@@ -280,6 +286,11 @@ class WebService:
                         ]
                     },
                 )
+                # 这里只写入已经完成的审议，不应调度日常Agent继续推理。
+                # 新thread的update_state可能按输入节点推导后继任务；显式结束这次
+                # 注入，避免下一轮被误判为中断。synced仍在两步成功后才标记，
+                # 若中间退出，恢复时用稳定消息ID重写并结束，不重复调用模型。
+                session.agent.update_state(session.config, None, as_node=END)
         with self.store.transaction() as db:
             db.execute("UPDATE web_turns SET synced=1 WHERE id=?", (turn["id"],))
 
