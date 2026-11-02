@@ -1,0 +1,1462 @@
+{
+  "mode": "fixed frozen snapshots; real cloud; baseline then updated; no retries",
+  "max_calls": 24,
+  "baseline_service_sha256": "a1c0f9d8efc2270f329825515760ac78f9dae9a393ab3f72abcfc9a3d0744f1a",
+  "dataset_sha256": "73fe1c9d00ca3bcfe8c8a2aeda24e4b02a0f6c2f050abe443f6cbeb792e2dfa4",
+  "attempts": [
+    {
+      "variant": "baseline",
+      "case": "historical_scope",
+      "snapshot": {
+        "question": "SQLiteRestart重启时恢复什么？是否表示未确认计划已保存？请依据本轮资料引用原文并给出核对步骤。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [],
+        "old_plan": null,
+        "retrieval": {
+          "status": "FOUND",
+          "matches": [
+            {
+              "document_id": "20c6f5f6557d6ae27ab7d1be6265f2b65c60e4f5be12017c329c2e6d7baaf728",
+              "version_id": "40982a3d2d817a41ccdde4d5bd918aeb79bb3fcd626faf036a118b951983b9e2",
+              "chunk_id": "3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+              "evidence_ref": "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+              "path": "boundary.txt",
+              "line": 1,
+              "offset": 128,
+              "quote": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙",
+              "sha256": "3db617e3b59d8ebd5c21cb57fc970cf5db3920462eb906b2ce2f2d15aec8e8b4",
+              "score": 0.673074,
+              "matched_terms": [
+                "sqliterestart"
+              ],
+              "keyword_score": 1
+            },
+            {
+              "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+              "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+              "chunk_id": "756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+              "evidence_ref": "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+              "path": "repeat.txt",
+              "line": 1,
+              "offset": 0,
+              "quote": "SQLite重复提示：先核对版本。",
+              "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+              "score": 0.631838,
+              "matched_terms": [],
+              "keyword_score": 0
+            },
+            {
+              "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+              "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+              "chunk_id": "ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+              "evidence_ref": "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+              "path": "repeat.txt",
+              "line": 8,
+              "offset": 0,
+              "quote": "SQLite补充提示：先备份再迁移。",
+              "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+              "score": 0.581155,
+              "matched_terms": [],
+              "keyword_score": 0
+            }
+          ],
+          "chunk_policy": "line160-overlap32-v2",
+          "deduplicated": 6,
+          "method": "dense cosine BAAI/bge-m3",
+          "embedding": {
+            "enabled": true,
+            "degraded": false,
+            "cache_hits": 0,
+            "embedded_chunks": 11,
+            "pool_truncated": false,
+            "query_truncated": false,
+            "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1",
+            "calls": 2,
+            "known_tokens": 480
+          },
+          "query_terms": [
+            "sqliterestart"
+          ],
+          "complete": true,
+          "coverage": {
+            "path": ".",
+            "match_mode": "case-sensitive literal substring",
+            "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+            "complete": true,
+            "incomplete_reasons": [],
+            "skipped": {},
+            "entries_seen": 2,
+            "files_examined": 2,
+            "bytes_read": 1269,
+            "limits": {
+              "entries": 200,
+              "files": 40,
+              "bytes": 262144,
+              "results": 8
+            },
+            "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+          },
+          "truncated": false,
+          "notice": "已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+        },
+        "evidence_ids": [
+          "user:current",
+          "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+          "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+          "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1"
+        ]
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 3152,
+              "input_tokens": 2316,
+              "output_tokens": 228,
+              "total_tokens": 2544,
+              "finish_reason": "stop",
+              "output_chars": 436
+            },
+            "opinion": {
+              "view": "原文指出SQLiteRestart恢复已提交事务，且重启不代表未确认计划已经保存。",
+              "recommendation": "核对步骤：1.打开boundary.txt定位该句；2.比对版本ID确认未被篡改；3.结合repeat.txt提示先备份再迁移。",
+              "concerns": [
+                "资料仅为测试片段，缺乏完整上下文与官方文档支撑。",
+                "未说明'未确认计划'的具体定义与业务含义。"
+              ],
+              "unknowns": [
+                "SQLiteRestart具体触发条件与适用范围未知。",
+                "未确认计划的判定标准与后续处理流程未知。"
+              ],
+              "evidence_refs": [
+                "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+                "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1"
+              ]
+            },
+            "seconds": 10.453
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 3152,
+              "input_tokens": 2317,
+              "output_tokens": 277,
+              "total_tokens": 2594,
+              "finish_reason": "stop",
+              "output_chars": 460
+            },
+            "opinion": {
+              "view": "原文指出SQLiteRestart恢复已提交事务，且重启不代表未确认计划已经保存。",
+              "recommendation": "先核对版本再操作，迁移前务必备份，避免数据丢失增加人员负担与成本。",
+              "concerns": [
+                "重启后未确认计划可能丢失，影响业务连续性。",
+                "若未先备份就迁移，出错时恢复成本高。"
+              ],
+              "unknowns": [
+                "未确认计划的具体定义和范围不明。",
+                "恢复已提交事务的完整条件未说明。"
+              ],
+              "evidence_refs": [
+                "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+                "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+                "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1"
+              ]
+            },
+            "seconds": 7.532
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 3152,
+              "input_tokens": 2313,
+              "output_tokens": 271,
+              "total_tokens": 2584,
+              "finish_reason": "stop",
+              "output_chars": 465
+            },
+            "opinion": {
+              "view": "原文指出SQLiteRestart恢复已提交事务，且重启不代表未确认计划已经保存。",
+              "recommendation": "先核对版本并备份再迁移，逐字比对boundary.txt原文以确认恢复范围与计划状态。",
+              "concerns": [
+                "资料仅为测试片段，可能不反映真实系统行为。",
+                "未确认计划的具体定义和判断标准不明。"
+              ],
+              "unknowns": [
+                "未确认计划包含哪些具体内容？",
+                "核对版本的详细步骤是什么？"
+              ],
+              "evidence_refs": [
+                "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+                "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+                "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1"
+              ]
+            },
+            "seconds": 8.062
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "SQLiteRestart恢复内容与核对步骤",
+          "steps": [
+            {
+              "action": "打开boundary.txt定位原文，逐字比对'SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存'。",
+              "done_when": "原文逐字匹配且无篡改痕迹。",
+              "minutes": null,
+              "kind": "核对"
+            },
+            {
+              "action": "比对version_id与sha256，确认文件版本未被篡改。",
+              "done_when": "哈希值与检索结果一致。",
+              "minutes": null,
+              "kind": "核对"
+            },
+            {
+              "action": "按repeat.txt提示先备份数据库，再执行迁移或恢复操作。",
+              "done_when": "备份完成且可验证完整性。",
+              "minutes": null,
+              "kind": "操作"
+            }
+          ],
+          "assumptions": [
+            "boundary.txt中的测试片段能代表当前系统的实际行为。",
+            "'未确认计划'指尚未持久化到数据库的计划数据。"
+          ],
+          "revision_reason": "无旧计划；依据本轮三份资料原文整合共识，给出可核对步骤，不将模型推测当作用户授权。",
+          "source_excerpts": [
+            {
+              "evidence_ref": "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+              "quote": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙"
+            },
+            {
+              "evidence_ref": "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+              "quote": "SQLite重复提示：先核对版本。"
+            },
+            {
+              "evidence_ref": "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+              "quote": "SQLite补充提示：先备份再迁移。"
+            }
+          ],
+          "source_ids": [
+            "source:0",
+            "source:1",
+            "source:2"
+          ],
+          "unknowns": [
+            "核对版本的详细操作步骤在资料中未展开。",
+            "未确认计划包含哪些具体内容未知。"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 5431,
+          "input_tokens": 3944,
+          "output_tokens": 323,
+          "total_tokens": 4267,
+          "finish_reason": "stop",
+          "output_chars": 795,
+          "minutes_by_kind": {},
+          "seconds": 9.844
+        },
+        "agreement": [
+          "三方均依据原文认定：SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。",
+          "三方均建议操作前先核对版本并备份，再执行迁移或恢复。"
+        ],
+        "disagreements": [],
+        "unknowns": [
+          "'未确认计划'的具体定义、判定标准与业务含义不明。",
+          "SQLiteRestart的触发条件、适用范围及完整恢复条件未知。",
+          "资料仅为测试片段，缺乏官方文档支撑真实系统行为。"
+        ],
+        "calls": 4,
+        "seconds": 35.891
+      },
+      "seconds": 35.89099999999962
+    },
+    {
+      "variant": "baseline",
+      "case": "historical_missing",
+      "snapshot": {
+        "question": "输出清单算办妥了吗？请根据本轮资料提出核对步骤。没有匹配资料时明确说明，不冒充已有来源。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [],
+        "old_plan": null,
+        "retrieval": {
+          "status": "NO_RESULTS",
+          "matches": [],
+          "method": "bounded keyword overlap (Chinese bigrams)",
+          "query_terms": [
+            "输出",
+            "出清",
+            "清单",
+            "单算",
+            "算办",
+            "办妥",
+            "妥了",
+            "了吗",
+            "请根",
+            "根据",
+            "据本",
+            "本轮",
+            "轮资",
+            "资料",
+            "料提",
+            "提出",
+            "出核",
+            "核对",
+            "对步",
+            "步骤",
+            "没有",
+            "有匹",
+            "匹配",
+            "配资",
+            "料时",
+            "时明",
+            "明确",
+            "确说",
+            "说明",
+            "不冒",
+            "冒充",
+            "充已",
+            "已有",
+            "有来",
+            "来源"
+          ],
+          "complete": true,
+          "coverage": {
+            "path": ".",
+            "match_mode": "case-sensitive literal substring",
+            "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+            "complete": true,
+            "incomplete_reasons": [],
+            "skipped": {},
+            "entries_seen": 1,
+            "files_examined": 1,
+            "bytes_read": 54,
+            "limits": {
+              "entries": 200,
+              "files": 40,
+              "bytes": 262144,
+              "results": 8
+            },
+            "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+          },
+          "truncated": false,
+          "notice": "仅授权文本范围；最多五条160字片段。字词重合不证明资料支持结论；无结果不等于没有答案。"
+        },
+        "evidence_ids": [
+          "user:current"
+        ]
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 975,
+              "input_tokens": 710,
+              "output_tokens": 106,
+              "total_tokens": 816,
+              "finish_reason": "stop",
+              "output_chars": 234
+            },
+            "opinion": {
+              "view": "本轮检索无匹配资料，无法确认清单是否办妥，需依据通用逻辑提出核对步骤。",
+              "recommendation": "建议按定义范围、逐项比对、记录差异、复核确认四步执行核对。",
+              "concerns": [
+                "缺乏具体清单内容，无法验证实际完成状态。",
+                "无历史计划参考，核对标准需重新明确。"
+              ],
+              "unknowns": [
+                "清单的具体条目与验收标准未知。",
+                "办妥的判定依据和责任人未提供。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 5.078
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 975,
+              "input_tokens": 711,
+              "output_tokens": 101,
+              "total_tokens": 812,
+              "finish_reason": "stop",
+              "output_chars": 226
+            },
+            "opinion": {
+              "view": "本轮检索无匹配资料，无法确认清单是否办妥，也不存在可依据的核对步骤。",
+              "recommendation": "请补充清单内容或相关文档后重新检索，再制定具体核对步骤。",
+              "concerns": [
+                "当前无任何资料支撑，无法评估人的负担与成本。",
+                "缺乏上下文，无法判断该事项的可逆性与影响。"
+              ],
+              "unknowns": [
+                "清单的具体内容和完成标准未知。",
+                "后续核对所需的资料来源和范围不明确。"
+              ],
+              "evidence_refs": []
+            },
+            "seconds": 6.688
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 975,
+              "input_tokens": 707,
+              "output_tokens": 106,
+              "total_tokens": 813,
+              "finish_reason": "stop",
+              "output_chars": 242
+            },
+            "opinion": {
+              "view": "本轮检索无匹配资料，无法确认清单是否办妥，也不存在可引用的核对步骤来源。",
+              "recommendation": "请补充清单的具体内容或目标，由你自主决定是否继续推进及投入多少时间。",
+              "concerns": [
+                "无资料支撑时强行输出步骤会偏离你的真实目标。",
+                "缺乏上下文可能导致机会成本被低估。"
+              ],
+              "unknowns": [
+                "清单具体指什么任务或交付物？",
+                "你期望的核对标准和时间预算是什么？"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.828
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "资料缺口下的通用核对步骤",
+          "steps": [
+            {
+              "action": "明确声明本轮检索无匹配资料，不冒充已有来源",
+              "done_when": "输出中已说明资料缺口且未引用虚假来源",
+              "minutes": null,
+              "kind": "记录"
+            },
+            {
+              "action": "请用户补充清单具体条目、验收标准及相关资料范围",
+              "done_when": "已向用户发出明确的补充信息请求",
+              "minutes": null,
+              "kind": "沟通"
+            },
+            {
+              "action": "收到资料后逐项比对清单条目与实际完成状态",
+              "done_when": "每项均有比对结果并记录差异",
+              "minutes": null,
+              "kind": "核对"
+            },
+            {
+              "action": "汇总差异项，确认是否满足办妥条件或需返工",
+              "done_when": "形成最终核对结论并记录待办事项",
+              "minutes": null,
+              "kind": "复核"
+            }
+          ],
+          "assumptions": [
+            "用户能提供清单的具体内容与验收标准",
+            "通用核对流程适用于当前任务场景",
+            "补充资料后可在本地范围内完成检索比对"
+          ],
+          "revision_reason": "无旧计划；因检索无结果，采用通用核对框架并明确标注资料缺口，兼顾MELCHIOR的步骤建议与BALTHASAR/CASPER对缺口的警示。",
+          "source_excerpts": [
+            {
+              "evidence_ref": "user:current",
+              "quote": "输出清单算办妥了吗？请根据本轮资料提出核对步骤。没有匹配资料时明确说明，不冒充已有来源。"
+            }
+          ],
+          "source_ids": [
+            "source:0"
+          ],
+          "unknowns": [
+            "清单具体指什么任务或交付物",
+            "办妥的判定依据和责任人是谁",
+            "后续核对所需的资料来源和范围"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2580,
+          "input_tokens": 1645,
+          "output_tokens": 401,
+          "total_tokens": 2046,
+          "finish_reason": "stop",
+          "output_chars": 957,
+          "minutes_by_kind": {},
+          "seconds": 12.093
+        },
+        "agreement": [
+          "三方均确认本轮检索无匹配资料，无法判定清单是否办妥",
+          "三方均认为缺乏清单具体内容与验收标准，无法直接核对",
+          "三方均同意不应冒充已有来源或虚构资料支撑结论"
+        ],
+        "disagreements": [
+          "MELCHIOR建议按通用逻辑提出四步核对流程",
+          "BALTHASAR认为无资料时不存在可依据的核对步骤，应先补充文档",
+          "CASPER主张由用户自主决定是否继续推进及投入时间"
+        ],
+        "unknowns": [
+          "清单的具体条目、交付物定义与验收标准未知",
+          "办妥的判定依据、责任人及所需资料来源未提供",
+          "用户期望的核对深度与后续行动优先级不明确"
+        ],
+        "calls": 4,
+        "seconds": 28.687
+      },
+      "seconds": 28.68699999999808
+    },
+    {
+      "variant": "baseline",
+      "case": "new_purchase_scope",
+      "snapshot": {
+        "question": "我只想整理购买显示器前要向商家询问的问题，暂不决定型号、不下单。请给两步准备计划。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [],
+        "old_plan": null,
+        "evidence_ids": [
+          "user:current",
+          "document:synthetic-monitor"
+        ],
+        "retrieval": {
+          "status": "FOUND",
+          "matches": [
+            {
+              "evidence_ref": "document:synthetic-monitor",
+              "quote": "采购流程示例：比较接口和保修条款；确认报价后可下单。",
+              "path": "synthetic-monitor.txt",
+              "version_id": "synthetic-version",
+              "document_id": "synthetic-document",
+              "chunk_id": "synthetic-monitor",
+              "line": 1,
+              "offset": 0
+            }
+          ],
+          "complete": true,
+          "notice": "离线合成快照，不表示授权购买"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 541,
+              "input_tokens": 488,
+              "output_tokens": 107,
+              "total_tokens": 595,
+              "finish_reason": "stop",
+              "output_chars": 254
+            },
+            "opinion": {
+              "view": "依据快照，购买显示器前需比较接口和保修条款，可据此整理询问清单。",
+              "recommendation": "第一步列出接口类型问题；第二步列出保修条款与报价确认问题。",
+              "concerns": [
+                "快照仅为示例，可能未覆盖全部关键询问点。",
+                "仅整理问题不涉及下单，需避免误触发采购流程。"
+              ],
+              "unknowns": [
+                "用户具体使用场景对接口类型的要求未知。",
+                "商家是否提供书面报价单尚不明确。"
+              ],
+              "evidence_refs": [
+                "document:synthetic-monitor"
+              ]
+            },
+            "seconds": 4.782
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 541,
+              "input_tokens": 489,
+              "output_tokens": 91,
+              "total_tokens": 580,
+              "finish_reason": "stop",
+              "output_chars": 233
+            },
+            "opinion": {
+              "view": "整理询问清单负担极低，无需决策或下单，不影响成本且完全可逆。",
+              "recommendation": "第一步列出接口与保修等关键问题；第二步按优先级排序形成最终清单。",
+              "concerns": [
+                "问题过多可能增加沟通时间成本",
+                "遗漏关键条款会影响后续比价"
+              ],
+              "unknowns": [
+                "商家是否支持书面回复所有问题",
+                "是否有特殊售后政策需额外确认"
+              ],
+              "evidence_refs": [
+                "document:synthetic-monitor"
+              ]
+            },
+            "seconds": 5.234
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 541,
+              "input_tokens": 485,
+              "output_tokens": 109,
+              "total_tokens": 594,
+              "finish_reason": "stop",
+              "output_chars": 264
+            },
+            "opinion": {
+              "view": "你明确暂不选型不下单，仅整理询问清单，机会成本极低，符合自主准备节奏。",
+              "recommendation": "第一步列出接口与保修等关键问题；第二步按优先级排序形成最终询问清单。",
+              "concerns": [
+                "问题遗漏可能导致后续比价时反复补充沟通",
+                "未定型号时部分参数问题可能过于宽泛"
+              ],
+              "unknowns": [
+                "你打算向几家商家同时询问",
+                "是否有预算或尺寸等硬性约束待确认"
+              ],
+              "evidence_refs": [
+                "user:current",
+                "document:synthetic-monitor"
+              ]
+            },
+            "seconds": 4.422
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "显示器购买前询问清单准备计划",
+          "steps": [
+            {
+              "action": "列出接口类型、保修条款等关键问题草稿",
+              "done_when": "形成包含至少两类问题的未排序草稿",
+              "minutes": null,
+              "kind": "整理"
+            },
+            {
+              "action": "按优先级排序并精简为最终询问清单",
+              "done_when": "输出不超过一页的有序问题清单，不含下单动作",
+              "minutes": null,
+              "kind": "整理"
+            }
+          ],
+          "assumptions": [
+            "用户仅需通用问题模板，不涉及具体型号参数",
+            "清单仅供后续沟通使用，不构成采购承诺"
+          ],
+          "revision_reason": "无旧计划；依据用户两步要求新建，排除选型与下单步骤。",
+          "source_excerpts": [
+            {
+              "evidence_ref": "document:synthetic-monitor",
+              "quote": "采购流程示例：比较接口和保修条款；确认报价后可下单。"
+            },
+            {
+              "evidence_ref": "user:current",
+              "quote": "我只想整理购买显示器前要向商家询问的问题，暂不决定型号、不下单。请给两步准备计划。"
+            }
+          ],
+          "source_ids": [
+            "source:0",
+            "source:1"
+          ],
+          "unknowns": [
+            "用户打算向几家商家同时询问",
+            "是否有特殊售后政策需额外确认"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2195,
+          "input_tokens": 1454,
+          "output_tokens": 249,
+          "total_tokens": 1703,
+          "finish_reason": "stop",
+          "output_chars": 621,
+          "minutes_by_kind": {},
+          "seconds": 7.594
+        },
+        "agreement": [
+          "仅整理询问清单，暂不决定型号、不下单",
+          "需涵盖接口与保修条款等关键问题",
+          "分两步：先列出问题再排序形成清单"
+        ],
+        "disagreements": [
+          "是否将报价确认纳入当前询问清单",
+          "第二步是按类别分组还是按优先级排序"
+        ],
+        "unknowns": [
+          "用户具体使用场景对接口类型的要求未知",
+          "是否有预算或尺寸等硬性约束待确认",
+          "商家是否支持书面回复所有问题"
+        ],
+        "calls": 4,
+        "seconds": 22.032
+      },
+      "seconds": 22.03200000000288
+    },
+    {
+      "variant": "updated",
+      "case": "historical_scope",
+      "snapshot": {
+        "question": "SQLiteRestart重启时恢复什么？是否表示未确认计划已保存？请依据本轮资料引用原文并给出核对步骤。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [],
+        "old_plan": null,
+        "retrieval": {
+          "status": "FOUND",
+          "matches": [
+            {
+              "document_id": "20c6f5f6557d6ae27ab7d1be6265f2b65c60e4f5be12017c329c2e6d7baaf728",
+              "version_id": "40982a3d2d817a41ccdde4d5bd918aeb79bb3fcd626faf036a118b951983b9e2",
+              "chunk_id": "3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+              "evidence_ref": "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+              "path": "boundary.txt",
+              "line": 1,
+              "offset": 128,
+              "quote": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙",
+              "sha256": "3db617e3b59d8ebd5c21cb57fc970cf5db3920462eb906b2ce2f2d15aec8e8b4",
+              "score": 0.673074,
+              "matched_terms": [
+                "sqliterestart"
+              ],
+              "keyword_score": 1
+            },
+            {
+              "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+              "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+              "chunk_id": "756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+              "evidence_ref": "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+              "path": "repeat.txt",
+              "line": 1,
+              "offset": 0,
+              "quote": "SQLite重复提示：先核对版本。",
+              "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+              "score": 0.631838,
+              "matched_terms": [],
+              "keyword_score": 0
+            },
+            {
+              "document_id": "aaaa7e2229c87278d4a15ed761dd618e498cce1fd6b8d4ad61dabb56c2e16a27",
+              "version_id": "ad19249b6b80390511309f4e1c1626ff06d5d9c09798816e10d47b1f7c84bbd3",
+              "chunk_id": "ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+              "evidence_ref": "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1",
+              "path": "repeat.txt",
+              "line": 8,
+              "offset": 0,
+              "quote": "SQLite补充提示：先备份再迁移。",
+              "sha256": "73bdc58cd7030cc803bfd840f30c9abba44244c3e3cb2fbe5698118b920a8c70",
+              "score": 0.581155,
+              "matched_terms": [],
+              "keyword_score": 0
+            }
+          ],
+          "chunk_policy": "line160-overlap32-v2",
+          "deduplicated": 6,
+          "method": "dense cosine BAAI/bge-m3",
+          "embedding": {
+            "enabled": true,
+            "degraded": false,
+            "cache_hits": 0,
+            "embedded_chunks": 11,
+            "pool_truncated": false,
+            "query_truncated": false,
+            "provider": "https://api.siliconflow.cn/v1|BAAI/bge-m3|dense1024|v1",
+            "calls": 2,
+            "known_tokens": 480
+          },
+          "query_terms": [
+            "sqliterestart"
+          ],
+          "complete": true,
+          "coverage": {
+            "path": ".",
+            "match_mode": "case-sensitive literal substring",
+            "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+            "complete": true,
+            "incomplete_reasons": [],
+            "skipped": {},
+            "entries_seen": 2,
+            "files_examined": 2,
+            "bytes_read": 1269,
+            "limits": {
+              "entries": 200,
+              "files": 40,
+              "bytes": 262144,
+              "results": 8
+            },
+            "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+          },
+          "truncated": false,
+          "notice": "已使用云端BGE-M3语义相似度检索。仅授权文本范围；最多五条160字片段。相似度或字词重合不证明资料支持结论；无结果不等于没有答案。"
+        },
+        "evidence_ids": [
+          "user:current",
+          "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+          "document:756036f03c12c94480b041606b8284f5f6ed9733f60716f938d68fd9f8eb34b3",
+          "document:ba859d0c0709f85141a42ce4bcbb33ad17dfd07cad0ddfc0bb2cc84219e253a1"
+        ]
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "grounding_policy": "goal-evidence-v1",
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 3152,
+              "input_tokens": 2525,
+              "output_tokens": 146,
+              "total_tokens": 2671,
+              "finish_reason": "stop",
+              "output_chars": 297
+            },
+            "opinion": {
+              "view": "原文指出SQLiteRestart恢复已提交事务，且重启不代表未确认计划已经保存。",
+              "recommendation": "核对步骤：定位boundary.txt第1行，逐字比对引文并记录差异或通过。",
+              "concerns": [
+                "资料仅为测试文本片段，无法证明真实SQLite行为。"
+              ],
+              "unknowns": [
+                "未确认计划的具体定义与范围不明。",
+                "无其他权威文档可交叉验证该说法。"
+              ],
+              "evidence_refs": [
+                "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf"
+              ]
+            },
+            "seconds": 5.328
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "grounding_policy": "goal-evidence-v1",
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 3152,
+              "input_tokens": 2526,
+              "output_tokens": 156,
+              "total_tokens": 2682,
+              "finish_reason": "stop",
+              "output_chars": 315
+            },
+            "opinion": {
+              "view": "原文称SQLiteRestart恢复已提交事务，且重启不代表未确认计划已经保存。",
+              "recommendation": "核对步骤：定位boundary.txt第1行，逐字比对引文与当前文件内容是否一致。",
+              "concerns": [
+                "资料仅为文本片段，无法证明实际数据库行为",
+                "sha256一致仅支持快照核对，不证明来源可信"
+              ],
+              "unknowns": [
+                "未确认计划的具体定义不明",
+                "当前文件版本是否与检索时一致未知"
+              ],
+              "evidence_refs": [
+                "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf"
+              ]
+            },
+            "seconds": 5.782
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "grounding_policy": "goal-evidence-v1",
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 3152,
+              "input_tokens": 2522,
+              "output_tokens": 166,
+              "total_tokens": 2688,
+              "finish_reason": "stop",
+              "output_chars": 326
+            },
+            "opinion": {
+              "view": "原文指出SQLiteRestart恢复已提交事务，且重启不代表未确认计划已经保存。",
+              "recommendation": "核对步骤：1.定位boundary.txt第1行；2.逐字比对引文与原文是否一致。",
+              "concerns": [
+                "资料仅说明恢复已提交事务，未详述其他恢复范围",
+                "重启与计划保存的关系仅为否定表述，缺乏正面定义"
+              ],
+              "unknowns": [
+                "未确认计划的具体含义和判定标准不明",
+                "当前资料未提供版本或时间戳等上下文信息"
+              ],
+              "evidence_refs": [
+                "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf"
+              ]
+            },
+            "seconds": 5.89
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "核对SQLiteRestart恢复内容与计划保存表述",
+          "steps": [
+            {
+              "action": "定位boundary.txt第1行，逐字比对是否含“SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。”",
+              "done_when": "记录比对结果为通过、失败或差异，不要求必然成功。",
+              "minutes": null,
+              "kind": "核对"
+            },
+            {
+              "action": "核对sha256与version_id标识的快照一致性，明确其仅支持一致性核对而非来源可信。",
+              "done_when": "记录哈希核对结果及证据边界说明。",
+              "minutes": null,
+              "kind": "核对"
+            },
+            {
+              "action": "记录“未确认计划”定义缺失及无权威交叉验证的资料缺口，作为待确认事项。",
+              "done_when": "缺口已记入unknowns，未将假设当作用户授权。",
+              "minutes": null,
+              "kind": "记录"
+            }
+          ],
+          "assumptions": [
+            "假定boundary.txt仍可读且内容未被篡改。",
+            "假定用户仅需基于本轮资料的文本核对，不要求验证真实数据库行为。"
+          ],
+          "revision_reason": "无旧计划；依最新约束新增步骤聚焦核对与记录缺口，不复制过时时长，不宣称资料支持结论。",
+          "source_excerpts": [
+            {
+              "evidence_ref": "document:3d4201ae6377de98effc6f608954fabc74945c3e2992ccca071aab501382eddf",
+              "quote": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲SQLiteRestart恢复已提交事务；重启不代表未确认计划已经保存。乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙乙"
+            },
+            {
+              "evidence_ref": "user:current",
+              "quote": "SQLiteRestart重启时恢复什么？是否表示未确认计划已保存？请依据本轮资料引用原文并给出核对步骤。"
+            }
+          ],
+          "source_ids": [
+            "source:0",
+            "source:3"
+          ],
+          "unknowns": [
+            "“未确认计划”的具体含义和判定标准不明。",
+            "无其他权威文档可交叉验证该说法。",
+            "当前文件版本是否与检索时一致未知。"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "grounding_policy": "goal-evidence-v1",
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 5120,
+          "input_tokens": 3838,
+          "output_tokens": 371,
+          "total_tokens": 4209,
+          "finish_reason": "stop",
+          "output_chars": 873,
+          "minutes_by_kind": {},
+          "seconds": 10.578
+        },
+        "agreement": [
+          "三方均依据原文指出SQLiteRestart恢复已提交事务，且重启不代表未确认计划已经保存。",
+          "三方均建议定位boundary.txt第1行并逐字比对引文。",
+          "三方均认为资料仅为文本片段，无法证明真实SQLite行为。"
+        ],
+        "disagreements": [],
+        "unknowns": [
+          "“未确认计划”的具体定义与判定标准不明。",
+          "无其他权威文档可交叉验证该说法的真实性。",
+          "当前文件版本是否与检索时一致未知。"
+        ],
+        "calls": 4,
+        "seconds": 27.578
+      },
+      "seconds": 27.5779999999977
+    },
+    {
+      "variant": "updated",
+      "case": "historical_missing",
+      "snapshot": {
+        "question": "输出清单算办妥了吗？请根据本轮资料提出核对步骤。没有匹配资料时明确说明，不冒充已有来源。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [],
+        "old_plan": null,
+        "retrieval": {
+          "status": "NO_RESULTS",
+          "matches": [],
+          "method": "bounded keyword overlap (Chinese bigrams)",
+          "query_terms": [
+            "输出",
+            "出清",
+            "清单",
+            "单算",
+            "算办",
+            "办妥",
+            "妥了",
+            "了吗",
+            "请根",
+            "根据",
+            "据本",
+            "本轮",
+            "轮资",
+            "资料",
+            "料提",
+            "提出",
+            "出核",
+            "核对",
+            "对步",
+            "步骤",
+            "没有",
+            "有匹",
+            "匹配",
+            "配资",
+            "料时",
+            "时明",
+            "明确",
+            "确说",
+            "说明",
+            "不冒",
+            "冒充",
+            "充已",
+            "已有",
+            "有来",
+            "来源"
+          ],
+          "complete": true,
+          "coverage": {
+            "path": ".",
+            "match_mode": "case-sensitive literal substring",
+            "scope": "仅.md/.txt/.rst；排除隐藏项、依赖目录及链接，不搜索互联网",
+            "complete": true,
+            "incomplete_reasons": [],
+            "skipped": {},
+            "entries_seen": 1,
+            "files_examined": 1,
+            "bytes_read": 54,
+            "limits": {
+              "entries": 200,
+              "files": 40,
+              "bytes": 262144,
+              "results": 8
+            },
+            "notice": "片段仅证明本次读到这些文字，不保证结论正确或资料仍适用；无结果不代表所有资料没有答案。"
+          },
+          "truncated": false,
+          "notice": "仅授权文本范围；最多五条160字片段。字词重合不证明资料支持结论；无结果不等于没有答案。"
+        },
+        "evidence_ids": [
+          "user:current"
+        ]
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "grounding_policy": "goal-evidence-v1",
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 975,
+              "input_tokens": 919,
+              "output_tokens": 111,
+              "total_tokens": 1030,
+              "finish_reason": "stop",
+              "output_chars": 244
+            },
+            "opinion": {
+              "view": "本轮检索无匹配资料，无法确认清单是否办妥，需基于用户描述制定核对步骤。",
+              "recommendation": "请用户提供待核对清单及预期标准，再逐项比对并记录通过、失败或差异。",
+              "concerns": [
+                "当前资料库未找到与清单或核对相关的任何记录。",
+                "缺少待核对对象和判定标准，无法直接执行验证。"
+              ],
+              "unknowns": [
+                "待核对清单的具体内容和范围未知。",
+                "判断办妥的完成条件尚未明确。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.782
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "grounding_policy": "goal-evidence-v1",
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 975,
+              "input_tokens": 920,
+              "output_tokens": 95,
+              "total_tokens": 1015,
+              "finish_reason": "stop",
+              "output_chars": 223
+            },
+            "opinion": {
+              "view": "本轮检索无匹配资料，无法确认清单是否办妥，也不存在可引用的核对步骤来源。",
+              "recommendation": "请补充清单内容或相关文档路径，以便在授权范围内执行核对。",
+              "concerns": [
+                "当前资料库未找到与清单或核对相关的文件",
+                "无结果仅说明本次检索范围未匹配"
+              ],
+              "unknowns": [
+                "待核对的清单具体内容未知",
+                "清单所在文件或路径未知"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 3.937
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "grounding_policy": "goal-evidence-v1",
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 975,
+              "input_tokens": 916,
+              "output_tokens": 109,
+              "total_tokens": 1025,
+              "finish_reason": "stop",
+              "output_chars": 244
+            },
+            "opinion": {
+              "view": "本轮检索未匹配到任何资料，无法确认清单是否办妥，也不存在可引用的来源。",
+              "recommendation": "建议先明确需核对的清单内容及其存放位置，再重新发起定向检索或人工核查。",
+              "concerns": [
+                "当前资料库中无相关记录，无法验证清单状态。",
+                "缺乏具体清单定义，后续核对目标不明确。"
+              ],
+              "unknowns": [
+                "待核对清单的具体内容和格式未知。",
+                "清单应存放的文件路径或系统未知。"
+              ],
+              "evidence_refs": [
+                "user:current"
+              ]
+            },
+            "seconds": 4.891
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "记录资料缺口并收集核对前提",
+          "steps": [
+            {
+              "action": "明确记录本次检索无匹配资料，不宣称清单已办妥或未办妥",
+              "done_when": "输出中已声明资料缺口且未冒充来源",
+              "minutes": null,
+              "kind": null
+            },
+            {
+              "action": "向用户请求提供待核对清单内容、存放位置及判定标准",
+              "done_when": "已发出补充信息请求并列出所需字段",
+              "minutes": null,
+              "kind": null
+            },
+            {
+              "action": "收到清单后逐项比对，记录每项通过、失败、差异或证据不足",
+              "done_when": "每项均有可核对的状态记录",
+              "minutes": null,
+              "kind": null
+            }
+          ],
+          "assumptions": [
+            "用户持有待核对清单或能指定其来源",
+            "核对任务允许在证据不足时记录缺口而非必须得出确定结论"
+          ],
+          "revision_reason": "无旧计划；因检索无结果，步骤聚焦于记录缺口与收集前提，不预设执行时长。",
+          "source_excerpts": [
+            {
+              "evidence_ref": "user:current",
+              "quote": "输出清单算办妥了吗？请根据本轮资料提出核对步骤。没有匹配资料时明确说明，不冒充已有来源。"
+            }
+          ],
+          "source_ids": [
+            "source:0"
+          ],
+          "unknowns": [
+            "待核对清单的具体内容与格式",
+            "判断办妥的完成标准",
+            "清单所在文件或系统路径"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "grounding_policy": "goal-evidence-v1",
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2711,
+          "input_tokens": 1857,
+          "output_tokens": 272,
+          "total_tokens": 2129,
+          "finish_reason": "stop",
+          "output_chars": 622,
+          "minutes_by_kind": {},
+          "seconds": 8.594
+        },
+        "agreement": [
+          "三方均确认本轮检索无匹配资料，无法判断清单是否办妥",
+          "三方均认为需先明确待核对清单内容及判定标准才能执行验证"
+        ],
+        "disagreements": [],
+        "unknowns": [
+          "待核对清单的具体内容、范围与格式未知",
+          "判断办妥的完成条件或预期标准尚未明确",
+          "清单所在文件路径或系统位置未知"
+        ],
+        "calls": 4,
+        "seconds": 22.204
+      },
+      "seconds": 22.204000000001543
+    },
+    {
+      "variant": "updated",
+      "case": "new_purchase_scope",
+      "snapshot": {
+        "question": "我只想整理购买显示器前要向商家询问的问题，暂不决定型号、不下单。请给两步准备计划。",
+        "time_budget_minutes": null,
+        "memories": [],
+        "history": [],
+        "old_plan": null,
+        "evidence_ids": [
+          "user:current",
+          "document:synthetic-monitor"
+        ],
+        "retrieval": {
+          "status": "FOUND",
+          "matches": [
+            {
+              "evidence_ref": "document:synthetic-monitor",
+              "quote": "采购流程示例：比较接口和保修条款；确认报价后可下单。",
+              "path": "synthetic-monitor.txt",
+              "version_id": "synthetic-version",
+              "document_id": "synthetic-document",
+              "chunk_id": "synthetic-monitor",
+              "line": 1,
+              "offset": 0
+            }
+          ],
+          "complete": true,
+          "notice": "离线合成快照，不表示授权购买"
+        }
+      },
+      "result": {
+        "personas": [
+          {
+            "role": "MELCHIOR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "grounding_policy": "goal-evidence-v1",
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 541,
+              "input_tokens": 697,
+              "output_tokens": 128,
+              "total_tokens": 825,
+              "finish_reason": "stop",
+              "output_chars": 302
+            },
+            "opinion": {
+              "view": "用户仅需整理购买前询问清单，不下单不选型；快照提及比较接口和保修条款可作为问题方向参考。",
+              "recommendation": "第一步依据快照提示列出接口与保修等询问要点；第二步按优先级排序形成最终问题清单。",
+              "concerns": [
+                "快照仅为示例，未必覆盖所有需向商家确认的事项。",
+                "整理清单时须避免演变为实际选型或下单决策。"
+              ],
+              "unknowns": [
+                "用户是否还有其他特定使用场景需纳入询问范围。",
+                "商家类型（线上或线下）是否影响问题侧重点。"
+              ],
+              "evidence_refs": [
+                "user:current",
+                "document:synthetic-monitor"
+              ]
+            },
+            "seconds": 5.203
+          },
+          {
+            "role": "BALTHASAR",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "grounding_policy": "goal-evidence-v1",
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 541,
+              "input_tokens": 698,
+              "output_tokens": 107,
+              "total_tokens": 805,
+              "finish_reason": "stop",
+              "output_chars": 260
+            },
+            "opinion": {
+              "view": "用户仅需整理购买前询问清单，暂不选型或下单，负担极低且完全可逆。",
+              "recommendation": "第一步列出接口与保修等关键问题；第二步按优先级排序形成询问清单。",
+              "concerns": [
+                "资料含采购流程示例，需避免误读为授权下单。",
+                "仅整理问题不涉及实际购买承诺。"
+              ],
+              "unknowns": [
+                "商家是否支持自定义接口配置未知。",
+                "具体保修条款细节尚未获取。"
+              ],
+              "evidence_refs": [
+                "user:current",
+                "document:synthetic-monitor"
+              ]
+            },
+            "seconds": 4.078
+          },
+          {
+            "role": "CASPER",
+            "status": "COMPLETED",
+            "diagnostics": {
+              "grounding_policy": "goal-evidence-v1",
+              "output_budget": 768,
+              "timeout_seconds": 60.0,
+              "snapshot_payload_chars": 541,
+              "input_tokens": 694,
+              "output_tokens": 99,
+              "total_tokens": 793,
+              "finish_reason": "stop",
+              "output_chars": 251
+            },
+            "opinion": {
+              "view": "你只需整理购买前要问商家的问题清单，暂不选型号也不下单。",
+              "recommendation": "第一步列出接口与保修等关键询问点；第二步按优先级排序形成提问清单。",
+              "concerns": [
+                "资料中的采购流程示例仅作问题参考，不代表授权购买。"
+              ],
+              "unknowns": [
+                "尚未确定需向商家询问的具体问题范围。",
+                "不清楚是否有特殊使用场景影响提问重点。"
+              ],
+              "evidence_refs": [
+                "user:current",
+                "document:synthetic-monitor"
+              ]
+            },
+            "seconds": 3.906
+          }
+        ],
+        "status": "COMPLETED",
+        "candidate": {
+          "title": "购买显示器前商家询问清单准备计划",
+          "steps": [
+            {
+              "action": "依据快照提示列出接口、保修等关键询问要点，不涉及选型或下单",
+              "done_when": "形成初步问题草稿且未包含任何购买决策",
+              "minutes": null,
+              "kind": "整理"
+            },
+            {
+              "action": "按个人关注优先级对问题排序，形成最终询问清单",
+              "done_when": "输出有序问题列表，确认无下单动作",
+              "minutes": null,
+              "kind": "整理"
+            }
+          ],
+          "assumptions": [
+            "快照中的采购流程示例仅作为问题方向参考，不构成购买授权",
+            "用户当前阶段只需问题清单，无需实际报价或下单信息"
+          ],
+          "revision_reason": "无旧计划；严格遵循用户仅整理问题、不选型不下单的要求，利用快照提示确定问题方向。",
+          "source_excerpts": [
+            {
+              "evidence_ref": "document:synthetic-monitor",
+              "quote": "采购流程示例：比较接口和保修条款；确认报价后可下单。"
+            },
+            {
+              "evidence_ref": "user:current",
+              "quote": "我只想整理购买显示器前要向商家询问的问题，暂不决定型号、不下单。请给两步准备计划。"
+            }
+          ],
+          "source_ids": [
+            "source:0",
+            "source:1"
+          ],
+          "unknowns": [
+            "具体使用场景未知，可能遗漏针对性问题",
+            "商家支持的服务细节尚未获取"
+          ]
+        },
+        "synthesis_diagnostics": {
+          "grounding_policy": "goal-evidence-v1",
+          "output_budget": 1536,
+          "timeout_seconds": 60.0,
+          "snapshot_payload_chars": 2378,
+          "input_tokens": 1691,
+          "output_tokens": 271,
+          "total_tokens": 1962,
+          "finish_reason": "stop",
+          "output_chars": 647,
+          "minutes_by_kind": {},
+          "seconds": 9.344
+        },
+        "agreement": [
+          "仅整理购买前询问清单，暂不决定型号、不下单",
+          "可参考快照中接口与保修条款作为问题方向",
+          "分两步：先列出关键询问点，再按优先级排序"
+        ],
+        "disagreements": [],
+        "unknowns": [
+          "用户是否有特定使用场景需纳入询问范围",
+          "商家类型（线上或线下）是否影响问题侧重点",
+          "除接口和保修外还有哪些必问事项"
+        ],
+        "calls": 4,
+        "seconds": 22.531
+      },
+      "seconds": 22.53099999999904
+    }
+  ],
+  "human_review": "待人工复核，不把结构完成等同内容正确",
+  "source_sha256": {
+    "scripts\\evaluate_grounding.py": "0d1f356f0cf1d3e39a4c0e553c05e44009d6120e4fc713e06488dc9bbff65b2a",
+    "src\\magi\\council\\grounding.py": "868aa7489cf0e830f745dae481b938becd02fda77ec812c44dc57da45b002bf3",
+    "src\\magi\\council\\service.py": "7b79e1e1695b0b25a71681bc32bcdeb4e904f0f5dc2803772a3b9079f45da684"
+  },
+  "summary": {
+    "completed": 6,
+    "attempted": 6,
+    "calls": 24
+  }
+}

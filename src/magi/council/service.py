@@ -15,6 +15,7 @@ from magi.council.generation import (
     model_snapshot,
     timeout_diagnostics,
 )
+from magi.council.grounding import GROUNDING_GUIDANCE, POLICY_VERSION
 from magi.council.sources import selected_excerpts, source_options
 from magi.harness.model_factory import build_model
 from magi.harness.runtime import validate_model_message
@@ -217,6 +218,9 @@ class Council:
 
     def _generate(self, system, payload, schema, budget, timeout, diagnostics):
         """记录用量并解析结构化响应；校验失败向上抛出，不自动修复或重试。"""
+        # 三个角色和综合共用边界；这是生成指导，不是程序已证明语义正确。
+        system += GROUNDING_GUIDANCE
+        diagnostics["grounding_policy"] = POLICY_VERSION
         diagnostics.update(
             output_budget=budget,
             timeout_seconds=round(timeout, 3),

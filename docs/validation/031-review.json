@@ -1,0 +1,27 @@
+{
+  "mode": "human review of all six single attempts; no automatic semantic pass score",
+  "model_statuses": "6 COMPLETED, 24 calls",
+  "scope": {
+    "baseline": "contains unrequested migration and hash authenticity overclaim",
+    "updated": "no migration step, consistency scoped; unverified untampered assumption remains"
+  },
+  "missing": {
+    "updated_issue": "CASPER仍称当前资料库中无相关记录，超出本次检索证据"
+  },
+  "purchase": {
+    "baseline": "already no purchase action; disagreements exaggerated",
+    "updated": "no purchase action, disagreements empty; unsupported low-burden/completely-reversible claim remains"
+  },
+  "limitations": [
+    "small development sample",
+    "fixed old-then-new order",
+    "no retry",
+    "no semantic correctness guarantee",
+    "no new retrieval/browser/save/restart validation"
+  ],
+  "tokens": {
+    "known_input": 37382,
+    "known_output": 4400,
+    "known_total": 41782
+  }
+}
