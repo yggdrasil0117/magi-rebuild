@@ -41,7 +41,7 @@ def digest(value):
 def turn_signature(request, mode):
     """任务和同步入口共享请求身份，默认关闭的新增开关沿用旧摘要。"""
     data = request.model_dump()
-    for field in ("web_enabled", "memory_recall"):
+    for field in ("web_enabled", "memory_recall", "issue_enabled"):
         if not data[field]:
             data.pop(field)
     return digest([data, mode])
@@ -64,6 +64,8 @@ class WebService:
         session_factory=None,
         memory_extractor=None,
     ):
+        from magi.web.issues import IssueActions
+
         self.settings, self.owner = settings, owner
         self.store = PersonalStore(settings.business_db_path)
         self.plans = PlanService(self.store)
@@ -78,6 +80,7 @@ class WebService:
         self.extraction_gate = Lock()
         self.documents = TaskDocuments(self.store, owner)
         self.approvals = DocumentApprovals(self.documents)
+        self.issues = IssueActions(self.store, owner)
 
     def document_view(self, document_id):
         """将持久审批状态附在预览上，GET只读取，不恢复任何执行节点。"""
@@ -207,6 +210,7 @@ class WebService:
             self.gate.release()
 
     def recover(self):
+        self.issues.recover()
         self.suggestions.recover()
         with self.store.transaction() as db:
             db.execute(
@@ -235,6 +239,7 @@ class WebService:
         result["result"] = json.loads(result.pop("result_json") or "null")
         result["run_id"] = result["id"] if result["mode"] == "council" else None
         result["documents"] = self.documents.for_turn(turn_id)
+        result["issues"] = self.issues.for_turn(turn_id)
         return result
 
     def turn_status(self, chat, message_id):
@@ -258,6 +263,15 @@ class WebService:
                 )
             ]
             by_turn = {}
+            issues = {
+                row["turn_id"]: dict(row)
+                for row in db.execute(
+                    """SELECT a.id,a.status,a.turn_id FROM issue_actions a
+                       JOIN web_turns t ON t.id=a.turn_id
+                       WHERE a.owner=? AND t.owner=? AND t.chat=?""",
+                    (self.owner, self.owner, chat),
+                )
+            }
             for row in db.execute(
                 "SELECT d.id,d.plan_id,d.version,d.status,d.source_turn_id FROM task_documents d JOIN web_turns t ON t.id=d.source_turn_id WHERE d.owner=? AND t.owner=? AND t.chat=? ORDER BY d.rowid",
                 (self.owner, self.owner, chat),
@@ -271,6 +285,7 @@ class WebService:
                 turn["memory_recall"] = stored.get("memory_recall")
                 turn["web_research"] = stored.get("web_research", [])
                 turn["documents"] = by_turn.get(turn["id"], [])
+                turn["issues"] = [issues[turn["id"]]] if turn["id"] in issues else []
             return turns
 
     def _sync(self, turn):
@@ -334,6 +349,8 @@ class WebService:
         ]
 
     def turn(self, request, mode, *, expected_epoch=None):
+        if request.issue_enabled and mode != "chat":
+            raise WebError("INVALID_INPUT", "Issue 草稿工具仅用于日常聊天", 422)
         if request.memory_recall and mode != "chat":
             raise WebError("INVALID_INPUT", "语义记忆召回请使用日常聊天", 422)
         if request.web_enabled and mode != "chat":
@@ -350,6 +367,8 @@ class WebService:
                     "IDEMPOTENCY_CONFLICT", "同一消息 ID 的输入已改变；请新发消息"
                 )
             return self.get_turn(prior["id"])
+        if request.issue_enabled and not self.issues.repo:
+            raise WebError("ISSUE_DISABLED", "服务未配置有效的 Issue 目标仓库", 422)
         if not self.gate.acquire(blocking=False):
             raise WebError("BUSY", "正在处理其他任务", 429)
         turn_id = uuid4().hex
@@ -431,6 +450,8 @@ class WebService:
                             self.documents, turn_id, prepare=self.prepare_document
                         )
                     ]
+                    if request.issue_enabled:
+                        options["extra_tools"].extend(self.issues.tools(turn_id))
                 if (
                     request.web_enabled
                     and self.session_factory is open_personal_session

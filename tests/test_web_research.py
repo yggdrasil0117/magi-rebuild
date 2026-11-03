@@ -137,7 +137,7 @@ def test_opt_in_and_legacy_digest(env):
     _, service, _, _ = env
     req = request()
     turn = service.turn(req, "chat")
-    data = req.model_dump(exclude={"web_enabled", "memory_recall"})
+    data = req.model_dump(exclude={"web_enabled", "memory_recall", "issue_enabled"})
     assert turn["digest"] == digest([data, "chat"])
     with pytest.raises(WebError, match="日常聊天"):
         service.turn(request("2", web_enabled=True), "council")

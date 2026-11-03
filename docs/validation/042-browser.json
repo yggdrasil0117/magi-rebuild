@@ -1,0 +1,11 @@
+{
+  "browser": "Edge",
+  "transport": "mock",
+  "methods": [
+    "POST",
+    "GET"
+  ],
+  "status": "VERIFIED",
+  "issue_number": 12,
+  "restored_after_reload": true
+}

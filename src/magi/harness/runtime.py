@@ -479,6 +479,12 @@ def open_personal_session(
     # 仅开启联网的请求携带此指导，避免无关提示挤占其他会话预算。
     if any(tool.name == "magi_web_search" for tool in extra_tools):
         prompt += WEB_RESEARCH_PROMPT
+    if any(tool.name == "magi_prepare_issue" for tool in extra_tools):
+        prompt += (
+            "\n只有用户明确请求准备或创建 GitHub Issue 时才调用草稿工具。"
+            "草稿只保存待审内容。请用户在网页核对并批准，聊天里的同意不能执行发布。"
+            "用户问发布结果时查真实回执，只有 VERIFIED 才能说已核对创建结果。"
+        )
 
     def magi_list_plans() -> str:
         return json.dumps(

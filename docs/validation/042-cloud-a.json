@@ -1,0 +1,49 @@
+{
+  "remote_calls": [
+    {
+      "method": "POST",
+      "url": "https://api.github.com/repos/sandbox-owner/synthetic-issue-repo/issues"
+    }
+  ],
+  "draft_reply": "已生成待审草稿（action_id: `6ba80d131092415ebf24f943ccf09818`），标题为“核对后台任务超时提示：页面仍显示执行中”，内容仅包含本次复现现象、已知事实及后续复现与记录时间的期望动作。\n\n请在网页上核对并批准该草稿；聊天中的同意不能替代页面授权，也未实际向 GitHub 发送写入请求。如需调整标题或正文，请告诉我具体修改点。",
+  "drafts": [
+    {
+      "id": "6ba80d131092415ebf24f943ccf09818",
+      "turn_id": "5b9dc1ad78ec4354abe380dfd8cd0e24",
+      "repo": "sandbox-owner/synthetic-issue-repo",
+      "title": "核对后台任务超时提示：页面仍显示执行中",
+      "body": "## 现象\n- 本次复现时，后台任务已应超时，但页面仍显示“执行中”状态。\n\n## 已知事实\n- 仅确认上述现象在本次复现中出现。\n- 具体原因尚未查明。\n\n## 期望后续动作\n- 继续复现该问题。\n- 记录每次复现的发生时间及相关上下文，以便定位根因。",
+      "payload_hash": "db0cf2f5ef21ae7b19c170263505620d9f35f8a9be5bafb16cdaa496525083d3",
+      "epoch": 0,
+      "status": "DRAFT",
+      "issue_number": null,
+      "created_at": "2026-11-03T07:29:53.187596+00:00",
+      "approved_at": null,
+      "verified_at": null,
+      "outbound_body": "## 现象\n- 本次复现时，后台任务已应超时，但页面仍显示“执行中”状态。\n\n## 已知事实\n- 仅确认上述现象在本次复现中出现。\n- 具体原因尚未查明。\n\n## 期望后续动作\n- 继续复现该问题。\n- 记录每次复现的发生时间及相关上下文，以便定位根因。\n\n<!-- magi-action:6ba80d131092415ebf24f943ccf09818 -->",
+      "url": null
+    }
+  ],
+  "writes_before_approval": 0,
+  "approved": {
+    "id": "6ba80d131092415ebf24f943ccf09818",
+    "turn_id": "5b9dc1ad78ec4354abe380dfd8cd0e24",
+    "repo": "sandbox-owner/synthetic-issue-repo",
+    "title": "核对后台任务超时提示：页面仍显示执行中",
+    "body": "## 现象\n- 本次复现时，后台任务已应超时，但页面仍显示“执行中”状态。\n\n## 已知事实\n- 仅确认上述现象在本次复现中出现。\n- 具体原因尚未查明。\n\n## 期望后续动作\n- 继续复现该问题。\n- 记录每次复现的发生时间及相关上下文，以便定位根因。",
+    "payload_hash": "db0cf2f5ef21ae7b19c170263505620d9f35f8a9be5bafb16cdaa496525083d3",
+    "epoch": 0,
+    "status": "VERIFIED",
+    "issue_number": 17,
+    "created_at": "2026-11-03T07:29:53.187596+00:00",
+    "approved_at": "2026-11-03T07:29:55.745678+00:00",
+    "verified_at": "2026-11-03T07:29:55.752994+00:00",
+    "outbound_body": "## 现象\n- 本次复现时，后台任务已应超时，但页面仍显示“执行中”状态。\n\n## 已知事实\n- 仅确认上述现象在本次复现中出现。\n- 具体原因尚未查明。\n\n## 期望后续动作\n- 继续复现该问题。\n- 记录每次复现的发生时间及相关上下文，以便定位根因。\n\n<!-- magi-action:6ba80d131092415ebf24f943ccf09818 -->",
+    "url": "https://github.com/sandbox-owner/synthetic-issue-repo/issues/17"
+  },
+  "receipt_reply": "回执状态为 **VERIFIED**，已核对创建结果：\n\n- Issue 编号：**#17**\n- 仓库：sandbox-owner/synthetic-issue-repo\n- 链接：https://github.com/sandbox-owner/synthetic-issue-repo/issues/17\n\n如需补充复现时间记录模板或关联后续排查计划，请告诉我。",
+  "tools": [
+    "magi_prepare_issue",
+    "magi_get_issue_receipt"
+  ]
+}

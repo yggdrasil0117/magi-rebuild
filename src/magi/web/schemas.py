@@ -8,6 +8,7 @@ class Request(BaseModel):
 
 
 class TurnInput(Request):
+    issue_enabled: bool = Field(default=False, strict=True)
     memory_recall: bool = Field(default=False, strict=True)
     web_enabled: bool = Field(default=False, strict=True)
     chat_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,80}$")
@@ -25,6 +26,15 @@ class TaskSubmission(Request):
 
     mode: Literal["chat", "council"]
     turn: TurnInput
+
+
+class IssueDecision(Request):
+    payload_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    decision: Literal["approve", "reject"]
+
+
+class IssueReconcile(Request):
+    issue_number: int = Field(strict=True, ge=1, le=2147483647)
 
 
 class Confirmation(Request):

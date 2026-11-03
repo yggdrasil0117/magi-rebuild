@@ -11,6 +11,8 @@ function setMode(mode) {
   const enabled = mode === 'deliberations';
   $('webEnabled').disabled = enabled;
   $('memoryRecall').disabled = enabled;
+  $('issueEnabled').disabled = enabled;
+  if (enabled) $('issueEnabled').checked = false;
   if (enabled) $('memoryRecall').checked = false;
   if (enabled) $('webEnabled').checked = false;
   $('analyze').textContent = '三人格分析：' + (enabled ? '开启' : '关闭');
@@ -131,6 +133,74 @@ async function followTurn(chat, message, ticket) {
   }
 }
 
+// 使用服务端草稿与回执渲染，模型文字不能改变审批状态。
+function issuePanel(source) {
+  const details = document.createElement('details'), summary = document.createElement('summary');
+  const content = document.createElement('div'), status = document.createElement('p');
+  const path = '/v1/issues/' + encodeURIComponent(source.id);
+  const labels = {DRAFT: '待确认', REJECTED: '已拒绝', SENDING: '发送中', UNKNOWN: '结果待核对', VERIFIED: '已核对创建结果'};
+  summary.textContent = 'GitHub Issue · ' + labels[source.status];
+  details.append(summary, content, status);
+
+  function render(action) {
+    summary.textContent = 'GitHub Issue · ' + labels[action.status];
+    content.replaceChildren();
+    const preview = document.createElement('pre');
+    preview.textContent = '目标仓库：' + action.repo + '\n标题：' + action.title + '\n\n' + action.outbound_body;
+    content.append(preview);
+    const controls = document.createElement('div');
+    content.append(controls);
+    const button = (label, operation) => {
+      const item = document.createElement('button');
+      item.textContent = label;
+      item.onclick = async () => {
+        controls.querySelectorAll('button').forEach(element => { element.disabled = true; });
+        status.textContent = '正在处理…';
+        try {
+          render(await operation());
+          status.textContent = '';
+        } catch (e) {
+          status.textContent = e.message;
+        } finally {
+          controls.querySelectorAll('button').forEach(element => { element.disabled = false; });
+        }
+      };
+      controls.append(item);
+    };
+    if (action.status === 'DRAFT') {
+      const decision = value => api(path + '/decision', {payload_hash: action.payload_hash, decision: value});
+      button('批准并在 ' + action.repo + ' 创建 Issue', () => decision('approve'));
+      button('拒绝草稿', () => decision('reject'));
+    } else if (action.status === 'UNKNOWN') {
+      const field = document.createElement('input');
+      field.type = 'number';
+      field.min = '1';
+      field.setAttribute('aria-label', '在 GitHub 找到的 Issue 编号');
+      field.placeholder = 'GitHub Issue 编号';
+      controls.append(field);
+      button('只读核对结果', () => api(path + '/reconcile', {issue_number: Number(field.value)}));
+      const hint = document.createElement('p');
+      hint.textContent = '结果未知。请先在目标仓库查找相同草稿标记，再填编号核对。';
+      content.append(hint);
+    } else if (action.status === 'VERIFIED') {
+      const link = document.createElement('a');
+      link.href = action.url;
+      link.rel = 'noopener noreferrer';
+      link.target = '_blank';
+      link.textContent = '查看 Issue #' + action.issue_number;
+      content.append(link);
+    }
+    button('刷新状态', () => api(path));
+  }
+
+  details.ontoggle = async () => {
+    if (!details.open) return;
+    try { render(await api(path)); status.textContent = ''; }
+    catch (e) { status.textContent = e.message; }
+  };
+  return details;
+}
+
 // 展示一轮历史；保存按钮确认的是该轮冻结候选，不根据当前输入框重新生成。
 function show(turn) {
   lastReply = turn.reply;
@@ -141,6 +211,7 @@ function show(turn) {
     .split('\n\n候选 ID：')[0].replace(/\n调用 \d+\/4 · 耗时 [^\n]+/g, '');
   pre.textContent = '你：' + turn.user_text + '\n\n' + (turn.status === 'RUNNING' ? '服务端已接收，正在处理。' : answer);
   article.append(pre);
+  for (const issue of turn.issues || []) article.append(issuePanel(issue));
   // 来源来自实际工具回执；外部内容只展示文本，链接限制为HTTP(S)。
   const recall = turn.memory_recall || turn.result?.memory_recall;
   if (recall) {
@@ -610,7 +681,7 @@ $('send').onclick = async () => {
   if (!connected) { $('settings').open = true; $('status').textContent = '请先在设置中连接本机服务。'; $('token').focus(); return; }
   if (!pending && !$('text').value.trim()) { $('status').textContent = '先说说你的问题。'; $('text').focus(); return; }
   if (!pending) {
-    pending = {path: '/v1/' + $('mode').value, body: {chat_id: $('chat').value, message_id: crypto.randomUUID(), reply_message_id: crypto.randomUUID(), parent_reply_message_id: lastReply, user_text: $('text').value, web_enabled: $('webEnabled').checked, memory_recall: $('memoryRecall').checked}};
+    pending = {path: '/v1/' + $('mode').value, body: {chat_id: $('chat').value, message_id: crypto.randomUUID(), reply_message_id: crypto.randomUUID(), parent_reply_message_id: lastReply, user_text: $('text').value, web_enabled: $('webEnabled').checked, memory_recall: $('memoryRecall').checked, issue_enabled: $('issueEnabled').checked}};
     if ($('budget').value) pending.body.time_budget_minutes = Number($('budget').value);
     if ($('target').value) { pending.body.target_plan_id = $('target').value; pending.body.expected_version = Number($('version').value); }
     if ($('backgroundTask').checked) {

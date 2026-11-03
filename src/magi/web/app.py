@@ -20,6 +20,8 @@ from magi.web.schemas import (
     DocumentConfirm,
     DocumentPreview,
     ExecutionRecord,
+    IssueDecision,
+    IssueReconcile,
     MemoryCreate,
     MemorySuggestionConfirm,
     MemoryUpdate,
@@ -202,6 +204,18 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
     @app.get("/v1/turns/{turn_id}", dependencies=guarded)
     def turn(turn_id: str):
         return service.get_turn(turn_id)
+
+    @app.get("/v1/issues/{action_id}", dependencies=guarded)
+    def issue_action(action_id: str):
+        return service.issues.get(action_id)
+
+    @app.post("/v1/issues/{action_id}/decision", dependencies=guarded)
+    def issue_decision(action_id: str, body: IssueDecision):
+        return service.issues.decide(action_id, body)
+
+    @app.post("/v1/issues/{action_id}/reconcile", dependencies=guarded)
+    def issue_reconcile(action_id: str, body: IssueReconcile):
+        return service.issues.reconcile(action_id, body.issue_number)
 
     @app.get("/v1/proposals/{proposal_id}", dependencies=guarded)
     def proposal(proposal_id: str, chat_id: str, reply_message_id: str):
