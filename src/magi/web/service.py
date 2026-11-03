@@ -246,6 +246,7 @@ class WebService:
                 # 历史只附冻结资料，不把全部内部诊断强制展示给普通用户。
                 stored = json.loads(turn.pop("result_json") or "null") or {}
                 turn["retrieval"] = stored.get("snapshot", {}).get("retrieval")
+                turn["memory_recall"] = stored.get("memory_recall")
                 turn["web_research"] = stored.get("web_research", [])
                 turn["documents"] = by_turn.get(turn["id"], [])
             return turns
@@ -300,6 +301,10 @@ class WebService:
         if not data["web_enabled"]:
             # 关闭时保持旧请求摘要，避免升级后旧回执不能重放。
             data.pop("web_enabled")
+        if not data["memory_recall"]:
+            data.pop("memory_recall")
+        if request.memory_recall and mode != "chat":
+            raise WebError("INVALID_INPUT", "语义记忆召回请使用日常聊天", 422)
         if request.web_enabled and mode != "chat":
             raise WebError("INVALID_INPUT", "联网查资料请使用日常聊天模式", 422)
         signature = digest([data, mode])
@@ -357,6 +362,16 @@ class WebService:
                 # 只给真实日常会话注入当前轮次工具；测试替身与三人格只读续接保持原约定。
                 options = {}
                 research = None
+                recall_result = None
+                if self.session_factory is open_personal_session:
+                    options["compact_history"] = True
+                    if request.memory_recall:
+                        from magi.personal.recall import recall
+
+                        recall_result = recall(
+                            self.context, logical, request.user_text, self.settings
+                        )
+                        options["memory_selection"] = recall_result["items"]
                 if self.session_factory is open_personal_session:
                     options["extra_tools"] = [
                         build_document_tool(
@@ -388,6 +403,8 @@ class WebService:
                     text = session.ask(request.user_text)
                 if research:
                     result = {"web_research": research.records}
+                if recall_result is not None:
+                    result = {**(result or {}), "memory_recall": recall_result}
                 status, synced = "COMPLETED", 1
             else:
                 old = None

@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 9
 
 
 class ClosingConnection(sqlite3.Connection):
@@ -271,6 +271,27 @@ class PersonalStore:
                 COMMIT;
                 """
             )
+        if version < 9:
+            # 跟随记忆事务登记待索引版本，队列只保存身份，不复制个人正文。
+            connection.executescript("""
+                BEGIN IMMEDIATE;
+                CREATE TABLE IF NOT EXISTS memory_index_pending (
+                    memory_id TEXT PRIMARY KEY REFERENCES memories(id),
+                    version INTEGER NOT NULL
+                );
+                INSERT OR IGNORE INTO memory_index_pending
+                    SELECT id, version FROM memories;
+                CREATE TRIGGER IF NOT EXISTS memory_index_insert AFTER INSERT ON memories
+                BEGIN
+                    INSERT OR REPLACE INTO memory_index_pending VALUES (NEW.id, NEW.version);
+                END;
+                CREATE TRIGGER IF NOT EXISTS memory_index_update AFTER UPDATE ON memories
+                BEGIN
+                    INSERT OR REPLACE INTO memory_index_pending VALUES (NEW.id, NEW.version);
+                END;
+                UPDATE schema_meta SET version=9;
+                COMMIT;
+            """)
         connection.commit()
 
     @contextmanager

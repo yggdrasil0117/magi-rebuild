@@ -26,6 +26,7 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 <p id="revisionNote" hidden></p>
 <label for="text">想聊些什么？</label><textarea id="text" placeholder="直接说出你的问题，或告诉我现在的想法…"></textarea>
 <p><label><input id="webEnabled" type="checkbox"> 联网查资料</label><small>日常聊天可用；查询词和网址发送Exa，匿名额度有限。可展开查看本轮来源。</small></p>
+<p><label><input id="memoryRecall" type="checkbox"> 语义召回个人记忆</label><small>日常聊天可用；问题和待索引的已确认记忆会发送给硅基流动。</small></p>
 <select id="mode" hidden><option value="chat">日常助手</option><option value="deliberations">三人格审议</option></select>
 <button id="analyze" aria-pressed="false">三人格分析：关闭</button><button id="send">发送</button><button id="reset" hidden>取消这次发送</button><button id="exitRevision" hidden>退出修订</button>
 <p id="modeHint" class="muted">默认日常聊天。需要比较方案或形成计划时，开启三人格分析。</p>

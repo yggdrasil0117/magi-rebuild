@@ -171,7 +171,8 @@ class RunEvents:
 class AllowedToolBoundary(AgentMiddleware):
     """在模型可见和实际执行处检查白名单；预览写记录不代表获得文件写入权限。"""
 
-    def __init__(self, events, settings, allowed_tools=ALLOWED_TOOLS):
+    def __init__(self, events, settings, allowed_tools=ALLOWED_TOOLS, summary=None):
+        self.summary = summary
         self.events = events
         self.settings = settings
         self.allowed_tools = frozenset(allowed_tools)
@@ -184,8 +185,15 @@ class AllowedToolBoundary(AgentMiddleware):
         ]
         # A deliberately conservative UTF-8 byte proxy, not a tokenizer claim.
         # Reserve room for output plus message/template framing. Long-context
-        # summarization is deferred; reject rather than silently lose history.
-        messages = list(request.messages)
+        # Preserve the hard capacity check after optional history compression.
+        conversation = list(request.messages)
+        if (
+            self.summary
+            and sum(len(m.text.encode("utf-8")) for m in conversation)
+            > self.settings.num_ctx // 3
+        ):
+            conversation = self.summary.compact(conversation)
+        messages = list(conversation)
         if request.system_message is not None:
             messages.insert(0, request.system_message)
         payload = {
@@ -203,12 +211,9 @@ class AllowedToolBoundary(AgentMiddleware):
         reserved = self.settings.num_predict + 512 + 128 * len(messages)
         if input_bytes + reserved > self.settings.num_ctx:
             self.events.emit("context_budget_rejected", input_bytes=input_bytes)
-            raise ValueError(
-                "上下文超过本轮保守容量预算；请使用较短资料或新会话。"
-                "当前试验尚未启用历史摘要。"
-            )
+            raise ValueError("上下文超过本轮保守容量预算；请使用较短资料或新会话。")
         self.events.emit("model_request")
-        response = handler(request.override(tools=visible_tools))
+        response = handler(request.override(tools=visible_tools, messages=conversation))
         for message in response.result:
             if isinstance(message, AIMessage):
                 self.events.emit(
@@ -300,6 +305,7 @@ def open_session(
     system_prompt=None,
     extra_tools=(),
     interrupt_on=None,
+    compact_history=False,
 ):
     """创建有界会话；可选审批配置仅由可信宿主提供，默认入口不启用中断。
 
@@ -327,8 +333,20 @@ def open_session(
     with SqliteSaver.from_conn_string(str(settings.db_path)) as saver:
         all_tools = [*build_read_tools(settings.docs_root), *extra_tools]
         allowed_tools = {tool.name for tool in all_tools}
+        active_model = model if model is not None else build_model(settings)
+        summary = None
+        if compact_history:
+            from magi.harness.summary import ConversationSummary
+
+            summary = ConversationSummary(
+                settings.db_path.with_suffix(".summaries.db"),
+                session_id,
+                active_model,
+                settings,
+                events,
+            )
         agent = create_deep_agent(
-            model=model if model is not None else build_model(settings),
+            model=active_model,
             system_prompt=system_prompt or SYSTEM_PROMPT,
             tools=all_tools,
             middleware=[
@@ -344,7 +362,7 @@ def open_session(
                 ToolCallLimitMiddleware(
                     run_limit=settings.max_tool_calls, exit_behavior="error"
                 ),
-                AllowedToolBoundary(events, settings, allowed_tools),
+                AllowedToolBoundary(events, settings, allowed_tools, summary),
             ],
             checkpointer=saver,
             interrupt_on=interrupt_on,
@@ -354,7 +372,13 @@ def open_session(
 
 @contextmanager
 def open_personal_session(
-    settings: HarnessConfig, logical_session_id: str, *, model=None, extra_tools=()
+    settings: HarnessConfig,
+    logical_session_id: str,
+    *,
+    model=None,
+    extra_tools=(),
+    compact_history=False,
+    memory_selection=None,
 ):
     """按有效背景打开会话；extra_tools只由可信调用方注入，模型不能增加权限。"""
     from magi.personal.context import ContextService
@@ -362,7 +386,18 @@ def open_personal_session(
     from magi.personal.store import PersonalStore
 
     context = ContextService(PersonalStore(settings.business_db_path))
-    binding, memories = context.build_current_context(logical_session_id)
+    binding, memories = context.build_current_context(
+        logical_session_id, include_identity=memory_selection is not None
+    )
+    if memory_selection is not None:
+        # 召回和建会话之间可能有记忆更新，只使用当前范围内的同版本正文。
+        active = {(row["id"], row["version"]): row for row in memories}
+        memory_selection[:] = [
+            active[identity]
+            for row in memory_selection
+            if (identity := (row["id"], row["version"])) in active
+        ]
+        memories = memory_selection
     memory_lines = [
         f"- {item['key']} ({item['scope']}): {item['value']}" for item in memories
     ]
@@ -419,6 +454,7 @@ def open_personal_session(
         model=model,
         system_prompt=prompt,
         extra_tools=[*plan_tools, *extra_tools],
+        compact_history=compact_history,
     ) as session:
         session.logical_session_id = logical_session_id
         session.epoch = binding.epoch

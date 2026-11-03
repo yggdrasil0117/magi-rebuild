@@ -36,13 +36,16 @@ class ContextService:
         )
 
     def build_current_context(
-        self, logical_session_id: str
+        self, logical_session_id: str, *, include_identity=False
     ) -> tuple[CurrentBinding, list]:
         binding = self.resolve_binding(logical_session_id)
         scopes = ("global", f"session:{logical_session_id}")
         with self.store.connect() as connection:
+            columns = (
+                "id,version,key,scope,value" if include_identity else "key,scope,value"
+            )
             rows = connection.execute(
-                "SELECT key,scope,value FROM memories WHERE status='ACTIVE' AND scope IN (?,?) ORDER BY key,scope",
+                f"SELECT {columns} FROM memories WHERE status='ACTIVE' AND scope IN (?,?) ORDER BY key,scope",
                 scopes,
             ).fetchall()
         selected = {}

@@ -8,6 +8,8 @@ function setMode(mode) {
   $('mode').value = mode;
   const enabled = mode === 'deliberations';
   $('webEnabled').disabled = enabled;
+  $('memoryRecall').disabled = enabled;
+  if (enabled) $('memoryRecall').checked = false;
   if (enabled) $('webEnabled').checked = false;
   $('analyze').textContent = '三人格分析：' + (enabled ? '开启' : '关闭');
   $('analyze').setAttribute('aria-pressed', String(enabled));
@@ -61,6 +63,18 @@ function show(turn) {
   pre.textContent = '你：' + turn.user_text + '\n\n' + answer;
   article.append(pre);
   // 来源来自实际工具回执；外部内容只展示文本，链接限制为HTTP(S)。
+  const recall = turn.memory_recall || turn.result?.memory_recall;
+  if (recall) {
+    const details = document.createElement('details'), label = document.createElement('summary');
+    label.textContent = recall.status === 'OK' ? '本轮使用的语义记忆 · ' + recall.items.length + '条' : '本轮语义召回暂不可用';
+    details.append(label);
+    for (const item of recall.items) {
+      const p = document.createElement('p');
+      p.textContent = item.key + '（版本 ' + item.version + '）：' + item.value;
+      details.append(p);
+    }
+    article.append(details);
+  }
   const web = turn.web_research || turn.result?.web_research || [];
   if (web.length) {
     const details = document.createElement('details'), label = document.createElement('summary');
@@ -488,7 +502,7 @@ $('send').onclick = async () => {
   if (!connected) { $('settings').open = true; $('status').textContent = '请先在设置中连接本机服务。'; $('token').focus(); return; }
   if (!pending && !$('text').value.trim()) { $('status').textContent = '先说说你的问题。'; $('text').focus(); return; }
   if (!pending) {
-    pending = {path: '/v1/' + $('mode').value, body: {chat_id: $('chat').value, message_id: crypto.randomUUID(), reply_message_id: crypto.randomUUID(), parent_reply_message_id: lastReply, user_text: $('text').value, web_enabled: $('webEnabled').checked}};
+    pending = {path: '/v1/' + $('mode').value, body: {chat_id: $('chat').value, message_id: crypto.randomUUID(), reply_message_id: crypto.randomUUID(), parent_reply_message_id: lastReply, user_text: $('text').value, web_enabled: $('webEnabled').checked, memory_recall: $('memoryRecall').checked}};
     if ($('budget').value) pending.body.time_budget_minutes = Number($('budget').value);
     if ($('target').value) { pending.body.target_plan_id = $('target').value; pending.body.expected_version = Number($('version').value); }
   }

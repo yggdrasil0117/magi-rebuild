@@ -105,7 +105,7 @@ def test_web_sources_persist_when_model_succeeds_or_fails(
     )
 
     @contextmanager
-    def factory(settings, logical, extra_tools=()):
+    def factory(settings, logical, extra_tools=(), compact_history=False):
         class Session:
             def ask(self, text):
                 tool = next(t for t in extra_tools if t.name == "magi_web_search")
@@ -137,7 +137,7 @@ def test_opt_in_and_legacy_digest(env):
     _, service, _, _ = env
     req = request()
     turn = service.turn(req, "chat")
-    data = req.model_dump(exclude={"web_enabled"})
+    data = req.model_dump(exclude={"web_enabled", "memory_recall"})
     assert turn["digest"] == digest([data, "chat"])
     with pytest.raises(WebError, match="日常聊天"):
         service.turn(request("2", web_enabled=True), "council")

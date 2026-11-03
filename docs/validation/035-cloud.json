@@ -1,0 +1,36 @@
+{
+  "summary": {
+    "original_messages": 9,
+    "request_messages": 6,
+    "summary": "旧对话摘要（历史资料，当前确认记忆优先）：\n**任务进展**：正在准备 Python 后端面试，当前复习协程。已整理协程取消与异常传播的理论内容。\n\n**假设**：无明确假设记录。\n\n**未决事项**：尚未运行最小示例代码；需保留并验证示例中“取消子任务”的观察结果，留待后续继续完成。",
+    "events": []
+  },
+  "first": {
+    "status": "OK",
+    "items": [
+      {
+        "id": "36aba7ccdd03471caf4a1df78d5db5de",
+        "version": 1,
+        "key": "备考时间",
+        "scope": "global",
+        "value": "每周可学习10小时"
+      }
+    ]
+  },
+  "updated": {
+    "status": "OK",
+    "items": [
+      {
+        "id": "36aba7ccdd03471caf4a1df78d5db5de",
+        "version": 2,
+        "key": "备考时间",
+        "scope": "global",
+        "value": "每周可学习4小时"
+      }
+    ]
+  },
+  "deleted": {
+    "status": "OK",
+    "items": []
+  }
+}

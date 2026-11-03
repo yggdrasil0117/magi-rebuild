@@ -440,3 +440,23 @@ def test_personal_session_exposes_read_only_plan_tools(settings):
     tool_input = repr(withheld.requests[-1])
     assert "body_withheld" in tool_input
     assert "PLAN-BODY-771" not in tool_input
+
+
+def test_summary_changes_model_input_without_removing_checkpoint_messages(settings):
+    model = ScriptedModel(
+        responses=[
+            AIMessage(content=text)
+            for text in ("收到一", "收到二", "收到三", "旧任务待复查", "已续接")
+        ]
+    )
+    with open_session(
+        settings, "summary-test", model=model, compact_history=True
+    ) as session:
+        for marker in ("FIRST", "SECOND", "THIRD", "FOURTH"):
+            session.ask(marker + "x" * 800)
+        assert session.messages()[0].text.startswith("FIRST")
+        assert len(session.messages()) == 8
+    request_texts = [message.text for message in model.requests[-1]]
+    assert any("旧任务待复查" in text for text in request_texts)
+    assert not any(text.startswith("FIRST") for text in request_texts)
+    assert any(text.startswith("SECOND") for text in request_texts)
