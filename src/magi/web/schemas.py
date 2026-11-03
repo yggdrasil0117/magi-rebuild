@@ -20,6 +20,13 @@ class TurnInput(Request):
     time_budget_minutes: int | None = Field(default=None, ge=1, le=10080)
 
 
+class TaskSubmission(Request):
+    """后台任务复用已有聊天请求，模式与消息一起冻结。"""
+
+    mode: Literal["chat", "council"]
+    turn: TurnInput
+
+
 class Confirmation(Request):
     chat_id: str = Field(min_length=1, max_length=80)
     reply_message_id: str = Field(min_length=1, max_length=120)

@@ -3,6 +3,7 @@ let pending = null, lastReply = null, selectedPlan = null, viewTicket = 0, sendi
 let connected = false;
 let selectedVersion = null, exporting = false;
 let followTicket = 0, followingChat = null;
+let activeTaskChat = null;
 
 // 只切换交互状态；实际请求仍使用原来的两种后端模式。
 function setMode(mode) {
@@ -27,7 +28,7 @@ async function connect() {
   $('connect').disabled = false;
   if (connected) {
     $('settings').open = false;
-    if (!followingChat) $('status').textContent = '已连接，可以开始聊天。';
+    if (!followingChat && !activeTaskChat) $('status').textContent = '已连接，可以开始聊天。';
     $('text').focus();
   }
 }
@@ -63,6 +64,50 @@ async function readTurnStatus(chat, message) {
   const result = await api('/v1/chats/' + encodeURIComponent(chat) + '/turn-status?' + query,
     undefined, AbortSignal.timeout(5000));
   return result.turn;
+}
+
+function readTasks(chat) {
+  return api('/v1/chats/' + encodeURIComponent(chat) + '/tasks', undefined, AbortSignal.timeout(5000));
+}
+
+function renderTasks(tasks) {
+  const labels = {
+    QUEUED: '等待执行', RUNNING: '执行中', COMPLETED: '已完成',
+    FAILED: '失败', INTERRUPTED: '已中断，请核对已有结果',
+  };
+  $('taskList').replaceChildren();
+  $('taskPanel').hidden = !tasks.length;
+  $('taskSummary').textContent = tasks.length ? '后台任务 · ' + labels[tasks[0].status] : '后台任务';
+  for (const task of tasks) {
+    const item = document.createElement('li');
+    const reason = {CONTEXT_CHANGED: '个人背景已变化，请重新提交', BRANCH_CONFLICT: '会话已有新消息，请核对历史'}[task.error_code];
+    item.textContent = new Date(task.created_at).toLocaleString() + ' · ' +
+      (task.mode === 'council' ? '三人格分析' : '日常聊天') + ' · ' + labels[task.status] +
+      (reason ? ' · ' + reason : '');
+    $('taskList').append(item);
+  }
+  return tasks.some(task => task.status === 'QUEUED' || task.status === 'RUNNING');
+}
+
+// 队列独立于聊天轮次，排队中还没有轮次时也能在刷新后恢复观察。
+async function followTasks(chat, ticket) {
+  const current = () => ticket === followTicket && $('chat').value === chat;
+  try {
+    while (current()) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!current()) return;
+      const tasks = await readTasks(chat);
+      if (!current()) return;
+      if (!renderTasks(tasks)) {
+        await load();
+        return;
+      }
+    }
+  } catch (_) {
+    if (current()) $('status').textContent = '任务状态查询中断，请重新加载历史查看。';
+  } finally {
+    if (ticket === followTicket) activeTaskChat = null;
+  }
 }
 
 // 刷新后只跟踪服务端已经接收的轮次，切换会话后忽略旧轮次的迟到响应。
@@ -206,6 +251,7 @@ async function load() {
   const ticket = ++followTicket;
   const chat = $('chat').value;
   followingChat = null;
+  activeTaskChat = null;
   try {
     const turns = await api('/v1/chats/' + encodeURIComponent(chat) + '/turns');
     if (ticket !== followTicket || $('chat').value !== chat) return false;
@@ -214,6 +260,16 @@ async function load() {
     turns.forEach(show);
     loadMemorySuggestions($('chat').value); // 只读取已有候选，刷新不触发提取。
     $('welcome').hidden = turns.length > 0;
+    let tasks = [];
+    try { tasks = await readTasks(chat); } catch (_) {}
+    if (ticket !== followTicket || $('chat').value !== chat) return false;
+    if (renderTasks(tasks)) {
+      activeTaskChat = chat;
+      $('taskPanel').open = true;
+      $('status').textContent = '后台任务已登记，处理结束后会更新聊天。';
+      followTasks(chat, ticket);
+      return true;
+    }
     const latest = turns[turns.length - 1];
     if (latest?.status === 'RUNNING') {
       followingChat = chat;
@@ -550,12 +606,17 @@ $('reset').onclick = () => { if (!sending) { pending = null; $('reset').hidden =
 $('send').onclick = async () => {
   if (sending) return;
   if (followingChat === $('chat').value) return;
+  if (activeTaskChat === $('chat').value) return;
   if (!connected) { $('settings').open = true; $('status').textContent = '请先在设置中连接本机服务。'; $('token').focus(); return; }
   if (!pending && !$('text').value.trim()) { $('status').textContent = '先说说你的问题。'; $('text').focus(); return; }
   if (!pending) {
     pending = {path: '/v1/' + $('mode').value, body: {chat_id: $('chat').value, message_id: crypto.randomUUID(), reply_message_id: crypto.randomUUID(), parent_reply_message_id: lastReply, user_text: $('text').value, web_enabled: $('webEnabled').checked, memory_recall: $('memoryRecall').checked}};
     if ($('budget').value) pending.body.time_budget_minutes = Number($('budget').value);
     if ($('target').value) { pending.body.target_plan_id = $('target').value; pending.body.expected_version = Number($('version').value); }
+    if ($('backgroundTask').checked) {
+      pending.taskMode = pending.path === '/v1/chat' ? 'chat' : 'council';
+      pending.path = '/v1/tasks';
+    }
   }
   sending = true;
   $('send').disabled = true;
@@ -579,13 +640,15 @@ $('send').onclick = async () => {
       } catch (_) { /* 等待原提交结果。 */ }
     }
   };
-  check();
+  const taskMode = pending.taskMode;
+  if (!taskMode) check();
   try {
-    const turn = await api(pending.path, pending.body);
+    const turn = await api(pending.path, taskMode ? {mode: taskMode, turn: pending.body} : pending.body);
     pending = null;
     $('reset').hidden = true;
     $('text').value = '';
     await load();
+    if (taskMode) return;
     if (turn.status !== 'RUNNING') {
       $('status').textContent = turn.status === 'COMPLETED' ? (turn.proposal_id ? '建议已生成，由你决定是否保存。' : '已回复。') : '本次处理未完整完成，请查看回复中的说明。';
     }
@@ -597,7 +660,11 @@ $('send').onclick = async () => {
   } catch (e) {
     progress.abort();
     let state = null;
-    try { state = await readTurnStatus(pendingChat, message); } catch (_) {}
+    try {
+      state = taskMode
+        ? (await readTasks(pendingChat)).find(task => task.message === message)
+        : await readTurnStatus(pendingChat, message);
+    } catch (_) {}
     if (state && $('chat').value === pendingChat && await load()) {
       pending = null;
       $('reset').hidden = true;

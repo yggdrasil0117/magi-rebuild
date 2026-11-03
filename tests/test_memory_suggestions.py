@@ -279,7 +279,7 @@ def test_schema3_migration_preserves_confirmed_memory(env):
         db.execute("UPDATE schema_meta SET version=3")
     reopened = PersonalStore(settings.business_db_path)
     with reopened.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 10
+        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 11
         assert (
             db.execute(
                 "SELECT value FROM memories WHERE id=?", (created.object_id,)

@@ -1,0 +1,21 @@
+{
+  "exit_codes": {
+    "during": 1,
+    "after": 1
+  },
+  "after_recovery": {
+    "during": "INTERRUPTED",
+    "after": "COMPLETED",
+    "queued": "QUEUED"
+  },
+  "final": {
+    "during": "INTERRUPTED",
+    "after": "COMPLETED",
+    "queued": "COMPLETED"
+  },
+  "calls": [
+    "during",
+    "after",
+    "queued"
+  ]
+}

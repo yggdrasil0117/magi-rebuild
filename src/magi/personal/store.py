@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 10
+SCHEMA_VERSION = 11
 
 
 class ClosingConnection(sqlite3.Connection):
@@ -306,6 +306,32 @@ class PersonalStore:
                     UNIQUE(thread_id, turn_id)
                 );
                 UPDATE schema_meta SET version=10;
+                COMMIT;
+            """)
+        if version < 11:
+            connection.executescript("""
+                BEGIN IMMEDIATE;
+                CREATE TABLE IF NOT EXISTS agent_tasks (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    mode TEXT NOT NULL CHECK(mode IN ('chat','council')),
+                    request_json TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    status TEXT NOT NULL CHECK(status IN
+                        ('QUEUED','RUNNING','COMPLETED','FAILED','INTERRUPTED')),
+                    turn_id TEXT REFERENCES web_turns(id),
+                    error_code TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    UNIQUE(owner,chat,message)
+                );
+                CREATE INDEX IF NOT EXISTS agent_tasks_queue
+                    ON agent_tasks(owner,status,created_at,id);
+                CREATE UNIQUE INDEX IF NOT EXISTS agent_tasks_one_active_chat
+                    ON agent_tasks(owner,chat) WHERE status IN ('QUEUED','RUNNING');
+                UPDATE schema_meta SET version=11;
                 COMMIT;
             """)
         connection.commit()

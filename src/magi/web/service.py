@@ -38,6 +38,15 @@ def digest(value):
     ).hexdigest()
 
 
+def turn_signature(request, mode):
+    """任务和同步入口共享请求身份，默认关闭的新增开关沿用旧摘要。"""
+    data = request.model_dump()
+    for field in ("web_enabled", "memory_recall"):
+        if not data[field]:
+            data.pop(field)
+    return digest([data, mode])
+
+
 class WebError(Exception):
     def __init__(self, code, message, status=409, run_id=None):
         super().__init__(message)
@@ -324,18 +333,12 @@ class WebService:
             AIMessage(content=text[:2200], id=turn_id + "-assistant"),
         ]
 
-    def turn(self, request, mode):
-        data = request.model_dump()
-        if not data["web_enabled"]:
-            # 关闭时保持旧请求摘要，避免升级后旧回执不能重放。
-            data.pop("web_enabled")
-        if not data["memory_recall"]:
-            data.pop("memory_recall")
+    def turn(self, request, mode, *, expected_epoch=None):
         if request.memory_recall and mode != "chat":
             raise WebError("INVALID_INPUT", "语义记忆召回请使用日常聊天", 422)
         if request.web_enabled and mode != "chat":
             raise WebError("INVALID_INPUT", "联网查资料请使用日常聊天模式", 422)
-        signature = digest([data, mode])
+        signature = turn_signature(request, mode)
         with self.store.connect() as db:
             prior = db.execute(
                 "SELECT id,digest FROM web_turns WHERE owner=? AND chat=? AND message=?",
@@ -368,6 +371,26 @@ class WebService:
             logical = self.logical_id(request.chat_id)
             binding, memories = self.context.build_current_context(logical)
             with self.store.transaction() as db:
+                if (
+                    expected_epoch is None
+                    and db.execute(
+                        """SELECT 1 FROM agent_tasks WHERE owner=? AND chat=?
+                       AND status IN ('QUEUED','RUNNING')""",
+                        (self.owner, request.chat_id),
+                    ).fetchone()
+                ):
+                    raise WebError("CHAT_TASK_ACTIVE", "此会话还有后台任务，请等待结果")
+                if expected_epoch is not None:
+                    current_epoch = db.execute(
+                        "SELECT context_epoch FROM app_state WHERE singleton=1"
+                    ).fetchone()[0]
+                    if (
+                        expected_epoch != current_epoch
+                        or expected_epoch != binding.epoch
+                    ):
+                        raise WebError(
+                            "CONTEXT_CHANGED", "排队期间背景已变化，请重新提交"
+                        )
                 db.execute(
                     "INSERT INTO web_turns(id,owner,chat,message,reply,digest,epoch,mode,user_text,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,'RUNNING',?)",
                     (

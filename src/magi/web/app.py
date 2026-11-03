@@ -9,6 +9,7 @@ from pathlib import Path
 from fastapi import Depends, FastAPI, Header, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, Response
+from starlette.concurrency import run_in_threadpool
 
 from magi.harness.config import load_config
 from magi.personal.export import plan_markdown
@@ -23,9 +24,11 @@ from magi.web.schemas import (
     MemorySuggestionConfirm,
     MemoryUpdate,
     MemoryVersion,
+    TaskSubmission,
     TurnInput,
 )
 from magi.web.service import WebError, WebService
+from magi.web.tasks import AgentTasks
 
 
 def create_app(settings=None, *, token=None, owner=None, service=None):
@@ -37,12 +40,20 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
     if len(token) < 24:
         raise ValueError("MAGI_API_TOKEN 至少 24 字符；请由环境变量提供")
     service = service or WebService(settings, owner)
+    tasks = AgentTasks(service)
 
     @asynccontextmanager
     async def lifespan(app):
         with ApplicationLock(settings.business_db_path.with_suffix(".lock")):
             service.recover()
-            yield
+            tasks.recover()
+            worker = tasks.start_worker()
+            try:
+                yield
+            finally:
+                tasks.stop.set()
+                tasks.wake.set()
+                await run_in_threadpool(worker.join)
 
     app = FastAPI(title="MAGI", lifespan=lifespan)
     app.state.service = service
@@ -161,6 +172,18 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
     def chat(body: TurnInput):
         return service.turn(body, "chat")
 
+    @app.post("/v1/tasks", status_code=202, dependencies=guarded)
+    def submit_task(body: TaskSubmission):
+        return tasks.submit(body.turn, body.mode)
+
+    @app.get("/v1/tasks/{task_id}", dependencies=guarded)
+    def get_task(task_id: str):
+        return tasks.get(task_id)
+
+    @app.get("/v1/chats/{chat_id}/tasks", dependencies=guarded)
+    def list_tasks(chat_id: str):
+        return tasks.list_chat(chat_id)
+
     @app.post("/v1/deliberations", dependencies=guarded)
     def deliberate(body: TurnInput):
         return service.turn(body, "council")
@@ -170,7 +193,9 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
         return service.history(chat_id)
 
     @app.get("/v1/chats/{chat_id}/turn-status", dependencies=guarded)
-    def turn_status(chat_id: str, message_id: str = Query(min_length=1, max_length=120)):
+    def turn_status(
+        chat_id: str, message_id: str = Query(min_length=1, max_length=120)
+    ):
         """按发送前已知的消息 ID 查询轮次状态。"""
         return service.turn_status(chat_id, message_id)
 
