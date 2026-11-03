@@ -1,0 +1,144 @@
+........................................................................ [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 48%]
+.F...................................................................... [ 64%]
+........................................................................ [ 80%]
+........................................................................ [ 97%]
+.............                                                            [100%]
+================================== FAILURES ===================================
+_______________ test_capacity_check_includes_recovered_history ________________
+
+settings = HarnessConfig(docs_root=WindowsPath('C:/Users/yggdrasil/Documents/ChatGPT/magi�ع���/.magi/test-web-034-full/test_capacit...ax_model_calls=4, max_tool_calls=3, api_key_env='DASHSCOPE_API_KEY', embedding_enabled=False, embedding_min_score=0.45)
+
+    def test_capacity_check_includes_recovered_history(settings):
+        with open_session(
+            settings,
+            "long-history",
+            model=ScriptedModel(responses=[AIMessage(content="A" * 1000)]),
+        ) as first:
+            first.ask("Q" * 2000)
+
+        unused_model = ScriptedModel(responses=[])
+        with open_session(settings, "long-history", model=unused_model) as reopened:
+            with pytest.raises(ValueError, match="����Ԥ��"):
+                reopened.ask("R" * 4000)
+            assert unused_model.requests == []
+            assert "context_budget_rejected" in event_types(reopened)
+            assert_failed(reopened)
+
+        # The same new input fits without the recovered history.
+        fresh_model = ScriptedModel(responses=[AIMessage(content="ok")])
+        with open_session(settings, "fresh-history", model=fresh_model) as fresh:
+>           assert fresh.ask("R" * 4000) == "ok"
+                   ^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_harness_runtime.py:363:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\magi\harness\runtime.py:273: in ask
+    result = self.agent.invoke(
+.venv-harness\Lib\site-packages\langgraph\pregel\main.py:4001: in invoke
+    for chunk in self.stream(
+.venv-harness\Lib\site-packages\langgraph\pregel\main.py:3058: in stream
+    for _ in runner.tick(
+.venv-harness\Lib\site-packages\langgraph\pregel\_runner.py:204: in tick
+    run_with_retry(
+.venv-harness\Lib\site-packages\langgraph\pregel\_retry.py:617: in run_with_retry
+    return task.proc.invoke(task.input, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\langgraph\_internal\_runnable.py:707: in invoke
+    input = context.run(step.invoke, input, config, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\langgraph\_internal\_runnable.py:447: in invoke
+    ret = self.func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\langchain\agents\factory.py:1543: in model_node
+    result = wrap_model_call_handler(request, _execute_model_sync)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\langchain\agents\factory.py:357: in composed
+    outer_result = outer(request, inner_handler)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\langsmith\run_helpers.py:798: in wrapper
+    function_result = run_container["context"].run(func, *args, **kwargs)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\deepagents\middleware\filesystem.py:3458: in wrap_model_call
+    response = handler(request)
+               ^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\langchain\agents\factory.py:347: in inner_handler
+    inner_result = inner(req, handler)
+                   ^^^^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\langchain\agents\factory.py:357: in composed
+    outer_result = outer(request, inner_handler)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\langsmith\run_helpers.py:798: in wrapper
+    function_result = run_container["context"].run(func, *args, **kwargs)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\deepagents\middleware\_parent_notifier.py:59: in wrap_model_call
+    return handler(request)
+           ^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\langchain\agents\factory.py:347: in inner_handler
+    inner_result = inner(req, handler)
+                   ^^^^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\langchain\agents\factory.py:357: in composed
+    outer_result = outer(request, inner_handler)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-harness\Lib\site-packages\langsmith\run_helpers.py:798: in wrapper
+    function_result = run_container["context"].run(func, *args, **kwargs)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <magi.harness.runtime.AllowedToolBoundary object at 0x0000015A81CE67E0>
+request = ModelRequest(model=ScriptedModel(metadata={'lc_versions': {'langchain-core': '1.7.1', 'langchain': '1.4.7'}}, response...244.937395), server_info=None, control=<langgraph.runtime.RunControl object at 0x0000015A81CC5030>), model_settings={})
+handler = <function _chain_model_call_handlers.<locals>.compose_two.<locals>.composed.<locals>.inner_handler at 0x0000015A81BDD120>
+
+    def wrap_model_call(self, request, handler):
+        visible_tools = [
+            tool
+            for tool in request.tools
+            if getattr(tool, "name", None) in self.allowed_tools
+        ]
+        # A deliberately conservative UTF-8 byte proxy, not a tokenizer claim.
+        # Reserve room for output plus message/template framing. Long-context
+        # summarization is deferred; reject rather than silently lose history.
+        messages = list(request.messages)
+        if request.system_message is not None:
+            messages.insert(0, request.system_message)
+        payload = {
+            "messages": [
+                {
+                    "role": message.type,
+                    "content": message.content,
+                    "tool_calls": getattr(message, "tool_calls", []),
+                }
+                for message in messages
+            ],
+            "tools": [convert_to_openai_tool(tool) for tool in visible_tools],
+        }
+        input_bytes = len(json.dumps(payload, ensure_ascii=False).encode("utf-8"))
+        reserved = self.settings.num_predict + 512 + 128 * len(messages)
+        if input_bytes + reserved > self.settings.num_ctx:
+            self.events.emit("context_budget_rejected", input_bytes=input_bytes)
+>           raise ValueError(
+                "�����ĳ������ֱ�������Ԥ�㣻��ʹ�ý϶����ϻ��»Ự��"
+                "��ǰ������δ������ʷժҪ��"
+            )
+E           ValueError: �����ĳ������ֱ�������Ԥ�㣻��ʹ�ý϶����ϻ��»Ự����ǰ������δ������ʷժҪ��
+E           During task with name 'model' and id '2cf092a0-a345-d8c9-2e25-57b731601c4d'
+
+src\magi\harness\runtime.py:204: ValueError
+============================== warnings summary ===============================
+.venv-harness\Lib\site-packages\starlette\testclient.py:51
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\starlette\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_terminal.py::test_real_http_client_auth_and_terminal_turn
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+tests/test_terminal.py::test_real_http_client_auth_and_terminal_turn
+  C:\Users\yggdrasil\Documents\ChatGPT\magi�ع���\.venv-harness\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+    from websockets.server import WebSocketServerProtocol
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_harness_runtime.py::test_capacity_check_includes_recovered_history
+1 failed, 444 passed, 3 warnings in 42.21s

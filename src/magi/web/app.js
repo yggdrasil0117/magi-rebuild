@@ -7,6 +7,8 @@ let selectedVersion = null, exporting = false;
 function setMode(mode) {
   $('mode').value = mode;
   const enabled = mode === 'deliberations';
+  $('webEnabled').disabled = enabled;
+  if (enabled) $('webEnabled').checked = false;
   $('analyze').textContent = '三人格分析：' + (enabled ? '开启' : '关闭');
   $('analyze').setAttribute('aria-pressed', String(enabled));
   $('modeHint').textContent = enabled ? '会从三个视角分析，并给出待你确认的建议。' : '默认日常聊天。需要比较方案或形成计划时，开启三人格分析。';
@@ -58,6 +60,28 @@ function show(turn) {
     .split('\n\n候选 ID：')[0].replace(/\n调用 \d+\/4 · 耗时 [^\n]+/g, '');
   pre.textContent = '你：' + turn.user_text + '\n\n' + answer;
   article.append(pre);
+  // 来源来自实际工具回执；外部内容只展示文本，链接限制为HTTP(S)。
+  const web = turn.web_research || turn.result?.web_research || [];
+  if (web.length) {
+    const details = document.createElement('details'), label = document.createElement('summary');
+    label.textContent = '本轮联网资料 · ' + web.length + '次查询或读取';
+    details.append(label);
+    for (const record of web) {
+      const info = document.createElement('p');
+      const statusLabel = {OK: '已返回片段', FAILED: '调用失败', UNPARSED: '未识别有效资料', NO_RESULTS: '本次未返回内容', RUNNING: '结果尚未确认'}[record.status] || record.status;
+      info.textContent = (record.operation === 'fetch' ? '读取网页' : '搜索网页') + ' · ' + statusLabel + ' · ' + record.target + (record.error_code ? ' · ' + record.error_code : '') + ' · ' + record.retrieved_at;
+      details.append(info);
+      for (const source of record.sources) {
+        const link = document.createElement('a'), excerpt = document.createElement('pre');
+        link.textContent = source.title;
+        try { const url = new URL(source.url); if (['https:', 'http:'].includes(url.protocol)) link.href = url.href; } catch (_) {}
+        link.target = '_blank'; link.rel = 'noopener noreferrer';
+        excerpt.textContent = source.excerpt + (source.truncated ? '\n（片段已截断）' : '');
+        details.append(link, excerpt);
+      }
+    }
+    article.append(details);
+  }
   // 来源是后端冻结的本轮原文；DOM使用textContent，不执行资料中的HTML。
   const retrieval = turn.retrieval || turn.result?.snapshot?.retrieval;
   if (retrieval) {
@@ -464,7 +488,7 @@ $('send').onclick = async () => {
   if (!connected) { $('settings').open = true; $('status').textContent = '请先在设置中连接本机服务。'; $('token').focus(); return; }
   if (!pending && !$('text').value.trim()) { $('status').textContent = '先说说你的问题。'; $('text').focus(); return; }
   if (!pending) {
-    pending = {path: '/v1/' + $('mode').value, body: {chat_id: $('chat').value, message_id: crypto.randomUUID(), reply_message_id: crypto.randomUUID(), parent_reply_message_id: lastReply, user_text: $('text').value}};
+    pending = {path: '/v1/' + $('mode').value, body: {chat_id: $('chat').value, message_id: crypto.randomUUID(), reply_message_id: crypto.randomUUID(), parent_reply_message_id: lastReply, user_text: $('text').value, web_enabled: $('webEnabled').checked}};
     if ($('budget').value) pending.body.time_budget_minutes = Number($('budget').value);
     if ($('target').value) { pending.body.target_plan_id = $('target').value; pending.body.expected_version = Number($('version').value); }
   }

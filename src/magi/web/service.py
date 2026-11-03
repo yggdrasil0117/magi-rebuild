@@ -246,6 +246,7 @@ class WebService:
                 # 历史只附冻结资料，不把全部内部诊断强制展示给普通用户。
                 stored = json.loads(turn.pop("result_json") or "null") or {}
                 turn["retrieval"] = stored.get("snapshot", {}).get("retrieval")
+                turn["web_research"] = stored.get("web_research", [])
                 turn["documents"] = by_turn.get(turn["id"], [])
             return turns
 
@@ -296,6 +297,11 @@ class WebService:
 
     def turn(self, request, mode):
         data = request.model_dump()
+        if not data["web_enabled"]:
+            # 关闭时保持旧请求摘要，避免升级后旧回执不能重放。
+            data.pop("web_enabled")
+        if request.web_enabled and mode != "chat":
+            raise WebError("INVALID_INPUT", "联网查资料请使用日常聊天模式", 422)
         signature = digest([data, mode])
         with self.store.connect() as db:
             prior = db.execute(
@@ -350,14 +356,38 @@ class WebService:
                     raise WebError("INVALID_INPUT", "反馈修订请使用三人格模式", 422)
                 # 只给真实日常会话注入当前轮次工具；测试替身与三人格只读续接保持原约定。
                 options = {}
+                research = None
                 if self.session_factory is open_personal_session:
                     options["extra_tools"] = [
                         build_document_tool(
                             self.documents, turn_id, prepare=self.prepare_document
                         )
                     ]
+                if (
+                    request.web_enabled
+                    and self.session_factory is open_personal_session
+                ):
+                    from magi.web_research import WebResearch
+
+                    def persist_web(records):
+                        """独立保存实际工具结果，后续模型失败仍能查询来源。"""
+                        with self.store.transaction() as db:
+                            db.execute(
+                                "UPDATE web_turns SET result_json=? WHERE id=?",
+                                (
+                                    json.dumps(
+                                        {"web_research": records}, ensure_ascii=False
+                                    ),
+                                    turn_id,
+                                ),
+                            )
+
+                    research = WebResearch(persist_web)
+                    options["extra_tools"].extend(research.tools())
                 with self.session_factory(self.settings, logical, **options) as session:
                     text = session.ask(request.user_text)
+                if research:
+                    result = {"web_research": research.records}
                 status, synced = "COMPLETED", 1
             else:
                 old = None

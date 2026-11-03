@@ -8,6 +8,7 @@ class Request(BaseModel):
 
 
 class TurnInput(Request):
+    web_enabled: bool = Field(default=False, strict=True)
     chat_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,80}$")
     message_id: str = Field(min_length=1, max_length=120)
     reply_message_id: str = Field(min_length=1, max_length=120)

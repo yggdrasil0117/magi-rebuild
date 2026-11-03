@@ -1,0 +1,16 @@
+{
+  "history_equal": true,
+  "counts": {
+    "web_turns": 1,
+    "plans": 0,
+    "plan_revisions": 0,
+    "memories": 0,
+    "operations": 0
+  },
+  "model_requests": 3,
+  "tools": [
+    "magi_web_search",
+    "magi_web_fetch"
+  ],
+  "event_lines_after_browser_reload": 12
+}
