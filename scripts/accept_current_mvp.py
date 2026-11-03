@@ -17,7 +17,7 @@ from pathlib import Path
 import httpx
 
 
-def run(root, output):
+def run(root, output, *, extended=False):
     """root/output必须不存在；每步立即留证，任何失败停止，不重试生成或覆盖报告。"""
     if root.exists() or output.exists():
         raise ValueError("验收数据目录和报告必须是新路径")
@@ -39,11 +39,14 @@ def run(root, output):
         port = sock.getsockname()[1]
     env = os.environ.copy()
     env["MAGI_API_TOKEN"] = secrets.token_urlsafe(32)
+    if extended:
+        env.pop("MAGI_GITHUB_ISSUES_TOKEN", None)
     report = {
         "scope": "real HTTP/Qianwen/BGE-M3/SQLite/process restart; synthetic data; no browser; no generation retries",
         "attempts": [],
         "checks": {},
         "pids": [],
+        "extended": extended,
         "source_sha256": {
             str(p): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in [Path(__file__), Path("scripts/serve_mvp_acceptance.py")]
@@ -81,7 +84,14 @@ def run(root, output):
                 if child.poll() is not None:
                     raise RuntimeError("验收子进程提前退出")
                 try:
-                    if httpx.get(f"http://127.0.0.1:{port}/health").status_code == 200:
+                    if (
+                        httpx.get(
+                            f"http://127.0.0.1:{port}/health",
+                            timeout=1,
+                            trust_env=False,
+                        ).status_code
+                        == 200
+                    ):
                         return child
                 except httpx.TransportError:
                     pass
@@ -106,6 +116,7 @@ def run(root, output):
             base_url=f"http://127.0.0.1:{port}",
             headers={"Authorization": "Bearer " + env["MAGI_API_TOKEN"]},
             timeout=300,
+            trust_env=False,
         ) as client:
 
             def call(method, path, body=None, expected=200):
@@ -156,13 +167,64 @@ def run(root, output):
                 )
                 return call("POST", path + "/confirm", body), (path + "/confirm", body)
 
+            if extended:
+                daily_text = (
+                    "请读取核对指南.md，简短复述测试账号缺失时的范围。现在只确认背景。"
+                )
+                queued = call(
+                    "POST",
+                    "/v1/tasks",
+                    {
+                        "mode": "chat",
+                        "turn": {
+                            "chat_id": "acceptance",
+                            "message_id": "u1",
+                            "reply_message_id": "a1",
+                            "user_text": daily_text,
+                        },
+                    },
+                    expected=202,
+                )
+                task_path = "/v1/tasks/" + queued["id"]
+                deadline = time.monotonic() + 240
+                state = queued
+                while (
+                    state["status"] in {"QUEUED", "RUNNING"}
+                    and time.monotonic() < deadline
+                ):
+                    time.sleep(1)
+                    state = call("GET", task_path)
+                check("background_daily_completed", state["status"] == "COMPLETED")
+                daily = call("GET", "/v1/turns/" + state["turn_id"])
+                events = [
+                    json.loads(line)
+                    for line in (root / "events.jsonl")
+                    .read_text(encoding="utf8")
+                    .splitlines()
+                ]
+                tools = [
+                    event["name"]
+                    for event in events
+                    if event.get("web_turn_id") == daily["id"]
+                    and event["type"] == "tool_started"
+                ]
+                report["daily_tools"] = tools
+                check("daily_selected_read_tool", "magi_read_file" in tools)
+                check("daily_did_not_create_candidate", daily["proposal_id"] is None)
+
             first = turn(
-                1,
+                2 if extended else 1,
                 "登录接口核对：请根据核对指南安排查看错误日志、使用测试账号复现，并记录核对结果或缺口。只有60分钟。",
                 time_budget_minutes=60,
             )
             check("candidate_is_not_plan", call("GET", "/v1/plans") == [])
             detail = call("GET", "/v1/turns/" + first["id"])
+            if extended:
+                history = detail["result"]["snapshot"]["history"]
+                check(
+                    "daily_background_reaches_council",
+                    any(message["text"] == daily_text for message in history),
+                )
             retrieval = detail["result"]["snapshot"]["retrieval"]
             check("retrieved_documents", bool(retrieval["matches"]))
             check(
@@ -177,6 +239,27 @@ def run(root, output):
             old = call("GET", path + "?version=1")
             replay = call("POST", *confirmation)
             check("save_replay", replay["duplicate"] and replay["object_id"] == plan_id)
+            if extended:
+                document = call(
+                    "POST", path + "/documents", {"version": 1, "request_id": "work-v1"}
+                )
+                output_file = Path(document["path"])
+                check(
+                    "preview_does_not_write_file",
+                    document["status"] == "PREVIEW" and not output_file.exists(),
+                )
+                document_path = "/v1/documents/" + document["id"]
+                approval = {
+                    "confirmed": True,
+                    "payload_hash": document["payload_hash"],
+                    "interrupt_id": document["approval"]["interrupt_id"],
+                }
+                created = call("POST", document_path + "/confirm", approval)
+                check(
+                    "approved_workfile_matches_preview",
+                    created["verified"]
+                    and output_file.read_bytes() == document["content"].encode("utf8"),
+                )
             progress = dict(
                 request_id="blocked-1",
                 version=1,
@@ -199,7 +282,7 @@ def run(root, output):
                 expected=409,
             )
             second = turn(
-                2,
+                3 if extended else 2,
                 "请根据执行记录修订登录接口核对计划：没有测试账号，只剩30分钟。仅整理现有日志和待验证问题，不要求定位根因。",
                 target_plan_id=plan_id,
                 expected_version=1,
@@ -220,6 +303,15 @@ def run(root, output):
             process.terminate()
             process.wait(timeout=15)
             process = start()
+            if extended:
+                check("background_receipt_restored", call("GET", task_path) == state)
+                restored_doc = call("GET", document_path)
+                check(
+                    "workfile_restored_on_original_version",
+                    restored_doc["status"] == "CREATED"
+                    and restored_doc["version"] == 1
+                    and output_file.read_bytes() == document["content"].encode("utf8"),
+                )
             check("old_plan_restored", call("GET", path + "?version=1") == old)
             check("new_plan_restored", call("GET", path + "?version=2") == new)
             old_execution = call("GET", path + "/execution?version=1")
@@ -262,5 +354,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--extended", action="store_true", help="加入真实后台聊天、工具选择和工作单"
+    )
     args = parser.parse_args()
-    sys.exit(0 if run(args.data_dir.resolve(), args.output.resolve()) else 1)
+    sys.exit(
+        0
+        if run(args.data_dir.resolve(), args.output.resolve(), extended=args.extended)
+        else 1
+    )

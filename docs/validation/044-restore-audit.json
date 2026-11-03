@@ -1,0 +1,19 @@
+{
+  "archive_files": [
+    "business.approvals.sqlite3",
+    "business.sqlite3",
+    "task-documents/62a4cdd1815f4d0f960f02adb7790409.md"
+  ],
+  "equal_table_counts": {
+    "web_turns": 3,
+    "web_chat_history": 3,
+    "agent_tasks": 1,
+    "plans": 1,
+    "plan_revisions": 2,
+    "plan_execution_events": 1,
+    "operations": 2,
+    "task_documents": 1,
+    "document_approvals": 1
+  },
+  "workfile_bytes_equal": true
+}

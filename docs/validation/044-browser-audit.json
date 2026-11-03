@@ -1,0 +1,33 @@
+{
+  "daily_event_counts": {
+    "run_started": 1,
+    "model_request": 2,
+    "model_response": 2,
+    "tool_started": 1,
+    "tool_succeeded": 1,
+    "run_completed": 1
+  },
+  "daily_successful_tools": [
+    "magi_read_file"
+  ],
+  "browser": {
+    "engine": "Edge",
+    "history_turns": 3,
+    "personas_visible": 3,
+    "v1_execution": "BLOCKED",
+    "v2_execution": "NOT_STARTED",
+    "workfile_visible_only_on_v1": true,
+    "non_get_requests": 0
+  },
+  "restored_counts_after_browser": {
+    "web_turns": 3,
+    "web_chat_history": 3,
+    "agent_tasks": 1,
+    "plans": 1,
+    "plan_revisions": 2,
+    "plan_execution_events": 1,
+    "operations": 2,
+    "task_documents": 1,
+    "document_approvals": 1
+  }
+}
