@@ -169,6 +169,11 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
     def history(chat_id: str):
         return service.history(chat_id)
 
+    @app.get("/v1/chats/{chat_id}/turn-status", dependencies=guarded)
+    def turn_status(chat_id: str, message_id: str = Query(min_length=1, max_length=120)):
+        """按发送前已知的消息 ID 查询轮次状态。"""
+        return service.turn_status(chat_id, message_id)
+
     @app.get("/v1/turns/{turn_id}", dependencies=guarded)
     def turn(turn_id: str):
         return service.get_turn(turn_id)

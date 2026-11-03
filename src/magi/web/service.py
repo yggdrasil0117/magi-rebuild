@@ -13,7 +13,9 @@ from langgraph.graph import END
 from magi.council.generation import failure_details, timeout_diagnostics
 from magi.council.service import Candidate, Council, candidate_body, render
 from magi.embedding import SiliconFlowEmbeddingProvider
-from magi.harness.runtime import open_personal_session
+from magi.harness.chat_loop import ChatCapacityError
+from magi.harness.runtime import HarnessSession, WebChatSession
+from magi.harness.runtime import open_web_session as open_personal_session
 from magi.personal.approvals import DocumentApprovals
 from magi.personal.context import ContextService
 from magi.personal.documents import TaskDocuments
@@ -204,7 +206,8 @@ class WebService:
         # Completed business results may need checkpoint repair; never rerun models.
         with self.store.connect() as db:
             pending = db.execute(
-                "SELECT * FROM web_turns WHERE synced=0 AND status='COMPLETED'"
+                "SELECT * FROM web_turns WHERE owner=? AND synced=0 AND status='COMPLETED' ORDER BY created_at,id",
+                (self.owner,),
             ).fetchall()
         for turn in pending:
             self._sync(dict(turn))
@@ -224,6 +227,16 @@ class WebService:
         result["run_id"] = result["id"] if result["mode"] == "council" else None
         result["documents"] = self.documents.for_turn(turn_id)
         return result
+
+    def turn_status(self, chat, message_id):
+        """只查本用户的持久轮次，尚未登记时返回空，避免把查询当作提交。"""
+        with self.store.connect() as db:
+            row = db.execute(
+                """SELECT id, status, created_at FROM web_turns
+                   WHERE owner=? AND chat=? AND message=?""",
+                (self.owner, chat, message_id),
+            ).fetchone()
+        return {"turn": dict(row) if row is not None else None}
 
     def history(self, chat):
         """恢复当前owner会话及真实工具产物，不能根据模型回答推断文件已创建。"""
@@ -265,36 +278,51 @@ class WebService:
                 result = json.loads(turn["result_json"])
             # Only the bounded synthesis continues the conversation. Full persona
             # opinions remain in the business store and display history.
-            continuation = turn["text"]
-            if result and result.get("candidate"):
-                continuation = (
-                    "三人格综合（候选，保存事实请查询计划）：\n"
-                    + candidate_body(Candidate(**result["candidate"]))
-                )
+            messages = self._council_exchange(
+                turn["id"], turn["user_text"], turn["text"], result
+            )
             with self.session_factory(
                 self.settings, self.logical_id(turn["chat"])
             ) as session:
-                session.agent.update_state(
-                    session.config,
-                    {
-                        "messages": [
-                            HumanMessage(
-                                content=turn["user_text"], id=turn["id"] + "-user"
-                            ),
-                            AIMessage(
-                                content=continuation[:2200],
-                                id=turn["id"] + "-assistant",
-                            ),
-                        ]
-                    },
-                )
-                # 这里只写入已经完成的审议，不应调度日常Agent继续推理。
-                # 新thread的update_state可能按输入节点推导后继任务；显式结束这次
-                # 注入，避免下一轮被误判为中断。synced仍在两步成功后才标记，
-                # 若中间退出，恢复时用稳定消息ID重写并结束，不重复调用模型。
-                session.agent.update_state(session.config, None, as_node=END)
+                if isinstance(session, WebChatSession):
+                    session.messages()  # 先导入旧历史，再补写已有审议结果。
+                    with self.store.transaction() as db:
+                        updated = db.execute(
+                            "UPDATE web_turns SET synced=1 WHERE id=? AND synced=0",
+                            (turn["id"],),
+                        )
+                        epoch = db.execute(
+                            "SELECT context_epoch FROM app_state WHERE singleton=1"
+                        ).fetchone()[0]
+                        if (
+                            updated.rowcount
+                            and epoch == session.history.binding.epoch == turn["epoch"]
+                        ):
+                            session.history.append(db, turn["id"], messages)
+                    return
+                if isinstance(session, HarnessSession):
+                    session.save_messages(messages)
+                else:
+                    # 兼容已有演示脚本注入的会话适配器。
+                    session.agent.update_state(
+                        session.config,
+                        {"messages": messages},
+                    )
+                    session.agent.update_state(session.config, None, as_node=END)
         with self.store.transaction() as db:
             db.execute("UPDATE web_turns SET synced=1 WHERE id=?", (turn["id"],))
+
+    @staticmethod
+    def _council_exchange(turn_id, question, text, result):
+        """聊天只承接综合结论，完整意见仍由审议结果保管。"""
+        if result and result.get("candidate"):
+            text = "三人格综合（候选，保存事实请查询计划）：\n" + candidate_body(
+                Candidate(**result["candidate"])
+            )
+        return [
+            HumanMessage(content=question, id=turn_id + "-user"),
+            AIMessage(content=text[:2200], id=turn_id + "-assistant"),
+        ]
 
     def turn(self, request, mode):
         data = request.model_dump()
@@ -332,7 +360,8 @@ class WebService:
             # Repair any durable completed council result before a new turn.
             with self.store.connect() as db:
                 pending = db.execute(
-                    "SELECT * FROM web_turns WHERE synced=0 AND status='COMPLETED'"
+                    "SELECT * FROM web_turns WHERE owner=? AND synced=0 AND status='COMPLETED' ORDER BY created_at,id",
+                    (self.owner,),
                 ).fetchall()
             for row in pending:
                 self._sync(dict(row))
@@ -356,6 +385,7 @@ class WebService:
                 )
             created = True
             result, proposal, synced = None, None, 0
+            native_history, exchange = None, None
             if mode == "chat":
                 if request.target_plan_id or request.expected_version:
                     raise WebError("INVALID_INPUT", "反馈修订请使用三人格模式", 422)
@@ -400,7 +430,12 @@ class WebService:
                     research = WebResearch(persist_web)
                     options["extra_tools"].extend(research.tools())
                 with self.session_factory(self.settings, logical, **options) as session:
-                    text = session.ask(request.user_text)
+                    if isinstance(session, WebChatSession):
+                        session.events.web_turn_id = turn_id
+                        native_history = session.history
+                        text, exchange = session.ask(request.user_text)
+                    else:
+                        text = session.ask(request.user_text)
                 if research:
                     result = {"web_research": research.records}
                 if recall_result is not None:
@@ -419,7 +454,12 @@ class WebService:
                         "INVALID_INPUT", "expected_version requires target_plan_id", 422
                     )
                 with self.session_factory(self.settings, logical) as session:
-                    if session.agent.get_state(session.config).next:
+                    if isinstance(session, WebChatSession):
+                        native_history = session.history
+                        pending = False
+                    else:
+                        pending = session.agent.get_state(session.config).next
+                    if pending:
                         raise WebError(
                             "INTERRUPTED_CONTEXT", "此会话有未完成推理，请新建聊天继续"
                         )
@@ -491,7 +531,19 @@ class WebService:
                         {**proposal, "epoch": binding.epoch}
                     )
                     text += f"\n\n候选 ID：{proposal['id']}\n摘要：{proposal['payload_hash']}\n请点击确认保存；当前尚未保存。"
+                if native_history is not None and status == "COMPLETED":
+                    exchange = self._council_exchange(
+                        turn_id, request.user_text, text, result
+                    )
+                    synced = 1
             with self.store.transaction() as db:
+                if exchange is not None:
+                    epoch = db.execute(
+                        "SELECT context_epoch FROM app_state WHERE singleton=1"
+                    ).fetchone()[0]
+                    if epoch != binding.epoch or epoch != native_history.binding.epoch:
+                        raise WebError("CONTEXT_CHANGED", "背景已变化，请新发消息")
+                    native_history.append(db, turn_id, exchange)
                 if proposal:
                     db.execute(
                         "INSERT INTO plan_proposals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -510,8 +562,8 @@ class WebService:
                             datetime.now(timezone.utc).isoformat(),
                         ),
                     )
-                db.execute(
-                    "UPDATE web_turns SET status=?,text=?,result_json=?,proposal_id=?,synced=? WHERE id=?",
+                updated = db.execute(
+                    "UPDATE web_turns SET status=?,text=?,result_json=?,proposal_id=?,synced=? WHERE id=? AND status='RUNNING'",
                     (
                         status,
                         text,
@@ -521,6 +573,8 @@ class WebService:
                         turn_id,
                     ),
                 )
+                if updated.rowcount != 1:
+                    raise WebError("TURN_NOT_RUNNING", "本轮已结束，请刷新聊天")
             if status == "COMPLETED" and not synced:
                 self._sync({**self.get_turn(turn_id)})
             return self.get_turn(turn_id)
@@ -531,10 +585,16 @@ class WebService:
                     db.execute(
                         "UPDATE web_turns SET status='FAILED',text=? WHERE id=? AND status='RUNNING'",
                         (
-                            "处理失败：" + type(exc).__name__ + "；请新发消息重试。",
+                            str(exc)
+                            if isinstance(exc, ChatCapacityError)
+                            else "处理失败："
+                            + type(exc).__name__
+                            + "；请新发消息重试。",
                             turn_id,
                         ),
                     )
+            if isinstance(exc, ChatCapacityError):
+                raise WebError(exc.code, str(exc), 422, run_id=turn_id) from exc
             if isinstance(exc, (WebError, PersonalError)):
                 if created:
                     exc.run_id = turn_id

@@ -1,0 +1,51 @@
+{
+  "num_ctx": 8192,
+  "resumed": true,
+  "turns": [
+    {
+      "status": "COMPLETED",
+      "text": "根据历史会话背景（非程序注入的已确认记忆）复述如下：\n\n-   **版本**：仅限 Python 3.12\n-   **时长**：本周仅有 4 小时\n-   **未验证事项**：协程取消实验尚未验证，按此前要求继续保留，是否安排待定\n\n注：以上信息均源自旧对话摘要，当前程序注入的已确认记忆中无相关内容。容量测试填充文本已忽略。"
+    }
+  ],
+  "restored_before_send": 4,
+  "summaries": [
+    {
+      "covered": 8,
+      "body": "**历史会话背景（非长期记忆）**\n\n- **任务**：准备 Python 面试。\n- **约束**：仅限 Python 3.12；本周仅有 4 小时；当前复习策略为先围绕基础进行，后续再决定进阶安排；暂不制定任务计划。\n- **进展**：用户要求先复习基础、稍后再定安排，AI 已确认收到并记录该策略；最新一轮中用户明确要求保留未决实验且不要给出任务计划，AI 已回复“收到”并确认暂不制定计划；本轮用户要求仅复述已知版本、时间限制及未验证事项（资料不足项需标明），并附带了容量测试填充文本（已按要求忽略）。AI 已据此完成复述，并说明信息均源自历史会话背景而非程序注入的已确认记忆。\n- **未决事项**：协程取消实验尚未验证，按用户要求继续保留，是否安排待定。"
+    }
+  ],
+  "summary_events": [
+    {
+      "type": "summary_saved",
+      "session_id": "ctx-65d851a271ed47c6989e0fd0cb3a050b",
+      "run_id": "0eb9a48b8cb343d88fe6fb85ecc6478d",
+      "time": "2026-11-03T06:49:55.148970+00:00",
+      "covered": 2,
+      "web_turn_id": "3066597c848b48d99ffde06e0b5f43e1"
+    },
+    {
+      "type": "summary_saved",
+      "session_id": "ctx-65d851a271ed47c6989e0fd0cb3a050b",
+      "run_id": "72c911a8baf04821b5009affa2f98dd6",
+      "time": "2026-11-03T06:50:01.959350+00:00",
+      "covered": 4,
+      "web_turn_id": "e02e60d2ea81493eb33435c7ac17d9ca"
+    },
+    {
+      "type": "summary_saved",
+      "session_id": "ctx-65d851a271ed47c6989e0fd0cb3a050b",
+      "run_id": "93837f5949994bd0979e89317b6431a6",
+      "time": "2026-11-03T06:50:08.427059+00:00",
+      "covered": 6,
+      "web_turn_id": "9642b4a16c274ae3bc8b57e73fe80d2b"
+    },
+    {
+      "type": "summary_saved",
+      "session_id": "ctx-65d851a271ed47c6989e0fd0cb3a050b",
+      "run_id": "4474a8353033475cb6f019b21cb9544d",
+      "time": "2026-11-03T06:50:20.481403+00:00",
+      "covered": 8,
+      "web_turn_id": "7c9b1fbb90d7412a9f24f7662316501c"
+    }
+  ]
+}

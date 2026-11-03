@@ -27,6 +27,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.tools import StructuredTool
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.graph import END
 from langsmith import tracing_context
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 
@@ -146,6 +147,7 @@ class RunEvents:
         self.path = path
         self.session_id = session_id
         self.run_id = None
+        self.web_turn_id = None
         self.records = []
         self.lock = Lock()
 
@@ -162,6 +164,8 @@ class RunEvents:
             "time": datetime.now(timezone.utc).isoformat(),
             **fields,
         }
+        if self.web_turn_id is not None:
+            record["web_turn_id"] = self.web_turn_id
         with self.lock:
             with self.path.open("a", encoding="utf-8") as output:
                 output.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -263,6 +267,24 @@ class HarnessSession:
 
     def messages(self):
         return self.agent.get_state(self.config).values.get("messages", [])
+
+    def has_pending(self):
+        """检查旧 checkpoint 是否还有待执行节点，不触发恢复。"""
+        return bool(self.agent.get_state(self.config).next)
+
+    def append_exchange(self, turn_id, question, answer):
+        """将业务库里已完成的审议接入对话，稳定 ID 允许恢复时覆盖。"""
+        self.save_messages(
+            [
+                HumanMessage(content=question, id=turn_id + "-user"),
+                AIMessage(content=answer, id=turn_id + "-assistant"),
+            ]
+        )
+
+    def save_messages(self, messages):
+        """仅写消息并结束图调度，兼容旧会话和终端读取。"""
+        self.agent.update_state(self.config, {"messages": messages})
+        self.agent.update_state(self.config, None, as_node=END)
 
     def ask(self, text: str) -> str:
         if not isinstance(text, str) or not text.strip():
@@ -370,6 +392,43 @@ def open_session(
         yield HarnessSession(agent, session_id, events)
 
 
+class WebChatSession:
+    """网页会话装配模型和工具，历史由网页业务库提供。"""
+
+    def __init__(self, history, settings, model, prompt, tools, compact_history):
+        self.history = history
+        self.settings = settings
+        self.model = model
+        self.prompt = prompt
+        self.tools = tools
+        self.compact_history = compact_history
+        self.events = RunEvents(settings.events_path, history.binding.thread_id)
+
+    def messages(self):
+        """读取当前背景下已提交的完整模型消息。"""
+        return self.history.load()
+
+    def ask(self, text):
+        """仅在聊天实际执行时装配模型，恢复历史不需要云端凭据。"""
+        from magi.harness.chat_loop import ChatLoop
+        from magi.harness.summary import ConversationSummary
+
+        self.settings.events_path.parent.mkdir(parents=True, exist_ok=True)
+        model = self.model if self.model is not None else build_model(self.settings)
+        summary = None
+        if self.compact_history:
+            summary = ConversationSummary(
+                self.settings.db_path.with_suffix(".summaries.db"),
+                self.history.binding.thread_id,
+                model,
+                self.settings,
+                self.events,
+            )
+        return ChatLoop(
+            self, self.settings, model, self.prompt, self.tools, summary
+        ).ask(text)
+
+
 @contextmanager
 def open_personal_session(
     settings: HarnessConfig,
@@ -379,6 +438,7 @@ def open_personal_session(
     extra_tools=(),
     compact_history=False,
     memory_selection=None,
+    native_loop=False,
 ):
     """按有效背景打开会话；extra_tools只由可信调用方注入，模型不能增加权限。"""
     from magi.personal.context import ContextService
@@ -448,6 +508,18 @@ def open_personal_session(
             args_schema=PlanArguments,
         ),
     ]
+    if native_loop:
+        from magi.web.chat_history import WebChatHistory
+
+        yield WebChatSession(
+            WebChatHistory(context.store, binding, settings),
+            settings,
+            model,
+            prompt,
+            [*build_read_tools(settings.docs_root), *plan_tools, *extra_tools],
+            compact_history,
+        )
+        return
     with open_session(
         settings,
         binding.thread_id,
@@ -459,3 +531,10 @@ def open_personal_session(
         session.logical_session_id = logical_session_id
         session.epoch = binding.epoch
         yield session
+
+
+def open_web_session(settings, logical_session_id, **options):
+    """打开自有网页会话，沿用原会话绑定，首次读取时兼容旧历史。"""
+    return open_personal_session(
+        settings, logical_session_id, native_loop=True, **options
+    )

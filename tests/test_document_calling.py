@@ -162,4 +162,4 @@ def test_schema5_upgrade_preserves_manual_preview(setup):
     assert service.documents.get(old["id"]) == old
     assert old["source_turn_id"] is None
     with service.store.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 9
+        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 10

@@ -1,0 +1,51 @@
+{
+  "num_ctx": 8192,
+  "resumed": true,
+  "turns": [
+    {
+      "status": "COMPLETED",
+      "text": "根据旧对话摘要复述如下：\n\n-   **版本/环境**：Python 3.12\n-   **时长/策略**：复习策略为先围绕基础进行，后续再决定具体安排；本轮未制定新任务计划。\n-   **未验证事项**：协程取消实验尚未验证（按要求暂保留）。\n\n填充内容已忽略。如需继续推进或调整计划，请随时告知。"
+    }
+  ],
+  "restored_before_send": 4,
+  "summaries": [
+    {
+      "covered": 8,
+      "body": "**任务进展**：准备 Python 面试（环境 Python 3.12），复习策略为先围绕基础进行，后续再决定具体安排。本轮未制定新任务计划。\n\n**假设/约束**：无。\n\n**未决事项**：协程取消实验尚未验证，按要求暂保留。"
+    }
+  ],
+  "summary_events": [
+    {
+      "type": "summary_saved",
+      "session_id": "ctx-29313c0aba704fa7b4b3a213a8f0fa3c",
+      "run_id": "7d68a6956fd64884a3ab4df4d67b91d1",
+      "time": "2026-11-03T03:52:18.440144+00:00",
+      "covered": 2,
+      "web_turn_id": "651dfb22493947878cf7a2074ad72a47"
+    },
+    {
+      "type": "summary_saved",
+      "session_id": "ctx-29313c0aba704fa7b4b3a213a8f0fa3c",
+      "run_id": "1a3a025e45574632bfbafa5cb164563c",
+      "time": "2026-11-03T03:52:23.521169+00:00",
+      "covered": 4,
+      "web_turn_id": "39a2b3817aa748689215c59aa9ed39d8"
+    },
+    {
+      "type": "summary_saved",
+      "session_id": "ctx-29313c0aba704fa7b4b3a213a8f0fa3c",
+      "run_id": "ce06798c6b354a06b94cc91ff6978edd",
+      "time": "2026-11-03T03:52:28.207250+00:00",
+      "covered": 6,
+      "web_turn_id": "201d4e42108e4ed795e6dcfbe760c2dd"
+    },
+    {
+      "type": "summary_saved",
+      "session_id": "ctx-29313c0aba704fa7b4b3a213a8f0fa3c",
+      "run_id": "2c706fcd922b483e8e0aee8f4abac328",
+      "time": "2026-11-03T03:52:40.415804+00:00",
+      "covered": 8,
+      "web_turn_id": "16e8b7cdebd649b6b29222ac9ce84cd8"
+    }
+  ]
+}

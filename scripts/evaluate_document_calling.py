@@ -10,7 +10,7 @@ from pathlib import Path
 from langchain_core.messages import AIMessage, ToolMessage
 
 from magi.harness.config import load_config
-from magi.harness.runtime import open_personal_session
+from magi.harness.runtime import open_web_session
 from magi.web.schemas import TurnInput
 from magi.web.service import WebService
 
@@ -74,7 +74,7 @@ def main():
                     error_code=getattr(exc, "code", None),
                 )
             item["seconds"] = round(time.monotonic() - started, 3)
-            with open_personal_session(settings, service.logical_id(name)) as session:
+            with open_web_session(settings, service.logical_id(name)) as session:
                 messages = session.messages()
             ai = [m for m in messages if isinstance(m, AIMessage)]
             item["model_calls_recorded"] = len(ai)

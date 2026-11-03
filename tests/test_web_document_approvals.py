@@ -211,4 +211,4 @@ def test_schema6_upgrade_preserves_existing_preview(setup):
         db.execute("UPDATE schema_meta SET version=6")
     assert service.document_view(saved["id"])["content"] == saved["content"]
     with service.store.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 9
+        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 10

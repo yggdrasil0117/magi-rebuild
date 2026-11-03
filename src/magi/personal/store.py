@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 9
+SCHEMA_VERSION = 10
 
 
 class ClosingConnection(sqlite3.Connection):
@@ -290,6 +290,22 @@ class PersonalStore:
                     INSERT OR REPLACE INTO memory_index_pending VALUES (NEW.id, NEW.version);
                 END;
                 UPDATE schema_meta SET version=9;
+                COMMIT;
+            """)
+        if version < 10:
+            connection.executescript("""
+                BEGIN IMMEDIATE;
+                CREATE TABLE IF NOT EXISTS web_chat_imports (
+                    thread_id TEXT PRIMARY KEY
+                );
+                CREATE TABLE IF NOT EXISTS web_chat_history (
+                    sequence INTEGER PRIMARY KEY,
+                    thread_id TEXT NOT NULL,
+                    turn_id TEXT REFERENCES web_turns(id),
+                    messages_json TEXT NOT NULL,
+                    UNIQUE(thread_id, turn_id)
+                );
+                UPDATE schema_meta SET version=10;
                 COMMIT;
             """)
         connection.commit()

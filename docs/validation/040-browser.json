@@ -1,0 +1,19 @@
+{
+  "browser": "Edge",
+  "scope": "isolated scripted model",
+  "browser_post_count": 2,
+  "lost_response_recovered": true,
+  "refresh_while_running_recovered": true,
+  "database_turns": [
+    {
+      "status": "COMPLETED",
+      "user_text": "丢回执测试",
+      "text": "已完成：丢回执测试"
+    },
+    {
+      "status": "COMPLETED",
+      "user_text": "刷新恢复测试",
+      "text": "已完成：刷新恢复测试"
+    }
+  ]
+}

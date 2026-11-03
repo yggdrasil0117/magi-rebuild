@@ -2,6 +2,7 @@ const $ = id => document.getElementById(id);
 let pending = null, lastReply = null, selectedPlan = null, viewTicket = 0, sending = false;
 let connected = false;
 let selectedVersion = null, exporting = false;
+let followTicket = 0, followingChat = null;
 
 // 只切换交互状态；实际请求仍使用原来的两种后端模式。
 function setMode(mode) {
@@ -24,7 +25,11 @@ async function connect() {
   $('connect').disabled = true;
   connected = await load();
   $('connect').disabled = false;
-  if (connected) { $('settings').open = false; $('status').textContent = '已连接，可以开始聊天。'; $('text').focus(); }
+  if (connected) {
+    $('settings').open = false;
+    if (!followingChat) $('status').textContent = '已连接，可以开始聊天。';
+    $('text').focus();
+  }
 }
 
 // 计划按需展开，主界面不常驻版本表单。
@@ -39,9 +44,10 @@ function showPlans(open) {
 }
 
 // 所有业务接口共用当前页面凭据；读取计划和对比不会请求模型。
-async function request(path, body) {
+async function request(path, body, signal) {
   const response = await fetch(path, {
     method: body ? 'POST' : 'GET',
+    signal,
     headers: {Authorization: 'Bearer ' + $('token').value, 'Content-Type': 'application/json'},
     ...(body ? {body: JSON.stringify(body)} : {})
   });
@@ -50,7 +56,35 @@ async function request(path, body) {
 }
 
 // JSON业务响应与文件下载共用认证，凭据不进入URL。
-async function api(path, body) { return (await request(path, body)).json(); }
+async function api(path, body, signal) { return (await request(path, body, signal)).json(); }
+
+async function readTurnStatus(chat, message) {
+  const query = new URLSearchParams({message_id: message});
+  const result = await api('/v1/chats/' + encodeURIComponent(chat) + '/turn-status?' + query,
+    undefined, AbortSignal.timeout(5000));
+  return result.turn;
+}
+
+// 刷新后只跟踪服务端已经接收的轮次，切换会话后忽略旧轮次的迟到响应。
+async function followTurn(chat, message, ticket) {
+  const current = () => ticket === followTicket && $('chat').value === chat;
+  try {
+    while (current()) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!current()) return;
+      const turn = await readTurnStatus(chat, message);
+      if (!current()) return;
+      if (!turn || turn.status !== 'RUNNING') {
+        await load();
+        return;
+      }
+    }
+  } catch (_) {
+    if (current()) $('status').textContent = '状态查询中断。重新加载历史可继续查看原消息。';
+  } finally {
+    if (ticket === followTicket) followingChat = null;
+  }
+}
 
 // 展示一轮历史；保存按钮确认的是该轮冻结候选，不根据当前输入框重新生成。
 function show(turn) {
@@ -60,7 +94,7 @@ function show(turn) {
   const start = turn.proposal_id ? turn.text.indexOf(marker) : -1;
   const answer = (start >= 0 ? turn.text.slice(start + marker.length) : turn.text)
     .split('\n\n候选 ID：')[0].replace(/\n调用 \d+\/4 · 耗时 [^\n]+/g, '');
-  pre.textContent = '你：' + turn.user_text + '\n\n' + answer;
+  pre.textContent = '你：' + turn.user_text + '\n\n' + (turn.status === 'RUNNING' ? '服务端已接收，正在处理。' : answer);
   article.append(pre);
   // 来源来自实际工具回执；外部内容只展示文本，链接限制为HTTP(S)。
   const recall = turn.memory_recall || turn.result?.memory_recall;
@@ -169,16 +203,32 @@ function show(turn) {
 
 // 从业务库恢复当前会话的展示历史，不据此推断计划的最新保存状态。
 async function load() {
+  const ticket = ++followTicket;
+  const chat = $('chat').value;
+  followingChat = null;
   try {
-    const turns = await api('/v1/chats/' + encodeURIComponent($('chat').value) + '/turns');
+    const turns = await api('/v1/chats/' + encodeURIComponent(chat) + '/turns');
+    if (ticket !== followTicket || $('chat').value !== chat) return false;
     lastReply = null;
     $('history').replaceChildren();
     turns.forEach(show);
     loadMemorySuggestions($('chat').value); // 只读取已有候选，刷新不触发提取。
     $('welcome').hidden = turns.length > 0;
-    $('status').textContent = '历史已加载';
+    const latest = turns[turns.length - 1];
+    if (latest?.status === 'RUNNING') {
+      followingChat = chat;
+      $('status').textContent = '服务端仍在处理这条消息，完成后会更新历史。';
+      followTurn(chat, latest.message, ticket);
+    } else {
+      $('status').textContent = '历史已加载';
+    }
     return true;
-  } catch (e) { $('status').textContent = '连接未完成，请检查设置中的服务凭据。' + e.message; return false; }
+  } catch (e) {
+    if (ticket === followTicket && $('chat').value === chat) {
+      $('status').textContent = '连接未完成，请检查设置中的服务凭据。' + e.message;
+    }
+    return false;
+  }
 }
 
 // 不把前一个计划的基准版本和预算带入下一次普通聊天。
@@ -499,6 +549,7 @@ $('mode').onchange = () => setMode($('mode').value);
 $('reset').onclick = () => { if (!sending) { pending = null; $('reset').hidden = true; $('status').textContent = '可以修改后重新发送。已发生的处理仍可在历史中查看。'; } };
 $('send').onclick = async () => {
   if (sending) return;
+  if (followingChat === $('chat').value) return;
   if (!connected) { $('settings').open = true; $('status').textContent = '请先在设置中连接本机服务。'; $('token').focus(); return; }
   if (!pending && !$('text').value.trim()) { $('status').textContent = '先说说你的问题。'; $('text').focus(); return; }
   if (!pending) {
@@ -512,18 +563,49 @@ $('send').onclick = async () => {
   $('analyze').disabled = true;
   $('status').textContent = '正在处理，请等待；断线后可重试相同消息。';
   const pendingChat = pending.body.chat_id;
+  const message = pending.body.message_id;
+  const progress = new AbortController();
+  // 并行观察是否登记成功。查询失败时，原提交与原重试规则继续生效。
+  const check = async () => {
+    while (!progress.signal.aborted) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (progress.signal.aborted) return;
+      try {
+        const state = await readTurnStatus(pendingChat, message);
+        if (progress.signal.aborted) return;
+        if (state?.status === 'RUNNING' && $('chat').value === pendingChat) {
+          $('status').textContent = '服务端已接收，正在处理。';
+        }
+      } catch (_) { /* 等待原提交结果。 */ }
+    }
+  };
+  check();
   try {
     const turn = await api(pending.path, pending.body);
     pending = null;
     $('reset').hidden = true;
     $('text').value = '';
     await load();
-    $('status').textContent = turn.status === 'COMPLETED' ? (turn.proposal_id ? '建议已生成，由你决定是否保存。' : '已回复。') : '本次分析未完整完成，请查看回复中的说明。';
+    if (turn.status !== 'RUNNING') {
+      $('status').textContent = turn.status === 'COMPLETED' ? (turn.proposal_id ? '建议已生成，由你决定是否保存。' : '已回复。') : '本次处理未完整完成，请查看回复中的说明。';
+    }
     if (turn.status === 'COMPLETED' && $('autoMemorySuggestions').checked) {
       const chat = pendingChat;
       api('/v1/turns/' + encodeURIComponent(turn.id) + '/memory-suggestions', {})
         .then(() => loadMemorySuggestions(chat)).catch(() => {});
     }
-  } catch (e) { $('reset').hidden = false; $('status').textContent = e.message + '；再次点击发送会重试原消息，也可取消后重新填写。'; }
-  finally { sending = false; $('send').disabled = false; $('reset').disabled = false; $('analyze').disabled = false; }
+  } catch (e) {
+    progress.abort();
+    let state = null;
+    try { state = await readTurnStatus(pendingChat, message); } catch (_) {}
+    if (state && $('chat').value === pendingChat && await load()) {
+      pending = null;
+      $('reset').hidden = true;
+      $('text').value = '';
+    } else {
+      $('reset').hidden = false;
+      $('status').textContent = e.message + '；再次点击发送会重试原消息，也可取消后重新填写。';
+    }
+  }
+  finally { progress.abort(); sending = false; $('send').disabled = false; $('reset').disabled = false; $('analyze').disabled = false; }
 };
