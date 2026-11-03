@@ -1,4 +1,7 @@
-﻿param([string]$Config = "magi.qianwen.toml")
+﻿param(
+    [string]$Config = "magi.qianwen.toml",
+    [ValidateRange(1, 65535)][int]$Port = 8765
+)
 $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 $profileJson = & .\.venv-harness\Scripts\python.exe -c "import json,sys; from pathlib import Path; from magi.harness.config import load_config; c=load_config(Path(sys.argv[1])); print(json.dumps({'provider':c.provider,'api_key_env':c.api_key_env,'embedding_enabled':c.embedding_enabled}))" $Config
@@ -35,9 +38,9 @@ if (-not $env:MAGI_API_TOKEN) {
 # 仅显示在本机启动窗口，不写入文件；这不是千问 API Key。
 Write-Host "本次服务凭据（粘贴到本机聊天页、终端或 Pipe Valves）：$env:MAGI_API_TOKEN"
 $env:MAGI_CONFIG = $Config
-Write-Host "MAGI: http://127.0.0.1:8765 ；Ctrl+C 停止。单 worker，不使用 reload。"
+Write-Host "MAGI: http://127.0.0.1:$Port ；Ctrl+C 停止。单 worker，不使用 reload。"
 try {
-    & .\.venv-harness\Scripts\python.exe -X utf8 -m magi.web
+    & .\.venv-harness\Scripts\python.exe -X utf8 -m magi.web --port $Port
 } finally {
     if ($enteredEmbeddingKey) { Remove-Item Env:SILICONFLOW_API_KEY -ErrorAction SilentlyContinue }
     if ($enteredKey) { [Environment]::SetEnvironmentVariable($modelProfile.api_key_env, $null, 'Process') }

@@ -139,3 +139,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start_magi.ps1
 ## GitHub Issue 草稿与批准
 
 在服务进程配置 `MAGI_GITHUB_ISSUES_REPO` 和 `MAGI_GITHUB_ISSUES_TOKEN` 后，日常聊天可勾选「启用 GitHub Issue 草稿」。提出问题后展开草稿，核对目标仓库、标题与实际正文，再选择批准或拒绝。若显示结果待核对，请在仓库中找到对应 Issue，输入编号只读核对。刷新历史可以再次查看原草稿和回执。[模块042](MAGI_模块总结_042_受控创建GitHubIssue.md)
+
+## 独立实例、备份与恢复
+
+用 `python -m magi.deployment init --config magi.qianwen.toml --directory .magi/instance-a` 生成独立配置。PowerShell 可运行 `.\scripts\start_magi.ps1 -Config .magi/instance-a/config.toml -Port 8766`，沿用隐藏输入模型凭据的启动方式。默认只监听本机，`/health` 返回就绪状态。
+
+停止源实例后用 `magi.deployment backup` 生成 ZIP，再用 `restore` 发布到新目录。目标目录及归档文件都需尚未存在。迁移时保持相同 `MAGI_OWNER`，重新配置凭据和授权资料。备份包括业务数据库、已有的摘要和 checkpoint、已登记工作单文件。索引与资料缓存按需重建。[模块043操作命令与验收](MAGI_模块总结_043_独立部署与备份恢复.md)

@@ -1,0 +1,30 @@
+{
+  "restart": {
+    "pid": 239864,
+    "health": {
+      "status": "ready",
+      "single_worker": true
+    }
+  },
+  "history_after_restart": 8,
+  "restored_summary": {
+    "covered": 10,
+    "body": "**历史会话背景（非已确认长期记忆）：**\n- 任务：准备 Python 3.12 面试。\n- 未决事项：协程取消实验尚未验证。\n- 进展：用户要求继续原任务，AI 确认保留上述待办。"
+  },
+  "issue_statuses_after_restart": [
+    "VERIFIED",
+    "UNKNOWN"
+  ],
+  "vector_index_rebuilt": true,
+  "events": [
+    "run_started",
+    "summary_saved",
+    "model_request",
+    "model_response",
+    "tool_started",
+    "tool_succeeded",
+    "model_request",
+    "model_response",
+    "run_completed"
+  ]
+}

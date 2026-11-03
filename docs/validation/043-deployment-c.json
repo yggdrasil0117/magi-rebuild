@@ -1,0 +1,52 @@
+{
+  "source": {
+    "health": {
+      "status": "ready",
+      "single_worker": true
+    },
+    "pid": 229588
+  },
+  "backup_denied_while_live": true,
+  "archive_files": [
+    "business.approvals.sqlite3",
+    "business.sqlite3",
+    "checkpoint.sqlite3",
+    "checkpoint.summaries.db",
+    "task-documents/e133c270bc594ddd92b4289cdae9f843.md"
+  ],
+  "worksheet_equal": true,
+  "rebuildable_index_initially_absent": true,
+  "restored": {
+    "health": {
+      "status": "ready",
+      "single_worker": true
+    },
+    "pid": 244728
+  },
+  "history_before_continue": 7,
+  "issue_statuses": [
+    "VERIFIED",
+    "UNKNOWN"
+  ],
+  "task_status": "COMPLETED",
+  "continuation_http": 200,
+  "continuation": {
+    "status": "COMPLETED",
+    "text": "已核对动作 cdc017fba9254effb351bff63650ba01，状态为 VERIFIED，对应 Issue #21。\n\n结合当前确认记忆与历史背景：\n- 每周备考可用时长仍为 **4 小时**；\n- 未验证事项仍是 **协程取消实验尚未验证**；\n- 本轮未创建任何新 Issue。\n\n如需继续推进面试准备，可在 4 小时额度内优先安排协程取消的最小可验证实验，并记录结果以便后续复盘或更新计划。",
+    "recall": {
+      "status": "OK",
+      "items": [
+        {
+          "id": "7b302c7657f64e8587bd1f891742cec6",
+          "version": 1,
+          "key": "备考时间",
+          "scope": "global",
+          "value": "每周只能安排4小时备考"
+        }
+      ]
+    }
+  },
+  "tools": [
+    "magi_get_issue_receipt"
+  ]
+}
