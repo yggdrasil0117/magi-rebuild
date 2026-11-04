@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class Request(BaseModel):
@@ -21,11 +21,58 @@ class TurnInput(Request):
     time_budget_minutes: int | None = Field(default=None, ge=1, le=10080)
 
 
-class TaskSubmission(Request):
-    """后台任务复用已有聊天请求，模式与消息一起冻结。"""
+class SourceArtifact(Request):
+    artifact_id: str = Field(min_length=1, max_length=120)
+    version: int = Field(ge=1, strict=True)
+    payload_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
 
-    mode: Literal["chat", "council"]
+
+class ResearchExecution(Request):
+    """研究执行身份由用户选择并随消息冻结，模型不能临时换负责人。"""
+
+    lead_agent_id: Literal["melchior", "balthasar", "casper"]
+    reviewer_ids: list[Literal["melchior", "balthasar", "casper"]] = Field(
+        default_factory=list, max_length=2
+    )
+    deliverable: Literal["report"] = "report"
+    entry_mode: Literal["persona", "room"]
+    shared_message_ids: list[str] = Field(default_factory=list, max_length=20)
+    source_artifact: SourceArtifact | None = None
+
+    @model_validator(mode="after")
+    def validate_participants(self):
+        """评审身份唯一且不能包含负责人；后续评审必须实际选择评审者。"""
+
+        if len(set(self.reviewer_ids)) != len(self.reviewer_ids):
+            raise ValueError("reviewer_ids must be unique")
+        if self.lead_agent_id in self.reviewer_ids:
+            raise ValueError("lead agent cannot review its own report")
+        if self.source_artifact is not None and not self.reviewer_ids:
+            raise ValueError("follow-up review requires reviewers")
+        return self
+
+
+class TaskSubmission(Request):
+    """后台任务冻结消息和执行身份；旧聊天请求保持兼容。"""
+
+    mode: Literal["chat", "council", "research"]
     turn: TurnInput
+    execution: ResearchExecution | None = None
+
+    @model_validator(mode="after")
+    def validate_mode(self):
+        if self.mode == "research" and self.execution is None:
+            raise ValueError("research mode requires execution")
+        if self.mode != "research" and self.execution is not None:
+            raise ValueError("execution is only valid in research mode")
+        return self
+
+
+class ArtifactDecision(Request):
+    request_id: str = Field(min_length=1, max_length=120)
+    expected_version: int = Field(ge=1, strict=True)
+    payload_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    decision: Literal["approve", "reject"]
 
 
 class IssueDecision(Request):

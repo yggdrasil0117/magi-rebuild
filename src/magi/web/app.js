@@ -32,6 +32,7 @@ async function connect() {
     $('settings').open = false;
     if (!followingChat && !activeTaskChat) $('status').textContent = '已连接，可以开始聊天。';
     $('text').focus();
+    loadResearch();
   }
 }
 
@@ -41,6 +42,8 @@ function showPlans(open) {
   $('togglePlans').setAttribute('aria-expanded', String(open));
   if (open) {
     $('memoriesPanel').hidden = true;
+    $('researchPanel').hidden = true;
+    $('toggleResearch').setAttribute('aria-expanded', 'false');
     $('toggleMemories').setAttribute('aria-expanded', 'false');
     $('plansPanel').scrollIntoView({behavior: 'smooth', block: 'start'});
   }
@@ -75,7 +78,7 @@ function readTasks(chat) {
 function renderTasks(tasks) {
   const labels = {
     QUEUED: '等待执行', RUNNING: '执行中', COMPLETED: '已完成',
-    FAILED: '失败', INTERRUPTED: '已中断，请核对已有结果',
+    PARTIAL: '部分完成，请核对问题', FAILED: '失败', INTERRUPTED: '已中断，请核对已有结果',
   };
   $('taskList').replaceChildren();
   $('taskPanel').hidden = !tasks.length;
@@ -84,8 +87,14 @@ function renderTasks(tasks) {
     const item = document.createElement('li');
     const reason = {CONTEXT_CHANGED: '个人背景已变化，请重新提交', BRANCH_CONFLICT: '会话已有新消息，请核对历史'}[task.error_code];
     item.textContent = new Date(task.created_at).toLocaleString() + ' · ' +
-      (task.mode === 'council' ? '三人格分析' : '日常聊天') + ' · ' + labels[task.status] +
+      (task.mode === 'research' ? '研究任务' : task.mode === 'council' ? '三人格分析' : '日常聊天') + ' · ' + labels[task.status] +
       (reason ? ' · ' + reason : '');
+    if (task.artifact_id) {
+      const link = document.createElement('button');
+      link.textContent = '查看报告';
+      link.onclick = () => openArtifact(task.artifact_id);
+      item.append(link);
+    }
     $('taskList').append(item);
   }
   return tasks.some(task => task.status === 'QUEUED' || task.status === 'RUNNING');
@@ -747,3 +756,166 @@ $('send').onclick = async () => {
   }
   finally { progress.abort(); sending = false; $('send').disabled = false; $('reset').disabled = false; $('analyze').disabled = false; }
 };
+
+let researchEntryMode = 'persona';
+let researchPoll = null;
+
+function selectedResearchReviewers(lead) {
+  return [...document.querySelectorAll('.researchReviewer:checked')]
+    .map(item => item.value).filter(value => value !== lead).slice(0, 2);
+}
+
+function selectResearchEntry(mode, agent = 'melchior') {
+  researchEntryMode = mode;
+  $('researchLead').value = agent;
+  $('researchLead').disabled = mode === 'persona';
+  $('researchChat').value = mode === 'persona' ? 'research-' + agent : 'research-room';
+  $('researchEntryStatus').textContent = mode === 'persona'
+    ? '独立入口已绑定 ' + agent.toUpperCase() + '；这个会话后续不能静默换负责人。'
+    : '共同聊天室：提交时明确选择一位负责人，评审者不会共同写文件。';
+  document.querySelectorAll('.researchReviewer').forEach(item => {
+    item.checked = false;
+    item.disabled = item.value === agent;
+  });
+}
+
+function researchTaskLabel(task) {
+  const state = {QUEUED: '等待执行', RUNNING: '执行中', COMPLETED: '已完成', PARTIAL: '部分完成', FAILED: '失败', INTERRUPTED: '已中断'}[task.status] || task.status;
+  const review = {NOT_REQUESTED: '未请求评审', IN_PROGRESS: '评审中', PASSED: '评审通过', UNRESOLVED: '仍有未解决问题', INCOMPLETE: '评审不完整'}[task.review_status];
+  return state + (task.stage ? ' · ' + task.stage : '') + (review ? ' · ' + review : '') + (task.stop_reason ? ' · ' + task.stop_reason : '');
+}
+
+function artifactCard(artifact) {
+  const article = document.createElement('article');
+  const title = document.createElement('h3'), meta = document.createElement('p');
+  const body = document.createElement('pre'), controls = document.createElement('div');
+  title.textContent = artifact.title;
+  meta.className = 'muted';
+  meta.textContent = artifact.lead_agent_id.toUpperCase() + ' · v' + artifact.version +
+    ' · ' + artifact.review_status + ' · ' + artifact.status;
+  body.textContent = artifact.body;
+  article.append(title, meta, body);
+  if (artifact.unknowns.length) {
+    const unknowns = document.createElement('pre');
+    unknowns.textContent = '未核实事项：\n- ' + artifact.unknowns.join('\n- ');
+    article.append(unknowns);
+  }
+  const reviewDetails = document.createElement('details'), reviewTitle = document.createElement('summary');
+  reviewTitle.textContent = '评审与内部标识';
+  const reviewText = document.createElement('pre');
+  reviewText.textContent = '成果 ID：' + artifact.id + '\n内容摘要：' + artifact.payload_hash +
+    '\n' + (artifact.reviews.length ? artifact.reviews.map(item => item.agent_id + ' 第' + item.round + '轮：' + item.verdict).join('\n') : '无评审记录');
+  reviewDetails.append(reviewTitle, reviewText);
+  article.append(reviewDetails, controls);
+  const status = document.createElement('p');
+  const decision = async value => {
+    controls.querySelectorAll('button').forEach(button => { button.disabled = true; });
+    status.textContent = value === 'approve' ? '正在保存批准内容…' : '正在记录拒绝…';
+    try {
+      const result = await api('/v1/artifacts/' + encodeURIComponent(artifact.id) + '/decision', {
+        request_id: crypto.randomUUID(), expected_version: artifact.version,
+        payload_hash: artifact.payload_hash, decision: value,
+      });
+      status.textContent = value === 'approve' ? '已核对并保存文件：' + result.path : '已拒绝当前版本，未创建文件。';
+      await loadResearch();
+    } catch (e) { status.textContent = e.message; }
+    finally { controls.querySelectorAll('button').forEach(button => { button.disabled = false; }); }
+  };
+  if (!artifact.decision) {
+    const approve = document.createElement('button'), reject = document.createElement('button');
+    approve.textContent = artifact.review_status === 'PASSED' ? '批准保存报告' : '知晓评审状态并保存报告';
+    reject.textContent = '拒绝当前报告';
+    approve.onclick = () => decision('approve'); reject.onclick = () => decision('reject');
+    controls.append(approve, reject);
+  } else {
+    status.textContent = artifact.decision.status === 'SAVED' ? '已保存：' + artifact.decision.path : '决定状态：' + artifact.decision.status;
+  }
+  const invite = document.createElement('button');
+  invite.textContent = '邀请当前选择的评审者';
+  invite.onclick = () => submitResearch(artifact);
+  controls.append(invite);
+  article.append(status);
+  return article;
+}
+
+async function openArtifact(id) {
+  $('researchPanel').hidden = false;
+  $('toggleResearch').setAttribute('aria-expanded', 'true');
+  try {
+    const artifact = await api('/v1/artifacts/' + encodeURIComponent(id));
+    $('researchArtifacts').replaceChildren(artifactCard(artifact));
+    $('researchStatus').textContent = '已读取成果 v' + artifact.version + '；读取不会继续评审。';
+    $('researchPanel').scrollIntoView({behavior: 'smooth'});
+  } catch (e) { $('researchStatus').textContent = e.message; }
+}
+
+async function loadResearch() {
+  if (!connected) return;
+  const chat = $('researchChat').value.trim();
+  if (!chat) return;
+  try {
+    const [tasks, artifacts] = await Promise.all([
+      readTasks(chat), api('/v1/chats/' + encodeURIComponent(chat) + '/artifacts'),
+    ]);
+    $('researchTasks').replaceChildren();
+    for (const task of tasks.filter(item => item.mode === 'research')) {
+      const item = document.createElement('li');
+      item.textContent = new Date(task.created_at).toLocaleString() + ' · ' + researchTaskLabel(task);
+      if (task.artifact_id) {
+        const button = document.createElement('button'); button.textContent = '查看报告';
+        button.onclick = () => openArtifact(task.artifact_id); item.append(button);
+      }
+      $('researchTasks').append(item);
+    }
+    $('researchArtifacts').replaceChildren(...artifacts.map(artifactCard));
+    const active = tasks.some(item => item.mode === 'research' && ['QUEUED', 'RUNNING'].includes(item.status));
+    $('researchStatus').textContent = active ? '研究仍在后台执行，可以关闭页面后再回来。' : '研究任务与成果已刷新。';
+    clearTimeout(researchPoll);
+    if (active) researchPoll = setTimeout(loadResearch, 1500);
+  } catch (e) { $('researchStatus').textContent = '研究记录读取失败：' + e.message; }
+}
+
+async function submitResearch(sourceArtifact = null) {
+  if (!connected) { $('settings').open = true; $('researchStatus').textContent = '请先连接本机服务。'; return; }
+  const chat = $('researchChat').value.trim(), lead = sourceArtifact?.lead_agent_id || $('researchLead').value;
+  const reviewers = selectedResearchReviewers(lead);
+  if (!chat || (!sourceArtifact && !$('researchText').value.trim())) { $('researchStatus').textContent = '请填写研究会话和调查目标。'; return; }
+  if (sourceArtifact && !reviewers.length) { $('researchStatus').textContent = '后续评审至少选择一位不同于负责人的人格。'; return; }
+  const message = crypto.randomUUID();
+  const shared = $('researchSharedMessages').value.split(',').map(value => value.trim()).filter(Boolean);
+  const execution = {lead_agent_id: lead, reviewer_ids: reviewers, deliverable: 'report', entry_mode: researchEntryMode, shared_message_ids: [...new Set(shared)].slice(0, 20)};
+  if (sourceArtifact) execution.source_artifact = {artifact_id: sourceArtifact.id, version: sourceArtifact.version, payload_hash: sourceArtifact.payload_hash};
+  const turn = {
+    chat_id: chat, message_id: message, reply_message_id: crypto.randomUUID(),
+    user_text: sourceArtifact ? '请按所选人格评审这份报告，并在有明确问题时完成一次有界修改。' : $('researchText').value.trim(),
+    web_enabled: $('researchWeb').checked, memory_recall: false, issue_enabled: false,
+  };
+  $('submitResearch').disabled = true;
+  try {
+    await api('/v1/tasks', {mode: 'research', turn, execution});
+    if (!sourceArtifact) $('researchText').value = '';
+    $('researchStatus').textContent = '任务已登记；接收请求不等于研究已完成。';
+    await loadResearch();
+  } catch (e) { $('researchStatus').textContent = e.message; }
+  finally { $('submitResearch').disabled = false; }
+}
+
+document.querySelectorAll('.researchEntry').forEach(button => {
+  button.onclick = () => selectResearchEntry('persona', button.dataset.agent);
+});
+$('roomEntry').onclick = () => selectResearchEntry('room', $('researchLead').value);
+$('researchLead').onchange = () => {
+  document.querySelectorAll('.researchReviewer').forEach(item => {
+    item.disabled = item.value === $('researchLead').value;
+    if (item.disabled) item.checked = false;
+  });
+};
+$('toggleResearch').onclick = async () => {
+  const open = $('researchPanel').hidden;
+  $('researchPanel').hidden = !open; $('toggleResearch').setAttribute('aria-expanded', String(open));
+  if (open) { $('plansPanel').hidden = true; $('memoriesPanel').hidden = true; await loadResearch(); }
+};
+$('closeResearch').onclick = () => { $('researchPanel').hidden = true; $('toggleResearch').setAttribute('aria-expanded', 'false'); };
+$('refreshResearch').onclick = loadResearch;
+$('submitResearch').onclick = () => submitResearch();
+selectResearchEntry('persona', 'melchior');

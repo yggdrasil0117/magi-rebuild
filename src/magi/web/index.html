@@ -10,6 +10,7 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 <h1>MAGI</h1><p>说说你的想法，需要权衡时，再交给三人格一起分析。</p>
 <button id="togglePlans" aria-expanded="false">我的计划</button>
 <button id="toggleMemories" aria-expanded="false">个人记忆</button>
+<button id="toggleResearch" aria-expanded="false">研究任务</button>
 <details id="settings"><summary>设置</summary>
 <p><small>首次使用，填写启动终端提供的本机服务凭据。凭据仅留在当前页面，刷新后需重新连接。</small></p>
 <label>本机服务凭据 <input id="token" type="password" autocomplete="off"></label><button id="connect">连接</button>
@@ -33,6 +34,20 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 <select id="mode" hidden><option value="chat">日常助手</option><option value="deliberations">三人格审议</option></select>
 <button id="analyze" aria-pressed="false">三人格分析：关闭</button><button id="send">发送</button><button id="reset" hidden>取消这次发送</button><button id="exitRevision" hidden>退出修订</button>
 <p id="modeHint" class="muted">默认日常聊天。需要比较方案或形成计划时，开启三人格分析。</p>
+<section id="researchPanel" aria-labelledby="researchTitle" hidden>
+<h2 id="researchTitle">MAGI 研究任务</h2>
+<p class="muted">选择一位负责人调查并形成报告草稿。评审者只有只读工具；报告写入文件前仍需你确认。</p>
+<p><button class="researchEntry" data-agent="melchior">MELCHIOR 独立入口</button><button class="researchEntry" data-agent="balthasar">BALTHASAR 独立入口</button><button class="researchEntry" data-agent="casper">CASPER 独立入口</button><button id="roomEntry">共同聊天室</button></p>
+<p id="researchEntryStatus">尚未选择入口。</p>
+<label>研究会话 <input id="researchChat" value="research-melchior" pattern="[A-Za-z0-9_-]+"></label>
+<label>负责人 <select id="researchLead"><option value="melchior">MELCHIOR</option><option value="balthasar">BALTHASAR</option><option value="casper">CASPER</option></select></label>
+<fieldset><legend>可选评审者（最多两位）</legend><label><input class="researchReviewer" type="checkbox" value="melchior"> MELCHIOR</label><label><input class="researchReviewer" type="checkbox" value="balthasar"> BALTHASAR</label><label><input class="researchReviewer" type="checkbox" value="casper"> CASPER</label></fieldset>
+<label for="researchText">调查目标与授权边界</label><textarea id="researchText" maxlength="8000" placeholder="例如：阅读项目说明，比较三种记忆方案；可以联网，不安装依赖，不修改代码。"></textarea>
+<p><label><input id="researchWeb" type="checkbox"> 允许联网查公开资料</label></p>
+<details><summary>按需共享已有消息</summary><p class="muted">默认不读取其他会话。只在需要时填写已完成消息 ID，多个 ID 用英文逗号分隔；后端会逐条检查访问权。</p><input id="researchSharedMessages" maxlength="2400" placeholder="message-id-1,message-id-2"></details>
+<button id="submitResearch">提交后台研究</button><button id="refreshResearch">刷新任务与成果</button><button id="closeResearch">返回聊天</button>
+<p id="researchStatus" role="status" aria-live="polite"></p><ul id="researchTasks"></ul><div id="researchArtifacts"></div>
+</section>
 <section id="plansPanel" aria-labelledby="plansTitle" hidden>
 <h2 id="plansTitle">已保存计划</h2><p class="muted">查看实际保存的内容、比较版本，或选择计划提交新的执行反馈。</p>
 <button id="plans">刷新列表</button><button id="closePlans">返回聊天</button><p id="planStatus" role="status"></p><ul id="planList"></ul>

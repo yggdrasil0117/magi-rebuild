@@ -1,0 +1,47 @@
+{
+  "test_kind": "real_edge_with_controlled_model",
+  "date": "2026-11-03T22:29:22+08:00",
+  "scenario": "共同聊天室，MELCHIOR主研究，BALTHASAR与CASPER独立评审，一次修改、最终复核、批准发布、刷新恢复",
+  "console_errors": 0,
+  "counts": {
+    "agent_tasks": 1,
+    "agent_runs": 6,
+    "research_artifacts": 1,
+    "research_artifact_versions": 2,
+    "research_reviews": 4,
+    "research_artifact_decisions": 1
+  },
+  "artifact": {
+    "id": "8b2bdddb3abf451895f9c85fee638398",
+    "lead_agent_id": "melchior",
+    "current_version": 2,
+    "status": "SAVED"
+  },
+  "versions": [
+    {
+      "version": 1,
+      "payload_hash": "23f7bdfcd843c3896d9deda5af33e65345c8fa7f6bf3a5c7c6644caf688a7457",
+      "review_status_at_browser_run": "IN_PROGRESS",
+      "note": "浏览器验收后发现旧版本状态表达不准确；交付代码已改为生成新版本时将旧版标记UNRESOLVED，并由单元测试覆盖。"
+    },
+    {
+      "version": 2,
+      "payload_hash": "ae9d16d5b847b7cd4fc25badf6e69b6d7d174315ffa3aa74e6a2fcb3b2417a13",
+      "review_status": "PASSED"
+    }
+  ],
+  "decision": {
+    "request_id": "87f761e3-4da6-485b-89a8-b2ad89628d77",
+    "version": 2,
+    "payload_hash": "ae9d16d5b847b7cd4fc25badf6e69b6d7d174315ffa3aa74e6a2fcb3b2417a13",
+    "decision": "approve",
+    "status": "SAVED"
+  },
+  "published_file": {
+    "exists": true,
+    "matches_database_body": true,
+    "sha256": "ae9d16d5b847b7cd4fc25badf6e69b6d7d174315ffa3aa74e6a2fcb3b2417a13"
+  },
+  "refresh_result": "重新加载页面并重新连接后，恢复v2、PASSED和SAVED；没有重新启动研究循环。",
+  "screenshot": "045-browser-restored.png"
+}

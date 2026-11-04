@@ -8,6 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from magi.personal.models import PersonalError
+from magi.personal.store import SCHEMA_VERSION
 from magi.web.app import create_app
 from magi.web.service import WebService
 from tests.test_task_documents import setup as setup
@@ -211,4 +212,7 @@ def test_schema6_upgrade_preserves_existing_preview(setup):
         db.execute("UPDATE schema_meta SET version=6")
     assert service.document_view(saved["id"])["content"] == saved["content"]
     with service.store.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 12
+        assert (
+            db.execute("SELECT version FROM schema_meta").fetchone()[0]
+            == SCHEMA_VERSION
+        )

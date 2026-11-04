@@ -1,0 +1,39 @@
+模块045最终回归记录
+日期：2026-11-04（Asia/Shanghai）
+
+受限沙箱内的首次命令：
+  .\.venv-harness\Scripts\python.exe -X utf8 -m pytest
+
+结果：收集491项后卡在 tests/test_agent_tasks.py 第一项的 FastAPI TestClient
+初始化，没有进入业务断言；等待超过历史全量回归耗时后人工 Ctrl+C。单独运行
+tests/test_agent_tasks.py -vv -s 复现相同位置。该现象与 Windows 受限沙箱内
+socketpair/进程内通信限制一致，不能记作测试通过或失败。
+
+经用户授权，在沙箱外执行相同命令：
+  .\.venv-harness\Scripts\python.exe -X utf8 -m pytest
+
+结果：
+  collected 491 items
+  tests/test_research_tasks.py ................... [67%]
+  491 passed, 3 warnings in 52.12s
+
+三条 warning 均来自依赖弃用提示：Starlette 对 anyio BlockingPortal 的旧别名、
+websockets.legacy、Uvicorn 对 WebSocketServerProtocol 的旧导入。本轮没有把依赖
+告警当成业务失败，也没有顺手升级依赖扩大范围。
+
+本轮文件 Ruff：
+  .\.venv-harness\Scripts\python.exe -m ruff check <本轮23个Python文件>
+  .\.venv-harness\Scripts\python.exe -m ruff format --check <同一组文件>
+
+结果：All checks passed；23 files already formatted。
+
+全仓 Ruff 基线：
+  .\.venv-harness\Scripts\python.exe -m ruff check src tests scripts
+
+结果：11项旧问题，均位于本轮未改动的早期 domain/agent/council 文件及其旧测试，
+包括10项导入排序/可自动修复项和1项 E712。为避免夹带无关重构，本轮未修改。
+
+前端语法：
+  node --check src/magi/web/app.js
+
+结果：退出码0。

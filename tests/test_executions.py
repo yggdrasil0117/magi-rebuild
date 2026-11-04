@@ -8,7 +8,7 @@ import pytest
 from magi.personal.executions import PlanExecutions
 from magi.personal.models import PersonalError
 from magi.personal.plans import PlanService
-from magi.personal.store import PersonalStore
+from magi.personal.store import SCHEMA_VERSION, PersonalStore
 
 
 @pytest.fixture
@@ -155,4 +155,7 @@ def test_schema7_upgrade_keeps_plan_and_initializes_empty_execution(execution_en
     assert PlanService(upgraded).get(plan_id, 1).body == "完成接口并记录验证结果"
     assert PlanExecutions(upgraded, "owner").view(plan_id, 1)["revision"] == 0
     with upgraded.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 12
+        assert (
+            db.execute("SELECT version FROM schema_meta").fetchone()[0]
+            == SCHEMA_VERSION
+        )

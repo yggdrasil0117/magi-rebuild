@@ -26,6 +26,7 @@ from magi.personal.models import PersonalError
 from magi.personal.plans import PlanService
 from magi.personal.store import PersonalStore
 from magi.personal.suggestions import MemorySuggestions
+from magi.research.service import ResearchService
 from magi.retrieval import MagiLocalRetrievalProvider, RetrievalRequest
 from magi.web.document_tools import build_document_tool
 
@@ -81,6 +82,7 @@ class WebService:
         self.documents = TaskDocuments(self.store, owner)
         self.approvals = DocumentApprovals(self.documents)
         self.issues = IssueActions(self.store, owner)
+        self.research = ResearchService(self.store, owner, settings)
 
     def document_view(self, document_id):
         """将持久审批状态附在预览上，GET只读取，不恢复任何执行节点。"""

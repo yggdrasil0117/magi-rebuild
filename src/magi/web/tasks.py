@@ -6,10 +6,13 @@ from datetime import datetime, timezone
 from threading import Event, Thread
 from uuid import uuid4
 
-from magi.web.schemas import TurnInput
+from magi.web.schemas import ResearchExecution, TurnInput
 from magi.web.service import WebError, turn_signature
 
-PUBLIC_FIELDS = "id,chat,message,mode,status,turn_id,error_code,created_at,updated_at"
+PUBLIC_FIELDS = (
+    "id,chat,message,mode,status,turn_id,error_code,created_at,updated_at,"
+    "artifact_id,stage,review_status,stop_reason,budget_json,execution_json"
+)
 
 
 def now():
@@ -24,17 +27,23 @@ class AgentTasks:
         self.wake = Event()
         self.stop = Event()
 
-    def submit(self, request, mode):
-        """同一消息重试返回原任务，提交后才通知执行器。"""
+    def submit(self, request, mode, execution=None):
+        """同一消息及执行身份重试返回原任务，提交后才通知执行器。"""
         payload = request.model_dump_json()
+        execution_payload = (
+            execution.model_dump_json() if execution is not None else None
+        )
         with self.store.transaction() as db:
             old = db.execute(
                 "SELECT * FROM agent_tasks WHERE owner=? AND chat=? AND message=?",
                 (self.owner, request.chat_id, request.message_id),
             ).fetchone()
             if old:
-                if old["mode"] != mode or json.loads(old["request_json"]) != json.loads(
-                    payload
+                if (
+                    old["mode"] != mode
+                    or json.loads(old["request_json"]) != json.loads(payload)
+                    or json.loads(old["execution_json"] or "null")
+                    != json.loads(execution_payload or "null")
                 ):
                     raise WebError("IDEMPOTENCY_CONFLICT", "同一消息的任务参数已改变")
                 task_id = old["id"]
@@ -62,11 +71,36 @@ class AgentTasks:
                 epoch = db.execute(
                     "SELECT context_epoch FROM app_state WHERE singleton=1"
                 ).fetchone()[0]
+                if mode == "research":
+                    if execution is None:
+                        raise WebError("INVALID_INPUT", "研究任务缺少执行身份", 422)
+                    try:
+                        self.service.research.bind_submission(db, request, execution)
+                    except Exception as exc:
+                        if hasattr(exc, "code"):
+                            raise WebError(
+                                exc.code, str(exc), getattr(exc, "status", 409)
+                            ) from exc
+                        raise
+                    if execution.source_artifact is not None:
+                        active_artifact = db.execute(
+                            """SELECT 1 FROM agent_tasks
+                               WHERE owner=? AND artifact_id=?
+                                 AND status IN ('QUEUED','RUNNING')""",
+                            (self.owner, execution.source_artifact.artifact_id),
+                        ).fetchone()
+                        if active_artifact:
+                            raise WebError(
+                                "ARTIFACT_TASK_ACTIVE",
+                                "这份成果已有修改或评审任务，请等待完成",
+                                409,
+                            )
                 task_id, timestamp = uuid4().hex, now()
                 db.execute(
                     """INSERT INTO agent_tasks
-                       (id,owner,chat,message,mode,request_json,epoch,status,created_at,updated_at)
-                       VALUES (?,?,?,?,?,?,?,'QUEUED',?,?)""",
+                       (id,owner,chat,message,mode,request_json,epoch,status,created_at,
+                        updated_at,execution_json,artifact_id)
+                       VALUES (?,?,?,?,?,?,?,'QUEUED',?,?,?,?)""",
                     (
                         task_id,
                         self.owner,
@@ -77,6 +111,10 @@ class AgentTasks:
                         epoch,
                         timestamp,
                         timestamp,
+                        execution_payload,
+                        execution.source_artifact.artifact_id
+                        if execution is not None and execution.source_artifact
+                        else None,
                     ),
                 )
         self.wake.set()
@@ -91,7 +129,10 @@ class AgentTasks:
             ).fetchone()
         if row is None:
             raise WebError("NOT_FOUND", "未找到该任务", 404)
-        return dict(row)
+        result = dict(row)
+        result["budget"] = json.loads(result.pop("budget_json") or "null")
+        result["execution"] = json.loads(result.pop("execution_json") or "null")
+        return result
 
     def list_chat(self, chat):
         """刷新时找回当前会话最近的任务，优先保留仍在运行的记录。"""
@@ -101,7 +142,13 @@ class AgentTasks:
                     ORDER BY (status IN ('QUEUED','RUNNING')) DESC, created_at DESC LIMIT 20""",
                 (self.owner, chat),
             ).fetchall()
-        return [dict(row) for row in rows]
+        results = []
+        for row in rows:
+            item = dict(row)
+            item["budget"] = json.loads(item.pop("budget_json") or "null")
+            item["execution"] = json.loads(item.pop("execution_json") or "null")
+            results.append(item)
+        return results
 
     def claim(self):
         """在短写事务内领取最早任务，网络执行发生在事务外。"""
@@ -128,6 +175,8 @@ class AgentTasks:
     @staticmethod
     def matching_turn(db, task):
         """请求摘要一致才认领回执，避免误关联同步入口的同名消息。"""
+        if task["mode"] == "research":
+            return None
         request = TurnInput.model_validate_json(task["request_json"])
         return db.execute(
             """SELECT id,status FROM web_turns
@@ -157,6 +206,14 @@ class AgentTasks:
                 (self.owner,),
             ).fetchall()
             for task in tasks:
+                if task["mode"] == "research":
+                    db.execute(
+                        """UPDATE agent_runs SET status='INTERRUPTED',updated_at=?
+                           WHERE task_id=? AND status='RUNNING'""",
+                        (now(), task["id"]),
+                    )
+                    self.finish(db, task, "INTERRUPTED", code="WORKER_INTERRUPTED")
+                    continue
                 turn = self.matching_turn(db, task)
                 status = turn["status"] if turn else None
                 if status not in {"COMPLETED", "FAILED", "INTERRUPTED"}:
@@ -177,6 +234,51 @@ class AgentTasks:
         code = None
         try:
             request = TurnInput.model_validate_json(task["request_json"])
+            if task["mode"] == "research":
+                execution = ResearchExecution.model_validate_json(
+                    task["execution_json"]
+                )
+                with self.store.connect() as db:
+                    epoch = db.execute(
+                        "SELECT context_epoch FROM app_state WHERE singleton=1"
+                    ).fetchone()[0]
+                if epoch != task["epoch"]:
+                    result = {
+                        "status": "FAILED",
+                        "artifact_id": task["artifact_id"],
+                        "review_status": None,
+                        "stop_reason": "CONTEXT_CHANGED",
+                        "error_code": "CONTEXT_CHANGED",
+                        "budget": None,
+                    }
+                elif not self.service.gate.acquire(blocking=False):
+                    with self.store.transaction() as db:
+                        self.finish(db, task, "QUEUED")
+                    return False
+                else:
+                    try:
+                        result = self.service.research.run_task(
+                            task, request, execution
+                        )
+                    finally:
+                        self.service.gate.release()
+                with self.store.transaction() as db:
+                    db.execute(
+                        """UPDATE agent_tasks SET status=?,artifact_id=?,review_status=?,
+                           stop_reason=?,error_code=?,budget_json=?,updated_at=?
+                           WHERE id=? AND status='RUNNING'""",
+                        (
+                            result["status"],
+                            result.get("artifact_id"),
+                            result.get("review_status"),
+                            result.get("stop_reason"),
+                            result.get("error_code"),
+                            json.dumps(result.get("budget"), ensure_ascii=False),
+                            now(),
+                            task["id"],
+                        ),
+                    )
+                return True
             self.service.turn(request, task["mode"], expected_epoch=task["epoch"])
         except WebError as exc:
             code = exc.code

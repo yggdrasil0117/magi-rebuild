@@ -1,6 +1,7 @@
 """网页聊天的执行顺序由 MAGI 控制，消息和工具协议沿用现有适配层。"""
 
 import json
+from time import monotonic
 
 from httpx import ConnectError, ConnectTimeout
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
@@ -19,8 +20,14 @@ class ChatCapacityError(ValueError):
         self.code = code
 
 
+class ChatDeadlineError(TimeoutError):
+    """共享任务期限已到；调用方据此保留已有成果并停止新操作。"""
+
+
 class ChatLoop:
-    def __init__(self, session, settings, model, prompt, tools, summary):
+    def __init__(
+        self, session, settings, model, prompt, tools, summary, *, deadline=None
+    ):
         """宿主提供存储、模型和本轮可用工具，模型不能自行注册工具。"""
         self.session = session
         self.settings = settings
@@ -29,6 +36,11 @@ class ChatLoop:
         self.tools = {tool.name: tool for tool in tools}
         self.specs = [convert_to_openai_tool(tool) for tool in tools]
         self.summary = summary
+        self.deadline = deadline
+
+    def check_deadline(self):
+        if self.deadline is not None and monotonic() >= self.deadline:
+            raise ChatDeadlineError("任务总期限已到，不再启动新的模型或工具调用")
 
     def model_input(self, history):
         """按完整轮次压缩输入，原始消息仍用于持久化；容量估算使用字节。"""
@@ -103,6 +115,7 @@ class ChatLoop:
             with tracing_context(enabled=False):
                 model = self.model.bind_tools(list(self.tools.values()))
                 for attempt in range(1, self.settings.max_model_calls + 1):
+                    self.check_deadline()
                     stage = "context"
                     messages = self.model_input([*history, *pending])
                     stage = "model"
@@ -146,6 +159,7 @@ class ChatLoop:
                     remaining_tools -= len(calls)
                     stage = "tool_execution"
                     for call in calls:
+                        self.check_deadline()
                         fields = {"name": call["name"], "call_id": call["id"]}
                         events.emit("tool_started", **fields)
                         try:

@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 12
+SCHEMA_VERSION = 13
 
 
 class ClosingConnection(sqlite3.Connection):
@@ -356,6 +356,154 @@ class PersonalStore:
                 UPDATE schema_meta SET version=12;
                 COMMIT;
             """)
+            version = 12
+        if version < 13:
+            # 研究任务继续使用同一持久队列，但需要新的模式、PARTIAL 终态和
+            # 独立成果身份。SQLite 不能修改 CHECK，因此在一个事务中重建队列表。
+            task_columns = {
+                row[1] for row in connection.execute("PRAGMA table_info(agent_tasks)")
+            }
+            research_tables = connection.execute(
+                """SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN
+                   ('research_chats','agent_runs','research_artifacts',
+                    'research_artifact_versions','research_reviews',
+                    'research_artifact_decisions')"""
+            ).fetchone()[0]
+            if "execution_json" in task_columns and research_tables == 6:
+                # 旧迁移测试会只回退版本号和某个旧表；v13 数据仍在时不能重建或删除。
+                connection.execute("UPDATE schema_meta SET version=13")
+            else:
+                connection.executescript("""
+                BEGIN IMMEDIATE;
+                ALTER TABLE agent_tasks RENAME TO agent_tasks_v12;
+                DROP INDEX IF EXISTS agent_tasks_queue;
+                DROP INDEX IF EXISTS agent_tasks_one_active_chat;
+                CREATE TABLE agent_tasks (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    mode TEXT NOT NULL CHECK(mode IN ('chat','council','research')),
+                    request_json TEXT NOT NULL,
+                    epoch INTEGER NOT NULL,
+                    status TEXT NOT NULL CHECK(status IN
+                        ('QUEUED','RUNNING','COMPLETED','PARTIAL','FAILED','INTERRUPTED')),
+                    turn_id TEXT REFERENCES web_turns(id),
+                    error_code TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    execution_json TEXT,
+                    artifact_id TEXT,
+                    stage TEXT,
+                    review_status TEXT,
+                    stop_reason TEXT,
+                    budget_json TEXT,
+                    UNIQUE(owner,chat,message)
+                );
+                INSERT INTO agent_tasks
+                    (id,owner,chat,message,mode,request_json,epoch,status,turn_id,
+                     error_code,created_at,updated_at)
+                SELECT id,owner,chat,message,mode,request_json,epoch,status,turn_id,
+                       error_code,created_at,updated_at FROM agent_tasks_v12;
+                DROP TABLE agent_tasks_v12;
+                CREATE INDEX agent_tasks_queue
+                    ON agent_tasks(owner,status,created_at,id);
+                CREATE UNIQUE INDEX agent_tasks_one_active_chat
+                    ON agent_tasks(owner,chat) WHERE status IN ('QUEUED','RUNNING');
+                CREATE UNIQUE INDEX agent_tasks_one_active_artifact
+                    ON agent_tasks(owner,artifact_id)
+                    WHERE artifact_id IS NOT NULL AND status IN ('QUEUED','RUNNING');
+
+                CREATE TABLE research_chats (
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    entry_mode TEXT NOT NULL CHECK(entry_mode IN ('persona','room')),
+                    agent_id TEXT,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(owner,chat),
+                    CHECK((entry_mode='persona' AND agent_id IS NOT NULL) OR
+                          (entry_mode='room' AND agent_id IS NULL))
+                );
+                CREATE TABLE agent_runs (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    task_id TEXT NOT NULL REFERENCES agent_tasks(id),
+                    agent_id TEXT NOT NULL,
+                    config_version TEXT NOT NULL,
+                    stage TEXT NOT NULL CHECK(stage IN ('generate','review','revise','verify')),
+                    review_round INTEGER NOT NULL CHECK(review_round BETWEEN 0 AND 2),
+                    target_artifact_id TEXT,
+                    target_version INTEGER,
+                    status TEXT NOT NULL CHECK(status IN ('RUNNING','COMPLETED','FAILED','INTERRUPTED')),
+                    input_json TEXT NOT NULL,
+                    output_json TEXT,
+                    diagnostics_json TEXT NOT NULL DEFAULT '{}',
+                    model_calls INTEGER NOT NULL DEFAULT 0,
+                    tool_calls INTEGER NOT NULL DEFAULT 0,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+                CREATE INDEX agent_runs_task ON agent_runs(owner,task_id,created_at,id);
+                CREATE TABLE research_artifacts (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    chat TEXT NOT NULL,
+                    lead_agent_id TEXT NOT NULL,
+                    current_version INTEGER NOT NULL CHECK(current_version >= 1),
+                    status TEXT NOT NULL CHECK(status IN
+                        ('DRAFT','APPROVED','SAVED','REJECTED','RECONCILE_REQUIRED')),
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+                CREATE TABLE research_artifact_versions (
+                    artifact_id TEXT NOT NULL REFERENCES research_artifacts(id),
+                    version INTEGER NOT NULL CHECK(version >= 1),
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    sources_json TEXT NOT NULL,
+                    completed_json TEXT NOT NULL,
+                    unknowns_json TEXT NOT NULL,
+                    generator_run_id TEXT NOT NULL REFERENCES agent_runs(id),
+                    review_status TEXT NOT NULL CHECK(review_status IN
+                        ('NOT_REQUESTED','IN_PROGRESS','PASSED','UNRESOLVED','INCOMPLETE')),
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(artifact_id,version)
+                );
+                CREATE TABLE research_reviews (
+                    id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    task_id TEXT NOT NULL REFERENCES agent_tasks(id),
+                    artifact_id TEXT NOT NULL,
+                    artifact_version INTEGER NOT NULL,
+                    run_id TEXT NOT NULL REFERENCES agent_runs(id),
+                    agent_id TEXT NOT NULL,
+                    round INTEGER NOT NULL CHECK(round IN (1,2)),
+                    verdict TEXT NOT NULL CHECK(verdict IN
+                        ('PASS','REVISE','INSUFFICIENT_EVIDENCE')),
+                    result_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(artifact_id,artifact_version)
+                        REFERENCES research_artifact_versions(artifact_id,version)
+                );
+                CREATE TABLE research_artifact_decisions (
+                    request_id TEXT PRIMARY KEY,
+                    owner TEXT NOT NULL,
+                    artifact_id TEXT NOT NULL,
+                    version INTEGER NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    decision TEXT NOT NULL CHECK(decision IN ('approve','reject')),
+                    status TEXT NOT NULL CHECK(status IN
+                        ('APPROVED','SAVED','REJECTED','RECONCILE_REQUIRED')),
+                    path TEXT,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(artifact_id,version)
+                        REFERENCES research_artifact_versions(artifact_id,version),
+                    UNIQUE(owner,artifact_id,version,decision)
+                );
+                UPDATE schema_meta SET version=13;
+                COMMIT;
+                """)
         connection.commit()
 
     @contextmanager

@@ -6,6 +6,7 @@ from langchain_core.messages import AIMessage
 
 from magi.personal.documents import TaskDocuments
 from magi.personal.models import PersonalError
+from magi.personal.store import SCHEMA_VERSION
 from magi.web.app import create_app
 from magi.web.schemas import TurnInput
 from magi.web.service import WebError, WebService
@@ -162,4 +163,7 @@ def test_schema5_upgrade_preserves_manual_preview(setup):
     assert service.documents.get(old["id"]) == old
     assert old["source_turn_id"] is None
     with service.store.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 12
+        assert (
+            db.execute("SELECT version FROM schema_meta").fetchone()[0]
+            == SCHEMA_VERSION
+        )

@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from magi.harness.config import HarnessConfig
 from magi.personal.documents import TaskDocuments, checksum
 from magi.personal.models import PersonalError
+from magi.personal.store import SCHEMA_VERSION
 from magi.web.app import create_app
 from magi.web.service import WebService
 
@@ -195,4 +196,7 @@ def test_schema4_upgrade_preserves_plan(setup):
         db.execute("UPDATE schema_meta SET version=4")
     assert service.plans.get(plan_id).body == "实现接口；完成条件：响应符合约定。"
     with service.store.connect() as db:
-        assert db.execute("SELECT version FROM schema_meta").fetchone()[0] == 12
+        assert (
+            db.execute("SELECT version FROM schema_meta").fetchone()[0]
+            == SCHEMA_VERSION
+        )

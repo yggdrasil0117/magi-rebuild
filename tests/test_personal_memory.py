@@ -4,7 +4,7 @@ import pytest
 
 from magi.personal.memory import MemoryService
 from magi.personal.models import ErrorCode, PersonalError
-from magi.personal.store import PersonalStore
+from magi.personal.store import SCHEMA_VERSION, PersonalStore
 
 
 @pytest.fixture
@@ -104,7 +104,10 @@ def test_transaction_rolls_back_memory_and_epoch_on_failure(service, monkeypatch
 def test_schema_version_is_preserved_across_reopen(tmp_path):
     store = PersonalStore(tmp_path / "personal.sqlite3")
     with store.connect() as connection:
-        assert connection.execute("SELECT version FROM schema_meta").fetchone()[0] == 12
+        assert (
+            connection.execute("SELECT version FROM schema_meta").fetchone()[0]
+            == SCHEMA_VERSION
+        )
     with sqlite3.connect(store.path) as connection:
         connection.execute("UPDATE schema_meta SET version=99")
     with pytest.raises(RuntimeError, match="newer"):

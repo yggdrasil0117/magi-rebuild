@@ -12,10 +12,12 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from starlette.concurrency import run_in_threadpool
 
 from magi.harness.config import load_config
+from magi.personal.artifacts import ArtifactError
 from magi.personal.export import plan_markdown
 from magi.personal.locking import ApplicationLock
 from magi.personal.models import PersonalError
 from magi.web.schemas import (
+    ArtifactDecision,
     Confirmation,
     DocumentConfirm,
     DocumentPreview,
@@ -110,6 +112,17 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
             },
         )
 
+    @app.exception_handler(ArtifactError)
+    async def artifact_error(request: Request, exc: ArtifactError):
+        return JSONResponse(
+            status_code=404
+            if exc.code == "NOT_FOUND"
+            else 422
+            if exc.code == "INVALID_PATH"
+            else 409,
+            content={"code": exc.code, "message": str(exc), "run_id": None},
+        )
+
     @app.get("/")
     def page():
         return FileResponse(Path(__file__).with_name("index.html"))
@@ -176,7 +189,7 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
 
     @app.post("/v1/tasks", status_code=202, dependencies=guarded)
     def submit_task(body: TaskSubmission):
-        return tasks.submit(body.turn, body.mode)
+        return tasks.submit(body.turn, body.mode, body.execution)
 
     @app.get("/v1/tasks/{task_id}", dependencies=guarded)
     def get_task(task_id: str):
@@ -185,6 +198,31 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
     @app.get("/v1/chats/{chat_id}/tasks", dependencies=guarded)
     def list_tasks(chat_id: str):
         return tasks.list_chat(chat_id)
+
+    @app.get("/v1/chats/{chat_id}/artifacts", dependencies=guarded)
+    def list_artifacts(chat_id: str):
+        """刷新只读取内部草稿及发布回执，不触发模型或继续评审。"""
+        return service.research.artifacts.list_chat(chat_id)
+
+    @app.get("/v1/artifacts/{artifact_id}", dependencies=guarded)
+    def get_artifact(artifact_id: str, version: int | None = Query(default=None, ge=1)):
+        return service.research.artifacts.get(artifact_id, version)
+
+    @app.post("/v1/artifacts/{artifact_id}/decision", dependencies=guarded)
+    def decide_artifact(artifact_id: str, body: ArtifactDecision):
+        """批准只绑定页面已展示的版本和摘要；模型无法调用这个接口。"""
+        if not service.gate.acquire(blocking=False):
+            raise WebError("BUSY", "正在生成或保存，请稍后重试", 429)
+        try:
+            return service.research.artifacts.decide(
+                artifact_id,
+                body.request_id,
+                body.expected_version,
+                body.payload_hash,
+                body.decision,
+            )
+        finally:
+            service.gate.release()
 
     @app.post("/v1/deliberations", dependencies=guarded)
     def deliberate(body: TurnInput):

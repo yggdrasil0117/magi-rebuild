@@ -22,6 +22,7 @@ SUMMARY = "checkpoint.summaries.db"
 APPROVAL = "business.approvals.sqlite3"
 DATABASES = {BUSINESS, CHECKPOINT, SUMMARY, APPROVAL}
 DOCUMENT = re.compile(r"task-documents/[0-9a-f]{32}\.md")
+RESEARCH_ARTIFACT = re.compile(r"research-artifacts/[0-9a-f]{32}-v[1-9][0-9]*\.md")
 MANIFEST = "manifest.json"
 MAX_BYTES = 2 * 1024**3
 MAX_MANIFEST = 1024**2
@@ -116,7 +117,49 @@ def snapshot(settings, staging):
         target.parent.mkdir(exist_ok=True)
         shutil.copyfile(path, target)
         records[name] = file_record(target)
-    return {"format": 1, "files": records, "missing_documents": missing}
+    missing_artifacts = []
+    artifact_directory = settings.business_db_path.parent / "research-artifacts"
+    if (
+        artifact_directory.exists()
+        and artifact_directory.resolve() != artifact_directory
+    ):
+        raise ValueError("研究成果目录不能是链接")
+    with closing(sqlite3.connect(staging / BUSINESS)) as db:
+        has_artifacts = db.execute(
+            """SELECT 1 FROM sqlite_master
+               WHERE type='table' AND name='research_artifact_decisions'"""
+        ).fetchone()
+        artifacts = (
+            db.execute(
+                """SELECT artifact_id,version,status FROM research_artifact_decisions
+                   WHERE decision='approve'"""
+            ).fetchall()
+            if has_artifacts
+            else []
+        )
+    for artifact_id, version, status in artifacts:
+        name = f"research-artifacts/{artifact_id}-v{version}.md"
+        if not RESEARCH_ARTIFACT.fullmatch(name):
+            raise ValueError("业务库中存在非法研究成果编号")
+        path = artifact_directory / f"{artifact_id}-v{version}.md"
+        if path.is_symlink():
+            raise ValueError("研究成果文件不能是链接")
+        if not path.exists():
+            if status == "SAVED":
+                missing_artifacts.append(f"{artifact_id}:v{version}")
+            continue
+        if not path.is_file():
+            raise ValueError("研究成果应为普通文件")
+        target = staging / name
+        target.parent.mkdir(exist_ok=True)
+        shutil.copyfile(path, target)
+        records[name] = file_record(target)
+    return {
+        "format": 1,
+        "files": records,
+        "missing_documents": missing,
+        "missing_artifacts": missing_artifacts,
+    }
 
 
 def backup(settings, archive):
@@ -171,7 +214,11 @@ def read_manifest(source):
         raise ValueError("清单与归档条目不一致")
     size = 0
     for name, record in files.items():
-        if name not in DATABASES and not DOCUMENT.fullmatch(name):
+        if (
+            name not in DATABASES
+            and not DOCUMENT.fullmatch(name)
+            and not RESEARCH_ARTIFACT.fullmatch(name)
+        ):
             raise ValueError("归档含未知数据路径")
         if (
             not isinstance(record, dict)
@@ -281,6 +328,10 @@ def main():
             print(f"备份完成：{len(manifest['files'])} 个文件")
             if manifest["missing_documents"]:
                 print("源实例已缺失工作单：" + ", ".join(manifest["missing_documents"]))
+            if manifest["missing_artifacts"]:
+                print(
+                    "源实例已缺失研究成果：" + ", ".join(manifest["missing_artifacts"])
+                )
         else:
             print(install(args.directory, settings, getattr(args, "archive", None)))
     except (ValueError, OSError, RuntimeError, sqlite3.Error, BadZipFile) as exc:
