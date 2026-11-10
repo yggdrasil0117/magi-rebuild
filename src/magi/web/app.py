@@ -3,6 +3,7 @@ import os
 import sqlite3
 from contextlib import asynccontextmanager
 from dataclasses import asdict
+from datetime import datetime
 from difflib import unified_diff
 from pathlib import Path
 
@@ -15,6 +16,7 @@ from magi.harness.config import load_config
 from magi.personal.artifacts import ArtifactError
 from magi.personal.export import plan_markdown
 from magi.personal.locking import ApplicationLock
+from magi.personal.memory import memory_cutoff
 from magi.personal.models import PersonalError
 from magi.web.schemas import (
     ArtifactDecision,
@@ -165,9 +167,16 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
 
     @app.get("/v1/memories", dependencies=guarded)
     def memories():
-        """只读当前有效的全局记忆；不含已删除正文与其他会话专属内容。"""
+        """管理页保留已过期的公共记忆，供用户续期或删除。"""
+        now = datetime.fromisoformat(memory_cutoff())
         return {
-            "items": [asdict(m) for m in service.memories.list_active("global")],
+            "items": [
+                {
+                    **asdict(m),
+                    "expired": m.expires_at is not None and m.expires_at <= now,
+                }
+                for m in service.memories.list_active("global", include_expired=True)
+            ],
             "context_epoch": service.memories.current_epoch(),
         }
 

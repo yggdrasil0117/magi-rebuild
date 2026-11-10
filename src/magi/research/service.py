@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from magi.personal.artifacts import ArtifactError, ResearchArtifacts
+from magi.personal.memory import EFFECTIVE_MEMORY, memory_cutoff
 from magi.personas import get_persona
 from magi.research.budget import ResearchBudget
 from magi.research.runner import BudgetExhausted, PersonaRunner, ResearchOutputError
@@ -84,9 +85,10 @@ class ResearchService:
         with self.store.connect() as db:
             # 先限定公共记忆，再统计和排序。私有记忆不能进入提示词或占用名额。
             memory_rows = db.execute(
-                """SELECT id,version,key,value,COUNT(*) OVER () AS eligible_total
-                   FROM memories WHERE status='ACTIVE' AND scope='global'
-                   ORDER BY updated_at DESC,id ASC LIMIT 20"""
+                f"""SELECT id,version,key,value,COUNT(*) OVER () AS eligible_total
+                    FROM memories WHERE {EFFECTIVE_MEMORY} AND scope='global'
+                    ORDER BY updated_at DESC,id ASC LIMIT 20""",
+                (memory_cutoff(),),
             ).fetchall()
             memory_total = memory_rows[0]["eligible_total"] if memory_rows else 0
             memories = [

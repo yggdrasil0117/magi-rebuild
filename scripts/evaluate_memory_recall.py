@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 from contextlib import nullcontext
+from datetime import datetime
 from pathlib import Path
 from statistics import median
 from tempfile import TemporaryDirectory
@@ -198,6 +199,52 @@ def evaluate(db_path, *, cloud=False):
             ["study:v1", "study:v2", "local_study:v1", "private:v1"],
             "delete_cleanup",
         )
+        # 冻结评测时钟，在截止时刻仍保留 v1 向量，验证查询边界而非清理时机。
+        with patch(
+            "magi.personal.memory._now", return_value="2030-01-01T00:00:00.000000+00:00"
+        ) as clock:
+            deadline = datetime.fromisoformat("2030-01-02T00:00:00+00:00")
+            timed = memories.add(
+                key="备考时间",
+                scope="global",
+                value="这周可学习4小时",
+                request_id="timed-study",
+                expires_at=deadline,
+            )
+            labels[timed.object_id] = "timed"
+            run_case(
+                "有效期内",
+                "general",
+                "复习可以投入多久",
+                ["timed:v1"],
+                ["study:v2", "local_study:v1"],
+                "deadline_index_add",
+            )
+            clock.return_value = "2030-01-02T00:00:00.000000+00:00"
+            context = ContextService(PersonalStore(db_path))
+            run_case(
+                "到期后重开业务库",
+                "general",
+                "复习可以投入多久",
+                [],
+                ["timed:v1", "local_study:v1"],
+                "expired_existing_vector",
+            )
+            memories.update(
+                timed.object_id,
+                expected_version=1,
+                value="这周可学习4小时",
+                request_id="renew-study",
+                expires_at=datetime.fromisoformat("2030-01-03T00:00:00+00:00"),
+            )
+            run_case(
+                "续期后恢复",
+                "general",
+                "复习可以投入多久",
+                ["timed:v2"],
+                ["timed:v1", "local_study:v1"],
+                "renew_index_update",
+            )
     return {
         "mode": "cloud_bge_m3" if cloud else "offline_fixed_vectors",
         "embedding_min_score": settings.embedding_min_score,

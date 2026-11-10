@@ -1,4 +1,5 @@
 import sqlite3
+from contextlib import closing
 
 import pytest
 
@@ -112,3 +113,20 @@ def test_schema_version_is_preserved_across_reopen(tmp_path):
         connection.execute("UPDATE schema_meta SET version=99")
     with pytest.raises(RuntimeError, match="newer"):
         store.connect()
+
+
+def test_schema_13_memory_migrates_with_no_deadline(service):
+    """旧库原有记忆和回执在添加可选字段后保持可读。"""
+    body = dict(key="旧偏好", scope="global", value="先举例", request_id="old")
+    original = service.add(**body)
+    with closing(sqlite3.connect(service.store.path)) as connection, connection:
+        connection.execute("ALTER TABLE memories DROP COLUMN expires_at")
+        connection.execute("UPDATE schema_meta SET version=13")
+    restarted = MemoryService(PersonalStore(service.store.path))
+    item = restarted.list_active()[0]
+    assert (item.id, item.value, item.expires_at) == (
+        original.object_id,
+        "先举例",
+        None,
+    )
+    assert restarted.add(**body).duplicate

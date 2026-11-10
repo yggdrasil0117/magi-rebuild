@@ -1,6 +1,7 @@
 """验证研究人格、有限协作、隔离上下文与成果确认边界。"""
 
 from dataclasses import replace
+from datetime import datetime
 from pathlib import Path
 from time import monotonic, sleep
 
@@ -233,11 +234,13 @@ def test_private_research_context_does_not_leak_to_another_chat(env):
 
 
 @pytest.mark.parametrize("entry_mode", ["persona", "room"])
-def test_research_only_injects_active_global_memories(env, entry_mode):
+def test_research_only_injects_active_global_memories(env, entry_mode, monkeypatch):
     """用真实业务库验证进入研究员输入的记忆及候选统计。"""
     _, service, _, _ = env
     runner = CollaborationRunner()
     service.research.runner = runner
+    now = "2030-01-01T00:00:00.000000+00:00"
+    monkeypatch.setattr("magi.personal.memory._now", lambda: now)
     chat = "research-scope-check"
     for key, scope in (
         ("global-marker", "global"),
@@ -250,6 +253,14 @@ def test_research_only_injects_active_global_memories(env, entry_mode):
             service.memories.delete(
                 receipt.object_id, expected_version=1, request_id="delete-marker"
             )
+    service.memories.add(
+        key="expiring-marker",
+        scope="global",
+        value="即将到期",
+        request_id="expiring",
+        expires_at=datetime.fromisoformat("2030-01-02T00:00:00+00:00"),
+    )
+    now = "2030-01-02T00:00:00.000000+00:00"
     queue = AgentTasks(service)
     task = queue.submit(
         turn("scope-task", chat, "只使用已确认的公共偏好"),

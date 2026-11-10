@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 13
+SCHEMA_VERSION = 14
 
 
 class ClosingConnection(sqlite3.Connection):
@@ -504,6 +504,17 @@ class PersonalStore:
                 UPDATE schema_meta SET version=13;
                 COMMIT;
                 """)
+            version = 13
+        if version < 14:
+            # 旧记录缺省为长期有效。兼容只回退版本号的迁移测试。
+            if not connection.in_transaction:
+                connection.execute("BEGIN IMMEDIATE")
+            columns = {
+                row[1] for row in connection.execute("PRAGMA table_info(memories)")
+            }
+            if "expires_at" not in columns:
+                connection.execute("ALTER TABLE memories ADD COLUMN expires_at TEXT")
+            connection.execute("UPDATE schema_meta SET version=14")
         connection.commit()
 
     @contextmanager

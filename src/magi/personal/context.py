@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
+from magi.personal.memory import EFFECTIVE_MEMORY, memory_cutoff
 from magi.personal.models import CurrentBinding
 from magi.personal.store import PersonalStore
 
@@ -38,6 +39,7 @@ class ContextService:
     def build_current_context(
         self, logical_session_id: str, *, include_identity=False
     ) -> tuple[CurrentBinding, list]:
+        """读取当前有效范围，再应用会话同键覆盖。过期记录不能遮住有效全局值。"""
         binding = self.resolve_binding(logical_session_id)
         scopes = ("global", f"session:{logical_session_id}")
         with self.store.connect() as connection:
@@ -45,8 +47,8 @@ class ContextService:
                 "id,version,key,scope,value" if include_identity else "key,scope,value"
             )
             rows = connection.execute(
-                f"SELECT {columns} FROM memories WHERE status='ACTIVE' AND scope IN (?,?) ORDER BY key,scope",
-                scopes,
+                f"SELECT {columns} FROM memories WHERE {EFFECTIVE_MEMORY} AND scope IN (?,?) ORDER BY key,scope",
+                (memory_cutoff(), *scopes),
             ).fetchall()
         selected = {}
         for row in rows:

@@ -601,6 +601,74 @@ def test_memory_read_after_restart_and_session_scope_not_exposed(env):
         assert response.status_code == 422
 
 
+def test_memory_expiry_management_reopens_and_renews(env, monkeypatch):
+    """模拟时钟越过截止点，验证旧回执、管理页和续期仍可工作。"""
+    settings, service, _, _ = env
+    now = "2030-01-01T00:00:00.000000+00:00"
+    monkeypatch.setattr("magi.personal.memory._now", lambda: now)
+    token = "memory-expiry-test-token-long-enough"
+    headers = {"Authorization": "Bearer " + token}
+    creation = dict(
+        key="本周时间",
+        value="每周4小时",
+        request_id="add-timed",
+        confirmed=True,
+        expires_at="2030-01-02T08:00:00+08:00",
+    )
+    with TestClient(create_app(settings, token=token, service=service)) as client:
+        for invalid in ("2030-01-02T08:00:00", "9999-12-31T23:59:59-01:00"):
+            rejected = client.post(
+                "/v1/memories", headers=headers, json=creation | {"expires_at": invalid}
+            )
+            assert rejected.status_code == 422
+        result = client.post("/v1/memories", headers=headers, json=creation)
+        assert result.status_code == 200
+        memory_id = result.json()["receipt"]["object_id"]
+        assert (
+            service.context.build_current_context("study")[1][0]["value"] == "每周4小时"
+        )
+    now = "2030-01-02T00:00:00.000000+00:00"
+    restarted = WebService(settings, "owner")
+    assert restarted.context.build_current_context("study")[1] == []
+    assert restarted.memories.current_epoch() == 1
+    with TestClient(create_app(settings, token=token, service=restarted)) as client:
+        item = client.get("/v1/memories", headers=headers).json()["items"][0]
+        assert item["expired"] and item["version"] == 1
+        assert item["expires_at"] == "2030-01-02T00:00:00+00:00"
+        replay = client.post("/v1/memories", headers=headers, json=creation)
+        assert replay.json()["receipt"]["duplicate"]
+        rejected = client.post(
+            "/v1/memories", headers=headers, json=creation | {"request_id": "past"}
+        )
+        assert rejected.status_code == 422
+        path = f"/v1/memories/{memory_id}/update"
+        edit = dict(
+            expected_version=1, value="仍是4小时", request_id="edit", confirmed=True
+        )
+        assert client.post(path, headers=headers, json=edit).status_code == 200
+        assert restarted.context.build_current_context("study")[1] == []
+        renew = edit | dict(
+            expected_version=2, request_id="renew", expires_at="2030-01-03T00:00:00Z"
+        )
+        assert client.post(path, headers=headers, json=renew).status_code == 200
+        assert (
+            restarted.context.build_current_context("study")[1][0]["value"]
+            == "仍是4小时"
+        )
+        assert (
+            client.post(
+                path, headers=headers, json=renew | {"request_id": "stale"}
+            ).status_code
+            == 409
+        )
+        clear = renew | dict(expected_version=3, request_id="clear", expires_at=None)
+        assert client.post(path, headers=headers, json=clear).status_code == 200
+        assert (
+            client.get("/v1/memories", headers=headers).json()["items"][0]["expires_at"]
+            is None
+        )
+
+
 def test_other_owner_cannot_access_proposal_or_turn(env):
     settings, service, _, _ = env
     turn = service.turn(request(), "council")

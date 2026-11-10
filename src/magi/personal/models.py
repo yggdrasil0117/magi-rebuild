@@ -29,6 +29,7 @@ class Memory:
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None
+    expires_at: datetime | None = None
 
 
 @dataclass(frozen=True, kw_only=True)

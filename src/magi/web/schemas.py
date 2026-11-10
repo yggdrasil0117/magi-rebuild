@@ -1,6 +1,13 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    AwareDatetime,
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 
 class Request(BaseModel):
@@ -106,8 +113,11 @@ class MemoryConfirmation(Request):
 
 
 class MemoryCreate(MemoryConfirmation):
+    """带时区的截止时间可选，空值表示长期有效。"""
+
     key: str = Field(min_length=1, max_length=80)
     value: str = Field(min_length=1, max_length=4000)
+    expires_at: AwareDatetime | None = None
 
 
 class MemoryVersion(MemoryConfirmation):
@@ -115,7 +125,10 @@ class MemoryVersion(MemoryConfirmation):
 
 
 class MemoryUpdate(MemoryVersion):
+    """更新正文或有效期。字段缺省时沿用原有效期。"""
+
     value: str = Field(min_length=1, max_length=4000)
+    expires_at: AwareDatetime | None = None
 
 
 class MemorySuggestionConfirm(Request):

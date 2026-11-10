@@ -189,6 +189,7 @@ class WebService:
                     value=command.value,
                     request_id=request_id,
                     source="explicit_web",
+                    expires_at=command.expires_at,
                 )
             else:
                 if self.memories.get(memory_id).scope != "global":
@@ -197,6 +198,8 @@ class WebService:
                     expected_version=command.expected_version, request_id=request_id
                 )
                 if action == "update":
+                    if "expires_at" in command.model_fields_set:
+                        params["expires_at"] = command.expires_at
                     receipt = self.memories.update(
                         memory_id, value=command.value, **params
                     )

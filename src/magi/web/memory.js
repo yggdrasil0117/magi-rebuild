@@ -14,7 +14,7 @@ function showMemories(open) {
   if (open) { showPlans(false); $('memoriesPanel').scrollIntoView({behavior: 'smooth', block: 'start'}); }
 }
 
-// 只展示有效全局记忆，数据库ID和预期版本由程序管理。
+// 管理页也列出已到期的公共记忆，便于检查内容后续期。
 async function loadMemories() {
   try {
     const result = await api('/v1/memories');
@@ -24,15 +24,26 @@ async function loadMemories() {
       title.textContent = item.key;
       text.textContent = item.value;
       const edit = document.createElement('button'), remove = document.createElement('button');
-      edit.textContent = '修改';
+      const expiry = document.createElement('p');
+      expiry.textContent = item.expires_at
+        ? (item.expired ? '已到期 · ' : '有效至 ') + new Date(item.expires_at).toLocaleString()
+        : '长期有效';
+      edit.textContent = item.expired ? '修改或续期' : '修改';
       remove.textContent = '删除';
       edit.onclick = () => beginMemoryEdit(item);
       remove.onclick = () => previewMemory('delete', item);
-      card.append(title, text, edit, remove);
+      card.append(title, text, expiry, edit, remove);
       $('memoryList').append(card);
     }
-    $('memoryStatus').textContent = result.items.length ? '共 ' + result.items.length + ' 条有效记忆。' : '还没有个人记忆。你可以主动添加需要长期使用的背景或偏好。';
+    $('memoryStatus').textContent = result.items.length ? '共 ' + result.items.length + ' 条记忆。到期记录可在此续期。' : '还没有个人记忆。你可以主动添加需要记住的背景或偏好。';
   } catch (e) { $('memoryStatus').textContent = e.message; }
+}
+
+// datetime-local 接受本地墙上时间，API 保存明确的 UTC 时刻。
+function memoryLocalTime(timestamp) {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 }
 
 // 传入已有记录即编辑，否则新建；编辑名称保持不变，ID和版本由记录携带。
@@ -43,6 +54,7 @@ function beginMemoryEdit(item = null) {
   $('memoryKey').value = item ? item.key : '';
   $('memoryKey').disabled = Boolean(item);
   $('memoryValue').value = item ? item.value : '';
+  $('memoryExpiresAt').value = memoryLocalTime(item?.expires_at);
   $('memoryEditor').hidden = false;
   $('memoryKey').focus();
   if (item) $('memoryValue').focus();
@@ -56,14 +68,33 @@ function previewMemory(action, item = memoryUI.item) {
   const value = deleting ? null : $('memoryValue').value.trim();
   if (!deleting && (!key || !value)) { $('memoryStatus').textContent = '请填写名称和内容。'; return; }
   const body = {request_id: crypto.randomUUID(), confirmed: true};
-  if (!deleting) body.value = value;
+  let expiry = item?.expires_at ?? null;
+  if (!deleting) {
+    body.value = value;
+    const field = $('memoryExpiresAt');
+    if (!field.validity.valid) { $('memoryStatus').textContent = '请填写有效的截止日期和时间。'; return; }
+    if (field.value !== memoryLocalTime(expiry)) {
+      const date = field.value ? new Date(field.value) : null;
+      if (date && (!Number.isFinite(date.getTime()) || memoryLocalTime(date) !== field.value)) {
+        $('memoryStatus').textContent = '该本地时间不可用，请选择其他时间。';
+        return;
+      }
+      if (date && date.getTime() <= Date.now()) {
+        $('memoryStatus').textContent = '有效期必须晚于当前时间。';
+        return;
+      }
+      expiry = date ? date.toISOString() : null;
+      body.expires_at = expiry;
+    }
+  }
   if (item) body.expected_version = item.version;
   else body.key = key;
   const path = item ? '/v1/memories/' + encodeURIComponent(item.id) + (deleting ? '/delete' : '/update') : '/v1/memories';
   memoryUI.pending = {path, body};
   memoryUI.uncertain = false;
   $('memoryPreview').textContent = deleting ? '删除「' + key + '」\n\n' + item.value :
-    (item ? '修改「' + key + '」\n\n原内容：\n' + item.value + '\n\n新内容：\n' : '添加「' + key + '」\n\n') + value;
+    (item ? '修改「' + key + '」\n\n原内容：\n' + item.value + '\n\n新内容：\n' : '添加「' + key + '」\n\n') + value +
+    '\n\n' + (expiry ? '有效至：' + new Date(expiry).toLocaleString() : '长期有效');
   $('confirmMemory').textContent = deleting ? '确认删除' : '确认保存';
   $('memoryEditor').hidden = true;
   $('memoryReview').hidden = false;

@@ -76,6 +76,7 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 <div id="memoryEditor" hidden><h3 id="memoryEditorTitle">添加记忆</h3>
 <label for="memoryKey">名称（例如“回答偏好”）</label><input id="memoryKey" maxlength="80">
 <label for="memoryValue">内容</label><textarea id="memoryValue" maxlength="4000" placeholder="例如：解释技术问题时先说明原理，再给代码。"></textarea>
+<label for="memoryExpiresAt">有效至（本地时间，留空表示长期有效）</label><input id="memoryExpiresAt" type="datetime-local">
 <button id="previewMemory">检查并确认</button><button id="cancelMemoryEdit">取消</button></div>
 <div id="memoryReview" hidden><h3>确认这项更改</h3><pre id="memoryPreview"></pre>
 <p class="muted">更改会影响后续交流，已有计划会标记需复核，未保存的旧候选需要重新生成。删除记忆不会清除历史聊天或旧计划。</p>
