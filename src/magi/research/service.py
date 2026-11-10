@@ -79,12 +79,16 @@ class ResearchService:
                 )
 
     def _context(self, task, turn, execution):
-        """装配冻结输入；默认只读同一研究会话，额外私聊必须逐条显式分享。"""
+        """按提交的会话和分享清单装配研究输入，只注入已确认的公共记忆。"""
 
         with self.store.connect() as db:
-            memory_total = db.execute(
-                "SELECT COUNT(*) FROM memories WHERE status='ACTIVE'"
-            ).fetchone()[0]
+            # 先限定公共记忆，再统计和排序。私有记忆不能进入提示词或占用名额。
+            memory_rows = db.execute(
+                """SELECT id,version,key,value,COUNT(*) OVER () AS eligible_total
+                   FROM memories WHERE status='ACTIVE' AND scope='global'
+                   ORDER BY updated_at DESC,id ASC LIMIT 20"""
+            ).fetchall()
+            memory_total = memory_rows[0]["eligible_total"] if memory_rows else 0
             memories = [
                 {
                     "id": row["id"],
@@ -92,10 +96,7 @@ class ResearchService:
                     "key": row["key"],
                     "value": row["value"],
                 }
-                for row in db.execute(
-                    """SELECT id,version,key,value FROM memories
-                       WHERE status='ACTIVE' ORDER BY updated_at DESC LIMIT 20"""
-                )
+                for row in memory_rows
             ]
             previous = []
             previous_total = db.execute(

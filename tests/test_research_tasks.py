@@ -232,6 +232,39 @@ def test_private_research_context_does_not_leak_to_another_chat(env):
     assert "PRIVATE-MARKER-991" not in repr(runner.contexts[-1])
 
 
+@pytest.mark.parametrize("entry_mode", ["persona", "room"])
+def test_research_only_injects_active_global_memories(env, entry_mode):
+    """用真实业务库验证进入研究员输入的记忆及候选统计。"""
+    _, service, _, _ = env
+    runner = CollaborationRunner()
+    service.research.runner = runner
+    chat = "research-scope-check"
+    for key, scope in (
+        ("global-marker", "global"),
+        ("same-chat-private", f"session:{chat}"),
+        ("other-chat-private", "session:another-chat"),
+        ("deleted-global", "global"),
+    ):
+        receipt = service.memories.add(key=key, scope=scope, value=key, request_id=key)
+        if key == "deleted-global":
+            service.memories.delete(
+                receipt.object_id, expected_version=1, request_id="delete-marker"
+            )
+    queue = AgentTasks(service)
+    task = queue.submit(
+        turn("scope-task", chat, "只使用已确认的公共偏好"),
+        "research",
+        ResearchExecution(lead_agent_id="casper", entry_mode=entry_mode),
+    )
+    assert queue.run_one()
+    assert queue.get(task["id"])["status"] == "COMPLETED"
+    context = runner.contexts[-1]
+    assert [item["key"] for item in context["confirmed_memories"]] == ["global-marker"]
+    assert context["selection"]["active_memories_total"] == 1
+    assert context["selection"]["omitted_memories"] == 0
+    assert len(service.memories.list_active()) == 3
+
+
 def test_explicit_message_share_is_validated_and_included(env):
     settings, _, _, _ = env
     service = WebService(settings, "owner")
