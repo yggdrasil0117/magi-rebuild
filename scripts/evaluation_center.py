@@ -139,6 +139,11 @@ def save_manifest(directory, record):
     pending.replace(directory / "manifest.json")
 
 
+def text_fingerprint(path):
+    """统一文本换行再计算指纹，避免 Git 的 CRLF 转换破坏版本对照。"""
+    return hashlib.sha256(path.read_text(encoding="utf-8").encode("utf-8")).hexdigest()
+
+
 def run_suite(root, suite, checkout, allow_dirty):
     """运行指定可信检出中的固定入口，每次分配独立目录和超时上限。"""
     source, kind, timeout = SUITES[suite]
@@ -152,13 +157,13 @@ def run_suite(root, suite, checkout, allow_dirty):
             "检出存在未提交变更；提交后再作版本对照，或显式传 --allow-dirty"
         )
     script = checkout / source
-    suite_hash = hashlib.sha256(script.read_bytes()).hexdigest()
+    suite_hash = text_fingerprint(script)
     directory = root / uuid4().hex
     directory.mkdir(parents=True)
     evidence = directory / ("evidence.xml" if kind == "junit" else "evidence.json")
     config = checkout / "magi.qianwen.toml"
     record = dict(
-        schema=1,
+        schema=2,
         id=directory.name,
         suite=suite,
         commit=commit,
@@ -169,9 +174,7 @@ def run_suite(root, suite, checkout, allow_dirty):
         evidence=evidence.name,
         cases={},
         metrics={},
-        config_hash=hashlib.sha256(config.read_bytes()).hexdigest()
-        if kind == "research"
-        else None,
+        config_hash=text_fingerprint(config) if kind == "research" else None,
     )
     save_manifest(directory, record)
     if kind == "junit":

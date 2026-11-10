@@ -2,7 +2,7 @@
 
 import pytest
 
-from scripts.evaluation_center import compare, read_evidence
+from scripts.evaluation_center import compare, read_evidence, text_fingerprint
 
 
 def test_junit_failure_is_visible_in_version_comparison(tmp_path):
@@ -16,7 +16,7 @@ def test_junit_failure_is_visible_in_version_comparison(tmp_path):
     )
     cases, metrics, model = read_evidence(report, "junit")
     failed = dict(
-        schema=1,
+        schema=2,
         suite="research-offline",
         id="first",
         commit="old",
@@ -46,3 +46,14 @@ def test_junit_failure_is_visible_in_version_comparison(tmp_path):
     ):
         with pytest.raises(ValueError, match=reason):
             compare(failed, passed | change)
+
+
+def test_suite_fingerprint_ignores_checkout_line_endings(tmp_path):
+    """同一 Git 内容在 Windows 的两种检出形式可以比较。"""
+    suite = tmp_path / "suite.py"
+    suite.write_bytes(b"first\nsecond\n")
+    baseline = text_fingerprint(suite)
+    suite.write_bytes(b"first\r\nsecond\r\n")
+    assert text_fingerprint(suite) == baseline
+    suite.write_bytes(b"first\r\nchanged\r\n")
+    assert text_fingerprint(suite) != baseline
