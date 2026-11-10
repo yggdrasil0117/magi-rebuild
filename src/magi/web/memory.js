@@ -9,9 +9,8 @@ $('autoMemorySuggestions').onchange = () => {
 
 // 面板按需打开，不把记忆表单常驻在聊天界面。
 function showMemories(open) {
-  $('memoriesPanel').hidden = !open;
-  $('toggleMemories').setAttribute('aria-expanded', String(open));
-  if (open) { showPlans(false); $('memoriesPanel').scrollIntoView({behavior: 'smooth', block: 'start'}); }
+  showWorkspacePanel(open ? 'memoriesPanel' : 'consolePanel');
+  if (open) $('memoriesPanel').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 // 管理页也列出已到期的公共记忆，便于检查内容后续期。

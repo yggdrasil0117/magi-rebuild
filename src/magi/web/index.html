@@ -4,13 +4,167 @@
 <title>MAGI · 个人决策与行动</title>
 <link rel="icon" href="data:,">
 <style>
-body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;margin:30px auto;padding:0 20px}h1{letter-spacing:.15em}input,select,textarea,button{font:inherit;background:#1d2b36;color:inherit;border:1px solid #587180;border-radius:6px;padding:8px;margin:4px;max-width:100%;box-sizing:border-box}textarea{width:100%;min-height:110px}button{cursor:pointer}button:disabled{opacity:.5;cursor:wait}pre{white-space:pre-wrap;overflow-wrap:anywhere}article,section{border:1px solid #455b69;border-radius:10px;margin-top:20px;padding:16px}small,.muted{color:#a9c4cf}#status,#revisionNote,.warning{color:#ffcd84}.columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.columns article{margin:0}#planList{padding-left:20px}#planList button{text-align:left}label{display:inline-block}input[type=number]{width:180px}[hidden]{display:none!important}@media(max-width:700px){.columns{grid-template-columns:1fr}body{padding:0 12px;margin:16px auto}}
-#history a{color:#8bd5ff}#history a:visited{color:#c5b4ff}
+/* 沿用终端的深色、红橙紫标识。正文使用更亮的派生色，便于长时间阅读。 */
+:root {
+  color-scheme: dark;
+  --bg: #0a0a0c;
+  --panel: #121215;
+  --inset: #0e0e11;
+  --line: #353139;
+  --text: #e8e6e3;
+  --muted: #aaa3af;
+  --red: #b7282e;
+  --signal: #f48785;
+  --orange: #f5ae6d;
+  --purple: #c1a1ef;
+  --mono: "Cascadia Mono", Consolas, "Microsoft YaHei", monospace;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0 auto; padding: 24px clamp(14px, 3vw, 38px) 34px; max-width: 1300px;
+  background: var(--bg); color: var(--text);
+  font: 15px/1.65 system-ui, "Microsoft YaHei", sans-serif;
+}
+[hidden] { display: none !important; }
+h1, h2, h3, h4, p { margin: 0 0 .65em; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.05rem; }
+p, pre, li, summary, label { overflow-wrap: anywhere; }
+a { color: var(--purple); }
+small, .muted { color: var(--muted); }
+.code-label { font: 600 12px/1.5 var(--mono); letter-spacing: .12em; color: var(--muted); }
+.masthead {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 0 0 12px; border-bottom: 1px solid var(--line);
+}
+.masthead strong { color: var(--signal); letter-spacing: .15em; }
+.intro {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; gap: 22px; padding: clamp(20px, 4vw, 40px);
+  margin: 18px 0; border: 1px solid var(--line); border-left: 3px solid var(--red);
+  background: linear-gradient(115deg, #1d1217, #121216 58%, #141018);
+}
+.intro::after {
+  position: absolute; right: -1px; bottom: -1px; width: 22px; height: 13px;
+  border-right: 2px solid var(--red); border-bottom: 2px solid var(--red);
+  content: ""; pointer-events: none;
+}
+.intro .code-label { color: var(--signal); }
+.intro h1 { font: 750 clamp(2.5rem, 6.3vw, 4.8rem)/1 var(--mono); letter-spacing: .11em; margin: 7px 0 9px; }
+.intro p:last-child { margin-bottom: 0; }
+.persona-strip { display: flex; flex-wrap: wrap; gap: clamp(10px, 2vw, 23px); }
+.persona-unit { text-align: center; color: var(--orange); font: 600 11px/1.5 var(--mono); letter-spacing: .05em; }
+.persona-unit:nth-child(2) { color: var(--purple); }
+.persona-unit:nth-child(3) { color: var(--signal); }
+.persona-unit svg { display: block; width: 49px; height: 45px; margin: 0 auto 7px; }
+.persona-unit path { fill: #171419; stroke: currentColor; stroke-width: 1.3; }
+.persona-unit text { fill: currentColor; font: 600 15px var(--mono); text-anchor: middle; }
+.layout { display: grid; grid-template-columns: minmax(172px, 205px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.rail, .workspace { min-width: 0; }
+.rail { border: 1px solid var(--line); background: var(--panel); padding: 14px; }
+.rail .code-label { margin-bottom: 10px; }
+.rail button {
+  display: flex; align-items: center; gap: 10px; width: 100%; margin: 0 0 6px;
+  padding: 8px 10px; text-align: left; border-color: transparent; background: transparent;
+}
+.rail button span { color: var(--muted); font: 11px var(--mono); }
+.rail button:hover { background: #201d24; }
+.rail button[aria-expanded="true"], .rail button[aria-current="page"] {
+  border-color: #623238; box-shadow: inset 2px 0 var(--red); background: #26171d;
+}
+.rail button[aria-expanded="true"] span, .rail button[aria-current="page"] span { color: var(--signal); }
+.workspace { display: grid; gap: 12px; }
+.system-bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; padding: 10px 14px; border: 1px solid var(--line); background: var(--panel); }
+.system-bar .code-label { color: var(--orange); }
+#status { margin: 0; flex: 1 1 220px; }
+#settings { margin: 0; }
+.module-panel, .console-panel { margin: 0; border-top: 2px solid var(--red); }
+.panel-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 8px; }
+.panel-heading h2 { margin: 0; }
+.panel-heading .code-label { color: var(--signal); }
+.console-welcome { min-height: 62px; margin: 12px 0; border-left: 2px solid var(--purple); background: var(--inset); padding: 12px 14px; }
+.console-welcome p { margin: 0; }
+.composer { margin-top: 14px; }
+.composer > label { font-weight: 650; }
+.composer textarea { margin: 6px 0 0; border-left: 2px solid var(--red); }
+.composer-actions { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin: 10px 0; }
+#send { margin-left: auto; min-width: 78px; }
+.primary { background: #85232a; border-color: #b14d55; color: #fff3f1; }
+.primary:hover { background: #9c2a32; border-color: var(--signal); }
+.option-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
+.option-grid p { margin: 0; }
+.option-grid small { display: block; margin-left: 24px; }
+.turn-question, .turn-answer { margin: 0 0 8px; }
+.turn-question .code-label { color: var(--orange); }
+.turn-answer .code-label { color: var(--purple); }
+.turn-question { border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+article, section { margin: 13px 0 0; border: 1px solid var(--line); background: var(--panel); padding: clamp(12px, 2vw, 20px); }
+article { background: var(--inset); }
+article pre { margin: 6px 0; }
+details { margin: 8px 0; border: 1px solid var(--line); background: var(--inset); padding: 8px 10px; }
+details[open] > summary { margin-bottom: 8px; }
+summary { cursor: pointer; }
+fieldset { min-width: 0; margin: 8px 0; border: 1px solid var(--line); }
+input, select, textarea, button {
+  font: inherit; color: inherit; background: #1c1a20; border: 1px solid #4d4653;
+  border-radius: 3px; padding: 6px 10px; margin: 3px; max-width: 100%;
+}
+input[type="checkbox"] { accent-color: var(--red); }
+input[type="number"] { width: 180px; }
+textarea { display: block; width: 100%; min-height: 96px; resize: vertical; }
+button { cursor: pointer; }
+button:hover { border-color: var(--signal); }
+button:disabled, input:disabled, select:disabled { opacity: .55; }
+button:disabled { cursor: default; }
+[aria-pressed="true"] { border-color: var(--purple); color: var(--purple); background: #24182f; }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+pre { font: 14px/1.65 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+label { display: inline-block; }
+#revisionNote, .warning { color: var(--orange); }
+.columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.columns article { margin: 0; }
+#planList { padding-left: 20px; }
+#planList button { text-align: left; }
+.research-entries { display: flex; flex-wrap: wrap; gap: 5px; }
+.researchEntry[data-agent="melchior"] { color: var(--orange); }
+.researchEntry[data-agent="balthasar"] { color: var(--purple); }
+.researchEntry[data-agent="casper"] { color: var(--signal); }
+.footer { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 12px; }
+@media (max-width: 730px) {
+  .layout, .columns { grid-template-columns: 1fr; }
+  .rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+  .rail .code-label { grid-column: 1 / -1; margin-bottom: 1px; }
+  .rail button { margin: 0; }
+}
+@media (max-width: 495px) {
+  body { padding-top: 14px; }
+  .intro, .option-grid { grid-template-columns: 1fr; }
+  .intro { gap: 14px; }
+  .persona-strip { justify-content: flex-start; }
+  .persona-unit svg { width: 34px; height: 32px; margin-bottom: 3px; }
+  #send { margin-left: 0; }
+}
 </style>
-<h1>MAGI</h1><p>说说你的想法，需要权衡时，再交给三人格一起分析。</p>
-<button id="togglePlans" aria-expanded="false">我的计划</button>
-<button id="toggleMemories" aria-expanded="false">个人记忆</button>
-<button id="toggleResearch" aria-expanded="false">研究任务</button>
+<header>
+<div class="masthead code-label"><strong>⬡ NERV / MAGI</strong><span>LOCAL INTERFACE</span></div>
+<div class="intro">
+  <div><p class="code-label">PERSONAL DECISION TERMINAL</p><h1>MAGI</h1><p class="muted">个人研究、决策与行动终端</p></div>
+  <div class="persona-strip" aria-label="三人格">
+    <div class="persona-unit"><svg aria-hidden="true" viewBox="0 0 50 46"><path d="M13 2h24l12 21-12 21H13L1 23Z"/><text x="25" y="28">01</text></svg>MELCHIOR</div>
+    <div class="persona-unit"><svg aria-hidden="true" viewBox="0 0 50 46"><path d="M13 2h24l12 21-12 21H13L1 23Z"/><text x="25" y="28">02</text></svg>BALTHASAR</div>
+    <div class="persona-unit"><svg aria-hidden="true" viewBox="0 0 50 46"><path d="M13 2h24l12 21-12 21H13L1 23Z"/><text x="25" y="28">03</text></svg>CASPER</div>
+  </div>
+</div>
+</header>
+<div class="layout">
+<nav class="rail" aria-label="工作区导航">
+<p class="code-label">WORKSPACE / 工作区</p>
+<button id="openConsole" aria-current="page"><span aria-hidden="true">00</span>对话终端</button>
+<button id="toggleResearch" aria-expanded="false" aria-controls="researchPanel"><span aria-hidden="true">01</span>研究任务</button>
+<button id="togglePlans" aria-expanded="false" aria-controls="plansPanel"><span aria-hidden="true">02</span>我的计划</button>
+<button id="toggleMemories" aria-expanded="false" aria-controls="memoriesPanel"><span aria-hidden="true">03</span>个人记忆</button>
+</nav>
+<main class="workspace">
 <details id="settings"><summary>设置</summary>
 <p><small>首次使用，填写启动终端提供的本机服务凭据。凭据仅留在当前页面，刷新后需重新连接。</small></p>
 <label>本机服务凭据 <input id="token" type="password" autocomplete="off"></label><button id="connect">连接</button>
@@ -21,23 +175,30 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 <input id="target" aria-label="修订目标计划 ID" placeholder="修订目标计划 ID（可选）"><input id="version" aria-label="修订基准版本" type="number" min="1" placeholder="旧版本号">
 <pre id="receipt"></pre>
 </details></details>
-<p id="status" role="status" aria-live="polite">先在设置中连接本机服务，就可以开始聊天。</p>
+<div class="system-bar"><span class="code-label" aria-hidden="true">⬡ SESSION</span><p id="status" role="status" aria-live="polite">先在设置中连接本机服务，就可以开始聊天。</p></div>
+<section id="consolePanel" class="console-panel" aria-labelledby="consoleTitle">
+<div class="panel-heading"><span class="code-label">00 / CONSOLE</span><h2 id="consoleTitle">对话终端</h2></div>
 <details id="taskPanel" hidden><summary id="taskSummary">后台任务</summary><ul id="taskList"></ul></details>
-<p id="welcome" class="muted">可以聊日常问题，也可以说说你的目标、遇到的困难，或计划执行得怎么样。</p><div id="history"></div>
+<div id="welcome" class="console-welcome"><p class="code-label">⬡ MAGI</p><p>说说你的想法，需要权衡时，可以切换到三人格分析。</p></div><div id="history"></div>
 <div id="memorySuggestions" aria-live="polite"></div>
 <p id="revisionNote" hidden></p>
+<div class="composer">
 <label for="text">想聊些什么？</label><textarea id="text" placeholder="直接说出你的问题，或告诉我现在的想法…"></textarea>
+<div class="composer-actions">
+<select id="mode" hidden><option value="chat">日常助手</option><option value="deliberations">三人格审议</option></select>
+<button id="analyze" aria-pressed="false">三人格分析：关闭</button><button id="reset" hidden>取消这次发送</button><button id="exitRevision" hidden>退出修订</button><button id="send" class="primary">发送</button>
+</div>
+<p id="modeHint" class="muted">默认日常聊天。需要比较方案或形成计划时，开启三人格分析。</p>
+<details class="composer-options"><summary>工具与运行选项</summary><div class="option-grid">
 <p><label><input id="webEnabled" type="checkbox"> 联网查资料</label><small>日常聊天可用；查询词和网址发送Exa，匿名额度有限。可展开查看本轮来源。</small></p>
 <p><label><input id="memoryRecall" type="checkbox"> 语义召回个人记忆</label><small>日常聊天可用；问题和待索引的已确认记忆会发送给硅基流动。</small></p>
 <p><label><input id="issueEnabled" type="checkbox"> 启用 GitHub Issue 草稿</label><small>日常聊天可用。先核对网页草稿，再批准发往配置的仓库。</small></p>
 <p><label><input id="backgroundTask" type="checkbox"> 提交为后台任务</label><small>入队后可关闭页面，重连同一会话查看结果。后台任务完成后不自动提取记忆建议。</small></p>
-<select id="mode" hidden><option value="chat">日常助手</option><option value="deliberations">三人格审议</option></select>
-<button id="analyze" aria-pressed="false">三人格分析：关闭</button><button id="send">发送</button><button id="reset" hidden>取消这次发送</button><button id="exitRevision" hidden>退出修订</button>
-<p id="modeHint" class="muted">默认日常聊天。需要比较方案或形成计划时，开启三人格分析。</p>
-<section id="researchPanel" aria-labelledby="researchTitle" hidden>
-<h2 id="researchTitle">MAGI 研究任务</h2>
+</div></details></div></section>
+<section id="researchPanel" class="module-panel" aria-labelledby="researchTitle" hidden>
+<div class="panel-heading"><span class="code-label">01 / RESEARCH</span><h2 id="researchTitle">MAGI 研究任务</h2></div>
 <p class="muted">选择一位负责人调查并形成报告草稿。评审者只有只读工具；报告写入文件前仍需你确认。</p>
-<p><button class="researchEntry" data-agent="melchior">MELCHIOR 独立入口</button><button class="researchEntry" data-agent="balthasar">BALTHASAR 独立入口</button><button class="researchEntry" data-agent="casper">CASPER 独立入口</button><button id="roomEntry">共同聊天室</button></p>
+<p class="research-entries"><button class="researchEntry" data-agent="melchior">MELCHIOR 独立入口</button><button class="researchEntry" data-agent="balthasar">BALTHASAR 独立入口</button><button class="researchEntry" data-agent="casper">CASPER 独立入口</button><button id="roomEntry">共同聊天室</button></p>
 <p id="researchEntryStatus">尚未选择入口。</p>
 <label>研究会话 <input id="researchChat" value="research-melchior" pattern="[A-Za-z0-9_-]+"></label>
 <label>负责人 <select id="researchLead"><option value="melchior">MELCHIOR</option><option value="balthasar">BALTHASAR</option><option value="casper">CASPER</option></select></label>
@@ -45,11 +206,11 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 <label for="researchText">调查目标与授权边界</label><textarea id="researchText" maxlength="8000" placeholder="例如：阅读项目说明，比较三种记忆方案；可以联网，不安装依赖，不修改代码。"></textarea>
 <p><label><input id="researchWeb" type="checkbox"> 允许联网查公开资料</label></p>
 <details><summary>按需共享已有消息</summary><p class="muted">默认不读取其他会话。只在需要时填写已完成消息 ID，多个 ID 用英文逗号分隔；后端会逐条检查访问权。</p><input id="researchSharedMessages" maxlength="2400" placeholder="message-id-1,message-id-2"></details>
-<button id="submitResearch">提交后台研究</button><button id="refreshResearch">刷新任务与成果</button><button id="closeResearch">返回聊天</button>
+<button id="submitResearch" class="primary">提交后台研究</button><button id="refreshResearch">刷新任务与成果</button><button id="closeResearch">返回聊天</button>
 <p id="researchStatus" role="status" aria-live="polite"></p><ul id="researchTasks"></ul><div id="researchArtifacts"></div>
 </section>
-<section id="plansPanel" aria-labelledby="plansTitle" hidden>
-<h2 id="plansTitle">已保存计划</h2><p class="muted">查看实际保存的内容、比较版本，或选择计划提交新的执行反馈。</p>
+<section id="plansPanel" class="module-panel" aria-labelledby="plansTitle" hidden>
+<div class="panel-heading"><span class="code-label">02 / PLANS</span><h2 id="plansTitle">已保存计划</h2></div><p class="muted">查看实际保存的内容、比较版本，或选择计划提交新的执行反馈。</p>
 <button id="plans">刷新列表</button><button id="closePlans">返回聊天</button><p id="planStatus" role="status"></p><ul id="planList"></ul>
 <details><summary>按 ID 读取</summary><input id="planId" aria-label="查询计划 ID" placeholder="计划 ID"><input id="planVersion" aria-label="查询版本" type="number" min="1" placeholder="版本（可选）"><button id="getPlan">读取版本</button></details>
 <div id="planDetail" hidden>
@@ -68,8 +229,8 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 <div id="comparison" hidden><p id="comparisonStatus"></p><div class="columns"><article><h4 id="beforeTitle"></h4><pre id="beforeBody"></pre></article><article><h4 id="afterTitle"></h4><pre id="afterBody"></pre></article></div><details open><summary>文本差异（- 原内容，+ 新内容）</summary><pre id="diff"></pre></details></div>
 </div>
 </section>
-<section id="memoriesPanel" aria-labelledby="memoriesTitle" hidden>
-<h2 id="memoriesTitle">个人记忆</h2>
+<section id="memoriesPanel" class="module-panel" aria-labelledby="memoriesTitle" hidden>
+<div class="panel-heading"><span class="code-label">03 / MEMORY</span><h2 id="memoriesTitle">个人记忆</h2></div>
 <p class="muted">这里只保存你明确确认的背景与偏好，后续交流会使用。保存计划不会自动添加记忆。</p>
 <button id="newMemory">添加记忆</button><button id="refreshMemories">刷新列表</button><button id="closeMemories">返回聊天</button>
 <p id="memoryStatus" role="status" aria-live="polite"></p><div id="memoryList"></div>
@@ -82,6 +243,8 @@ body{font:16px/1.6 system-ui;background:#101820;color:#e1e8ec;max-width:1100px;m
 <p class="muted">更改会影响后续交流，已有计划会标记需复核，未保存的旧候选需要重新生成。删除记忆不会清除历史聊天或旧计划。</p>
 <button id="confirmMemory">确认保存</button><button id="cancelMemoryReview">取消</button></div>
 </section>
+</main></div>
+<footer class="footer code-label">MAGI SYSTEM / MELCHIOR · BALTHASAR · CASPER</footer>
 <script src="/app.js"></script>
 <script src="/memory.js"></script>
 </html>

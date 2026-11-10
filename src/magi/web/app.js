@@ -36,16 +36,29 @@ async function connect() {
   }
 }
 
-// 计划按需展开，主界面不常驻版本表单。
+// 工作区一次展示一个面板，导航的选中状态与实际可见内容同步。
+function showWorkspacePanel(panelId) {
+  $('consolePanel').hidden = panelId !== 'consolePanel';
+  if (panelId === 'consolePanel') $('openConsole').setAttribute('aria-current', 'page');
+  else $('openConsole').removeAttribute('aria-current');
+  for (const [panel, toggle] of [
+    ['plansPanel', 'togglePlans'],
+    ['memoriesPanel', 'toggleMemories'],
+    ['researchPanel', 'toggleResearch'],
+  ]) {
+    const open = panel === panelId;
+    $(panel).hidden = !open;
+    $(toggle).setAttribute('aria-expanded', String(open));
+  }
+}
+
+// 从对话候选或导航进入计划时，复用同一个工作区面板。
 function showPlans(open) {
-  $('plansPanel').hidden = !open;
-  $('togglePlans').setAttribute('aria-expanded', String(open));
   if (open) {
-    $('memoriesPanel').hidden = true;
-    $('researchPanel').hidden = true;
-    $('toggleResearch').setAttribute('aria-expanded', 'false');
-    $('toggleMemories').setAttribute('aria-expanded', 'false');
+    showWorkspacePanel('plansPanel');
     $('plansPanel').scrollIntoView({behavior: 'smooth', block: 'start'});
+  } else if (!$('plansPanel').hidden) {
+    showWorkspacePanel('consolePanel');
   }
 }
 
@@ -213,13 +226,23 @@ function issuePanel(source) {
 // 展示一轮历史；保存按钮确认的是该轮冻结候选，不根据当前输入框重新生成。
 function show(turn) {
   lastReply = turn.reply;
-  const article = document.createElement('article'), pre = document.createElement('pre');
+  const article = document.createElement('article');
   const marker = '\n待确认候选（尚未保存）\n';
   const start = turn.proposal_id ? turn.text.indexOf(marker) : -1;
   const answer = (start >= 0 ? turn.text.slice(start + marker.length) : turn.text)
     .split('\n\n候选 ID：')[0].replace(/\n调用 \d+\/4 · 耗时 [^\n]+/g, '');
-  pre.textContent = '你：' + turn.user_text + '\n\n' + (turn.status === 'RUNNING' ? '服务端已接收，正在处理。' : answer);
-  article.append(pre);
+  for (const [className, label, content] of [
+    ['turn-question', '› 你', turn.user_text],
+    ['turn-answer', '⬡ MAGI', turn.status === 'RUNNING' ? '服务端已接收，正在处理。' : answer],
+  ]) {
+    const block = document.createElement('div'), title = document.createElement('p'), text = document.createElement('pre');
+    block.className = className;
+    title.className = 'code-label';
+    title.textContent = label;
+    text.textContent = content;
+    block.append(title, text);
+    article.append(block);
+  }
   for (const issue of turn.issues || []) article.append(issuePanel(issue));
   // 来源来自实际工具回执；外部内容只展示文本，链接限制为HTTP(S)。
   const recall = turn.memory_recall || turn.result?.memory_recall;
@@ -324,6 +347,7 @@ function show(turn) {
     article.append(button);
   }
   $('history').append(article);
+  $('welcome').hidden = true;
 }
 
 // 从业务库恢复当前会话的展示历史，不据此推断计划的最新保存状态。
@@ -839,8 +863,7 @@ function artifactCard(artifact) {
 }
 
 async function openArtifact(id) {
-  $('researchPanel').hidden = false;
-  $('toggleResearch').setAttribute('aria-expanded', 'true');
+  showWorkspacePanel('researchPanel');
   try {
     const artifact = await api('/v1/artifacts/' + encodeURIComponent(id));
     $('researchArtifacts').replaceChildren(artifactCard(artifact));
@@ -912,10 +935,13 @@ $('researchLead').onchange = () => {
 };
 $('toggleResearch').onclick = async () => {
   const open = $('researchPanel').hidden;
-  $('researchPanel').hidden = !open; $('toggleResearch').setAttribute('aria-expanded', String(open));
-  if (open) { $('plansPanel').hidden = true; $('memoriesPanel').hidden = true; await loadResearch(); }
+  showWorkspacePanel(open ? 'researchPanel' : 'consolePanel');
+  if (open) await loadResearch();
 };
-$('closeResearch').onclick = () => { $('researchPanel').hidden = true; $('toggleResearch').setAttribute('aria-expanded', 'false'); };
+$('closeResearch').onclick = $('openConsole').onclick = () => {
+  showWorkspacePanel('consolePanel');
+  $('text').focus();
+};
 $('refreshResearch').onclick = loadResearch;
 $('submitResearch').onclick = () => submitResearch();
 selectResearchEntry('persona', 'melchior');
