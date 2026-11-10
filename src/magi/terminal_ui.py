@@ -27,6 +27,23 @@ NERV_BLOCKS = (
 )
 
 
+def nerv_emblem_svg():
+    """把终端徽章的半块字符渲染为网页矢量图，两个界面共用一份素材。"""
+    path = []
+    for y, row in enumerate(NERV_BLOCKS):
+        for x, char in enumerate(row):
+            if char in "█▀":
+                path.append(f"M{x} {y * 2}h1v1h-1z")
+            if char in "█▄":
+                path.append(f"M{x} {y * 2 + 1}h1v1h-1z")
+    width = max(map(len, NERV_BLOCKS)) - 5
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" '
+        f'viewBox="5 0 {width} {len(NERV_BLOCKS) * 2}">'
+        f'<path fill="#f04639" d="{"".join(path)}"/></svg>'
+    )
+
+
 def welcome_rows(width=100):
     """按窗口列数安排徽章和信息；返回两列文本，颜色由终端入口统一应用。
 

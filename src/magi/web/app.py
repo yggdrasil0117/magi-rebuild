@@ -18,6 +18,7 @@ from magi.personal.export import plan_markdown
 from magi.personal.locking import ApplicationLock
 from magi.personal.memory import memory_cutoff
 from magi.personal.models import PersonalError
+from magi.terminal_ui import nerv_emblem_svg
 from magi.web.schemas import (
     ArtifactDecision,
     Confirmation,
@@ -128,6 +129,11 @@ def create_app(settings=None, *, token=None, owner=None, service=None):
     @app.get("/")
     def page():
         return FileResponse(Path(__file__).with_name("index.html"))
+
+    @app.get("/nerv-emblem.svg")
+    def nerv_emblem():
+        """提供与终端共用的静态徽章，不依赖外部资源。"""
+        return Response(nerv_emblem_svg(), media_type="image/svg+xml")
 
     @app.get("/app.js")
     def javascript():

@@ -17,19 +17,28 @@ function setMode(mode) {
   if (enabled) $('webEnabled').checked = false;
   $('analyze').textContent = '三人格分析：' + (enabled ? '开启' : '关闭');
   $('analyze').setAttribute('aria-pressed', String(enabled));
-  $('modeHint').textContent = enabled ? '会从三个视角分析，并给出待你确认的建议。' : '默认日常聊天。需要比较方案或形成计划时，开启三人格分析。';
+  $('modeHint').hidden = !enabled;
   if (!enabled) exitRevision();
 }
 
-// 初次只需连接一次；不把服务凭据存入浏览器持久存储或跳过后端认证。
+// 凭据表单收在工作区中，直接发送或点连接时仍能打开并聚焦它。
+function openConnectionSettings() {
+  $('workspaceMenu').open = true;
+  $('settings').open = true;
+  $('token').focus();
+}
+
+// 初次只需连接一次；服务凭据仍保留在当前页面。
 async function connect() {
   if (sending || pending) { $('status').textContent = '请先完成或放弃当前消息的重试。'; return; }
-  if (!$('token').value.trim()) { $('settings').open = true; $('token').focus(); return; }
+  if (!$('token').value.trim()) { openConnectionSettings(); return; }
   $('connect').disabled = true;
   connected = await load();
+  $('connectShortcut').hidden = connected;
   $('connect').disabled = false;
   if (connected) {
     $('settings').open = false;
+    $('workspaceMenu').open = false;
     if (!followingChat && !activeTaskChat) $('status').textContent = '已连接，可以开始聊天。';
     $('text').focus();
     loadResearch();
@@ -38,6 +47,7 @@ async function connect() {
 
 // 工作区一次展示一个面板，导航的选中状态与实际可见内容同步。
 function showWorkspacePanel(panelId) {
+  $('workspaceMenu').open = false;
   $('consolePanel').hidden = panelId !== 'consolePanel';
   if (panelId === 'consolePanel') $('openConsole').setAttribute('aria-current', 'page');
   else $('openConsole').removeAttribute('aria-current');
@@ -347,7 +357,6 @@ function show(turn) {
     article.append(button);
   }
   $('history').append(article);
-  $('welcome').hidden = true;
 }
 
 // 从业务库恢复当前会话的展示历史，不据此推断计划的最新保存状态。
@@ -363,7 +372,6 @@ async function load() {
     $('history').replaceChildren();
     turns.forEach(show);
     loadMemorySuggestions($('chat').value); // 只读取已有候选，刷新不触发提取。
-    $('welcome').hidden = turns.length > 0;
     let tasks = [];
     try { tasks = await readTasks(chat); } catch (_) {}
     if (ticket !== followTicket || $('chat').value !== chat) return false;
@@ -685,10 +693,16 @@ async function beginFeedback() {
 
 $('load').onclick = load;
 $('connect').onclick = connect;
-$('token').oninput = () => { connected = false; };
-$('analyze').onclick = () => { if (!pending && !sending) setMode($('mode').value === 'chat' ? 'deliberations' : 'chat'); };
+$('token').oninput = () => { connected = false; $('connectShortcut').hidden = false; };
+$('connectShortcut').onclick = openConnectionSettings;
+$('analyze').onclick = () => {
+  if (pending || sending) return;
+  setMode($('mode').value === 'chat' ? 'deliberations' : 'chat');
+  showWorkspacePanel('consolePanel');
+  $('text').focus();
+};
 $('togglePlans').onclick = async () => {
-  if (!connected) { $('settings').open = true; $('status').textContent = '请先连接本机服务。'; $('token').focus(); return; }
+  if (!connected) { openConnectionSettings(); $('status').textContent = '请先连接本机服务。'; return; }
   const open = $('plansPanel').hidden;
   showPlans(open);
   if (open) await loadPlans();
@@ -711,7 +725,7 @@ $('send').onclick = async () => {
   if (sending) return;
   if (followingChat === $('chat').value) return;
   if (activeTaskChat === $('chat').value) return;
-  if (!connected) { $('settings').open = true; $('status').textContent = '请先在设置中连接本机服务。'; $('token').focus(); return; }
+  if (!connected) { openConnectionSettings(); $('status').textContent = '请先连接本机服务。'; return; }
   if (!pending && !$('text').value.trim()) { $('status').textContent = '先说说你的问题。'; $('text').focus(); return; }
   if (!pending) {
     pending = {path: '/v1/' + $('mode').value, body: {chat_id: $('chat').value, message_id: crypto.randomUUID(), reply_message_id: crypto.randomUUID(), parent_reply_message_id: lastReply, user_text: $('text').value, web_enabled: $('webEnabled').checked, memory_recall: $('memoryRecall').checked, issue_enabled: $('issueEnabled').checked}};
@@ -899,7 +913,7 @@ async function loadResearch() {
 }
 
 async function submitResearch(sourceArtifact = null) {
-  if (!connected) { $('settings').open = true; $('researchStatus').textContent = '请先连接本机服务。'; return; }
+  if (!connected) { openConnectionSettings(); $('researchStatus').textContent = '请先连接本机服务。'; return; }
   const chat = $('researchChat').value.trim(), lead = sourceArtifact?.lead_agent_id || $('researchLead').value;
   const reviewers = selectedResearchReviewers(lead);
   if (!chat || (!sourceArtifact && !$('researchText').value.trim())) { $('researchStatus').textContent = '请填写研究会话和调查目标。'; return; }

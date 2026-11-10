@@ -135,7 +135,7 @@ async function confirmMemory() {
 }
 
 $('toggleMemories').onclick = async () => {
-  if (!connected) { $('settings').open = true; $('status').textContent = '请先连接本机服务。'; $('token').focus(); return; }
+  if (!connected) { openConnectionSettings(); $('status').textContent = '请先连接本机服务。'; return; }
   const open = $('memoriesPanel').hidden;
   showMemories(open);
   if (open) await loadMemories();
