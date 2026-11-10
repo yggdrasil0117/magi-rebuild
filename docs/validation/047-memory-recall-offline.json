@@ -1,0 +1,304 @@
+{
+  "mode": "offline_fixed_vectors",
+  "embedding_min_score": 0.45,
+  "attempts": [
+    {
+      "case": "改写问法",
+      "chat": "general",
+      "question": "复习可以投入多久",
+      "expected": [
+        "study:v1"
+      ],
+      "forbidden": [
+        "local_study:v1",
+        "private:v1"
+      ],
+      "index_phase": "cold",
+      "default": {
+        "status": "OK",
+        "items": [
+          {
+            "identity": "study:v1",
+            "value": "每周可学习10小时"
+          },
+          {
+            "identity": "style:v1",
+            "value": "先举例再解释"
+          },
+          {
+            "identity": "commute:v1",
+            "value": "平日乘坐地铁"
+          }
+        ],
+        "ms": 5.77
+      },
+      "semantic": {
+        "status": "OK",
+        "items": [
+          {
+            "identity": "study:v1",
+            "value": "每周可学习10小时"
+          }
+        ],
+        "ms": 693.962
+      }
+    },
+    {
+      "case": "无匹配资料",
+      "chat": "general",
+      "question": "解释黑洞蒸发",
+      "expected": [],
+      "forbidden": [
+        "local_study:v1",
+        "private:v1"
+      ],
+      "index_phase": "warm",
+      "default": {
+        "status": "OK",
+        "items": [
+          {
+            "identity": "study:v1",
+            "value": "每周可学习10小时"
+          },
+          {
+            "identity": "style:v1",
+            "value": "先举例再解释"
+          },
+          {
+            "identity": "commute:v1",
+            "value": "平日乘坐地铁"
+          }
+        ],
+        "ms": 3.521
+      },
+      "semantic": {
+        "status": "OK",
+        "items": [],
+        "ms": 18.853
+      }
+    },
+    {
+      "case": "同键会话覆盖",
+      "chat": "study",
+      "question": "复习可以投入多久",
+      "expected": [
+        "local_study:v1"
+      ],
+      "forbidden": [
+        "study:v1",
+        "private:v1"
+      ],
+      "index_phase": "session_index_add",
+      "default": {
+        "status": "OK",
+        "items": [
+          {
+            "identity": "local_study:v1",
+            "value": "每周可学习2小时"
+          },
+          {
+            "identity": "style:v1",
+            "value": "先举例再解释"
+          },
+          {
+            "identity": "commute:v1",
+            "value": "平日乘坐地铁"
+          }
+        ],
+        "ms": 5.976
+      },
+      "semantic": {
+        "status": "OK",
+        "items": [
+          {
+            "identity": "local_study:v1",
+            "value": "每周可学习2小时"
+          }
+        ],
+        "ms": 26.018
+      }
+    },
+    {
+      "case": "其他会话的专属事实",
+      "chat": "general",
+      "question": "专属项目是什么",
+      "expected": [],
+      "forbidden": [
+        "local_study:v1",
+        "private:v1"
+      ],
+      "index_phase": "warm",
+      "default": {
+        "status": "OK",
+        "items": [
+          {
+            "identity": "study:v1",
+            "value": "每周可学习10小时"
+          },
+          {
+            "identity": "style:v1",
+            "value": "先举例再解释"
+          },
+          {
+            "identity": "commute:v1",
+            "value": "平日乘坐地铁"
+          }
+        ],
+        "ms": 3.261
+      },
+      "semantic": {
+        "status": "OK",
+        "items": [],
+        "ms": 18.691
+      }
+    },
+    {
+      "case": "本会话的专属事实",
+      "chat": "private",
+      "question": "专属项目是什么",
+      "expected": [
+        "private:v1"
+      ],
+      "forbidden": [
+        "local_study:v1"
+      ],
+      "index_phase": "session_index_add",
+      "default": {
+        "status": "OK",
+        "items": [
+          {
+            "identity": "study:v1",
+            "value": "每周可学习10小时"
+          },
+          {
+            "identity": "private:v1",
+            "value": "只在私有会话讨论的项目"
+          },
+          {
+            "identity": "style:v1",
+            "value": "先举例再解释"
+          },
+          {
+            "identity": "commute:v1",
+            "value": "平日乘坐地铁"
+          }
+        ],
+        "ms": 6.304
+      },
+      "semantic": {
+        "status": "OK",
+        "items": [
+          {
+            "identity": "private:v1",
+            "value": "只在私有会话讨论的项目"
+          }
+        ],
+        "ms": 23.984
+      }
+    },
+    {
+      "case": "记忆更新",
+      "chat": "general",
+      "question": "复习可以投入多久",
+      "expected": [
+        "study:v2"
+      ],
+      "forbidden": [
+        "study:v1",
+        "local_study:v1",
+        "private:v1"
+      ],
+      "index_phase": "version_update",
+      "default": {
+        "status": "OK",
+        "items": [
+          {
+            "identity": "study:v2",
+            "value": "每周可学习4小时"
+          },
+          {
+            "identity": "style:v1",
+            "value": "先举例再解释"
+          },
+          {
+            "identity": "commute:v1",
+            "value": "平日乘坐地铁"
+          }
+        ],
+        "ms": 6.07
+      },
+      "semantic": {
+        "status": "OK",
+        "items": [
+          {
+            "identity": "study:v2",
+            "value": "每周可学习4小时"
+          }
+        ],
+        "ms": 31.236
+      }
+    },
+    {
+      "case": "记忆删除",
+      "chat": "general",
+      "question": "复习可以投入多久",
+      "expected": [],
+      "forbidden": [
+        "study:v1",
+        "study:v2",
+        "local_study:v1",
+        "private:v1"
+      ],
+      "index_phase": "delete_cleanup",
+      "default": {
+        "status": "OK",
+        "items": [
+          {
+            "identity": "style:v1",
+            "value": "先举例再解释"
+          },
+          {
+            "identity": "commute:v1",
+            "value": "平日乘坐地铁"
+          }
+        ],
+        "ms": 6.324
+      },
+      "semantic": {
+        "status": "OK",
+        "items": [],
+        "ms": 26.249
+      }
+    }
+  ],
+  "summary": {
+    "default": {
+      "hits": 4,
+      "returned": 21,
+      "expected": 4,
+      "false_positives": 17,
+      "misses": 0,
+      "micro_precision": 0.19047619047619047,
+      "micro_recall": 1.0,
+      "empty_cases": 3,
+      "correct_empty_cases": 0,
+      "boundary_violations": 0,
+      "failed_attempts": 0,
+      "sample_median_ms": 5.976
+    },
+    "semantic": {
+      "hits": 4,
+      "returned": 4,
+      "expected": 4,
+      "false_positives": 0,
+      "misses": 0,
+      "micro_precision": 1.0,
+      "micro_recall": 1.0,
+      "empty_cases": 3,
+      "correct_empty_cases": 3,
+      "boundary_violations": 0,
+      "failed_attempts": 0,
+      "sample_median_ms": 26.018
+    }
+  }
+}
